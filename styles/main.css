@@ -1550,3 +1550,468 @@ button, input, select, textarea {
   opacity: 0;
   transform: translateY(8px);
 }
+
+/* ==================== 全頁動態場景背景圖層 ==================== */
+.page-scene-bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: background-image 0.55s ease-in-out;
+}
+
+.page-scene-bg-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(28, 14, 42, 0.35) 0%, rgba(18, 9, 30, 0.76) 100%),
+    linear-gradient(180deg, rgba(20, 10, 34, 0.45) 0%, rgba(16, 8, 28, 0.82) 100%);
+  backdrop-filter: blur(1.5px);
+}
+
+/* ==================== 主頁籤切換列 (現在去哪跟誰講話 vs 人物關係圖) ==================== */
+.hub-main-tabs-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: rgba(34, 16, 52, 0.82);
+  border: 1px solid var(--gold-border);
+  border-radius: 18px;
+  padding: 10px 18px;
+  box-shadow: 0 10px 30px rgba(15, 6, 28, 0.45);
+}
+
+.hub-main-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hub-tab-btn {
+  background: rgba(24, 11, 38, 0.78);
+  color: #fce7f3;
+  border: 1px solid rgba(253, 224, 165, 0.35);
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.hub-tab-btn:hover {
+  border-color: #fde68a;
+  transform: translateY(-1px);
+}
+
+.hub-tab-btn.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  color: #ffffff;
+  border-color: #fde68a;
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
+}
+
+.current-bg-indicator {
+  font-size: 0.82rem;
+  color: #fde68a;
+  background: rgba(20, 10, 34, 0.75);
+  border: 1px solid rgba(253, 224, 165, 0.35);
+  padding: 6px 14px;
+  border-radius: 99px;
+}
+
+.btn-restart {
+  border-color: rgba(251, 113, 133, 0.55) !important;
+  color: #fecdd3 !important;
+}
+
+.btn-restart:hover {
+  background: rgba(225, 29, 72, 0.35) !important;
+  border-color: #fda4af !important;
+}
+
+/* ==================== 棲遲公寓・6 大場所與對話對象總覽 ==================== */
+.apartment-locations-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.scene-overview-card {
+  background: rgba(30, 14, 46, 0.84);
+  border: 1px solid var(--gold-border);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 28px rgba(10, 4, 20, 0.45);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.scene-overview-card:hover {
+  transform: translateY(-3px);
+  border-color: #fde68a;
+}
+
+.scene-overview-banner {
+  position: relative;
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 14px 16px;
+}
+
+.scene-overview-Shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 7, 26, 0.18) 0%, rgba(22, 10, 36, 0.92) 100%);
+}
+
+.scene-enter-pill {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 2;
+  background: rgba(24, 11, 38, 0.85);
+  border: 1px solid #fde68a;
+  color: #fde68a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.scene-overview-title {
+  position: relative;
+  z-index: 2;
+}
+
+.scene-overview-title h3 {
+  font-family: var(--font-serif);
+  color: #fef3c7;
+  font-size: 1.08rem;
+  margin-bottom: 3px;
+}
+
+.scene-overview-title p {
+  font-size: 0.78rem;
+  color: #f5d0fe;
+}
+
+.scene-overview-chars {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scene-who-label {
+  font-size: 0.76rem;
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.scene-mini-char-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(48, 24, 70, 0.65);
+  border: 1px solid rgba(253, 224, 165, 0.25);
+  border-left: 3px solid var(--char-color, #f472b6);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+
+.scene-mini-Face {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top center;
+  border: 1.5px solid #fde68a;
+  flex-shrink: 0;
+}
+
+.scene-mini-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.scene-mini-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+}
+
+.scene-mini-info small {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.scene-mini-btns {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.loc-stage-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ==================== 人物關係圖 (Relationship Network Diagram) ==================== */
+.relationship-graph-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.rel-web-container {
+  background: var(--bg-panel);
+  border: 1px solid var(--gold-border);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: var(--card-shadow);
+  overflow-x: auto;
+}
+
+.rel-diagram-box {
+  position: relative;
+  width: 100%;
+  min-width: 860px;
+  aspect-ratio: 1120 / 660;
+  max-height: 640px;
+  margin: 0 auto;
+}
+
+.rel-network-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.rel-center-protagonist {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.95), rgba(139, 92, 246, 0.95));
+  border: 2.5px solid #fde68a;
+  border-radius: 20px;
+  padding: 10px 18px;
+  text-align: center;
+  box-shadow: 0 0 32px rgba(244, 114, 182, 0.65);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.protag-avatar-ring {
+  font-size: 1.5rem;
+}
+
+.rel-center-protagonist strong {
+  font-size: 0.96rem;
+  color: #ffffff;
+}
+
+.rel-center-protagonist small {
+  font-size: 0.72rem;
+  color: #fef3c7;
+}
+
+.rel-char-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: rgba(26, 12, 40, 0.92);
+  border: 1.5px solid var(--node-color, #fde68a);
+  border-radius: 16px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  z-index: 4;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 18px rgba(10, 4, 20, 0.65);
+  text-align: left;
+}
+
+.rel-char-node:hover {
+  transform: translate(-50%, -53%) scale(1.06);
+  box-shadow: 0 8px 24px rgba(244, 114, 182, 0.55);
+  z-index: 10;
+}
+
+.rel-char-node.is-diagnosed {
+  border-width: 2px;
+  box-shadow: 0 0 18px rgba(244, 114, 182, 0.45);
+}
+
+.rel-node-avatar-wrap {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.rel-node-avatar-wrap img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top center;
+  border: 1.5px solid #fde68a;
+}
+
+.rel-node-num {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: #ec4899;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 99px;
+}
+
+.rel-node-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.rel-node-caption strong {
+  font-size: 0.82rem;
+  color: #fff;
+}
+
+.rel-node-status {
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.rel-node-diag {
+  font-size: 0.66rem;
+  color: #cbd5e1;
+}
+
+.rel-node-diag.unlocked {
+  color: #fde68a;
+  font-weight: 700;
+}
+
+/* ==================== 角色卡內嵌關係狀態與臨床診斷抽屜 ==================== */
+.rel-status-banner {
+  background: rgba(20, 10, 34, 0.72);
+  border: 1px solid;
+  border-radius: 99px;
+  padding: 4px 12px;
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.card-dsm-dossier {
+  background: rgba(20, 10, 34, 0.72);
+  border: 1px solid rgba(253, 224, 165, 0.3);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.card-dsm-dossier summary {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fde68a;
+  font-weight: 600;
+}
+
+.card-dsm-body {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(253, 224, 165, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-dsm-unlocked-box {
+  background: rgba(236, 72, 153, 0.14);
+  border-left: 3px solid #f472b6;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #fce7f3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-dsm-diff {
+  color: #fde68a;
+  font-size: 0.74rem;
+}
+
+.card-dsm-locked-tip {
+  color: #f5d0fe;
+  font-size: 0.75rem;
+}
+
+.card-criteria-mini-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-criteria-mini-list li {
+  background: rgba(34, 16, 52, 0.7);
+  border: 1px solid rgba(253, 224, 165, 0.2);
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-criteria-mini-list li.unlocked {
+  border-color: #f472b6;
+}
+
+.card-criteria-mini-list li.locked {
+  opacity: 0.65;
+}
+
+.card-criteria-mini-list li strong {
+  color: #fde68a;
+  font-size: 0.75rem;
+}
+
+.card-criteria-mini-list li span {
+  color: #fce7f3;
+  font-size: 0.72rem;
+}
+
+.rel-card-highlight {
+  outline: 3px solid #fde68a;
+  box-shadow: 0 0 36px rgba(253, 230, 138, 0.85) !important;
+}
