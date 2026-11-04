@@ -1,22 +1,22 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、共同天災（強震／颱風）、角色雙層背景與心靈成就控制器
 
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=7';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=7';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=7';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=7';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=8';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=8';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=8';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=8';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
   SHARED_DISASTER_REACTIONS,
   getCharacter15Events,
   getCharacterAchievements
-} from './data/eventTreeEngine.js?v=7';
+} from './data/eventTreeEngine.js?v=8';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=7';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=7';
-import { audio } from './ui/audioEngine.js?v=7';
+} from './data/characterPrompts.js?v=8';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=8';
+import { audio } from './ui/audioEngine.js?v=8';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
