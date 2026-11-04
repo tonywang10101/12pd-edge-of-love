@@ -1,9 +1,16 @@
-// 《愛的邊緣》(Edge of Love) — 戀與製作人唯美戀愛風格 ＆ 漸進式 DSM-5-TR 解鎖控制器
+// 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、共同天災（強震／颱風）、角色雙層背景與心靈成就控制器
 
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=5';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=5';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=5';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=5';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=6';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=6';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=6';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=6';
+import {
+  CHARACTER_EXTENDED_LORE,
+  TRIO_SCENES_DATA,
+  SHARED_DISASTER_REACTIONS,
+  getCharacter15Events,
+  getCharacterAchievements
+} from './data/eventTreeEngine.js?v=6';
 import {
   MASTER_STYLE_PROMPT,
   EMOTION_ACTION_MODIFIERS,
@@ -11,9 +18,9 @@ import {
   SCENE_BACKGROUNDS,
   buildCharacterActionPrompt,
   getSceneBackground
-} from './data/characterPrompts.js?v=5';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=5';
-import { audio } from './ui/audioEngine.js?v=5';
+} from './data/characterPrompts.js?v=6';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=6';
+import { audio } from './ui/audioEngine.js?v=6';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
@@ -21,18 +28,25 @@ const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_C_OTHER
 };
 
-const TIME_SLOTS = ['晨間微光 (Morning)', '午後暖陽 (Afternoon)', '星夜微醺 (Midnight)'];
-const STORAGE_KEY_AUTOSAVE = 'edge_of_love_browser_save_v2';
-const STORAGE_KEY_SESSION = 'edge_of_love_session_save_v2';
+const STORAGE_KEY_AUTOSAVE = 'edge_of_love_browser_save_v3';
+const STORAGE_KEY_SESSION = 'edge_of_love_session_save_v3';
 
 class EdgeOfLoveGame {
   constructor() {
     this.state = this.getDefaultState();
     this.activeScene = null;
-    this.activeMainTab = 'locations'; // 'locations' (現在去哪跟誰講話) | 'relationships' (人物關係圖＆已解鎖診斷)
+    this.activeMainTab = 'locations'; // 'locations' (現在去哪跟誰講話) | 'relationships' (人物關係圖＆角色成就)
     this.selectedFilter = 'ALL';
     this.activeLocationId = 'apartment'; // 'apartment' (無特定場景時預設為棲遲公寓) 或 6 大場景 ID
     this.lastSavedTime = null;
+    this.eventCache = {};
+  }
+
+  getEventsForChar(charId) {
+    if (!this.eventCache[charId]) {
+      this.eventCache[charId] = getCharacter15Events(charId, ALL_SCENARIOS[charId]);
+    }
+    return this.eventCache[charId];
   }
 
   getDefaultState() {
@@ -42,9 +56,13 @@ class EdgeOfLoveGame {
         affection: c.initialStats.affection,
         security: c.initialStats.security,
         boundary: c.initialStats.boundary,
+        eventCompleted: 0, // 0 ~ 15
         chapterCompleted: 0,
         unlockedCriteria: [],
         diagnosed: false,
+        sharedQuakeDone: false,
+        sharedTyphoonDone: false,
+        backstoryUnlocked: false,
         unlockedEndings: [],
         dailyTalkIndex: 0
       };
@@ -59,8 +77,7 @@ class EdgeOfLoveGame {
         pronoun: '她',
         trait: 'balanced'
       },
-      day: 1,
-      timeSlotIndex: 0,
+      roamCycle: 0,
       characters: charState
     };
   }
@@ -69,7 +86,8 @@ class EdgeOfLoveGame {
     const savedRaw =
       localStorage.getItem(STORAGE_KEY_AUTOSAVE) ||
       sessionStorage.getItem(STORAGE_KEY_SESSION) ||
-      localStorage.getItem('edge_of_love_autosave');
+      localStorage.getItem('edge_of_love_browser_save_v2') ||
+      sessionStorage.getItem('edge_of_love_session_save_v2');
 
     if (savedRaw) {
       try {
@@ -101,15 +119,22 @@ class EdgeOfLoveGame {
 
   migrateState(loadedState) {
     const def = this.getDefaultState();
+    if (typeof loadedState.roamCycle !== 'number') loadedState.roamCycle = 0;
+
     CHARACTERS.forEach((c) => {
       if (!loadedState.characters[c.id]) {
         loadedState.characters[c.id] = def.characters[c.id];
       } else {
         const cs = loadedState.characters[c.id];
         if (!Array.isArray(cs.unlockedCriteria)) cs.unlockedCriteria = [];
+        if (typeof cs.eventCompleted !== 'number') {
+          cs.eventCompleted = (cs.chapterCompleted || 0) * 4;
+        }
         if (typeof cs.diagnosed !== 'boolean') {
-          cs.diagnosed =
-            cs.unlockedCriteria.length >= c.criteria.length && cs.chapterCompleted >= 3;
+          cs.diagnosed = cs.unlockedCriteria.length >= c.criteria.length && cs.eventCompleted >= 12;
+        }
+        if (typeof cs.backstoryUnlocked !== 'boolean') {
+          cs.backstoryUnlocked = cs.eventCompleted >= 13;
         }
       }
     });
@@ -148,7 +173,7 @@ class EdgeOfLoveGame {
     sessionStorage.setItem(key, serialized);
     this.autoSave();
     audio.playSelect();
-    this.showToast(`💾 已儲存至瀏覽器記憶槽 #${slotIndex}（下次開啟可直接讀取）`);
+    this.showToast(`💾 已儲存至瀏覽器記憶槽 #${slotIndex}`);
     this.renderSaveModal();
   }
 
@@ -191,7 +216,7 @@ class EdgeOfLoveGame {
     const char = CHARACTERS.find((c) => c.id === charId);
     const cs = this.state.characters[charId];
     if (!char || !cs) return false;
-    return Boolean(cs.diagnosed || cs.unlockedCriteria.length >= char.criteria.length);
+    return Boolean(cs.diagnosed || (cs.unlockedCriteria.length >= char.criteria.length && cs.eventCompleted >= 12));
   }
 
   getDiagnosisDisplay(char) {
@@ -208,22 +233,89 @@ class EdgeOfLoveGame {
         fullTitle: `${char.dsmTitle} (${char.dsmTitleEn})`,
         clusterLabel: `Cluster ${char.cluster}`,
         badgeColor: CLUSTERS[char.cluster]?.color || char.themeColor,
-        progressText: `✅ 已達診斷標準 (${count}/${total})`
+        progressText: `🥇 靈魂真名已揭曉 (${count}/${total})`
       };
     }
 
     return {
       diagnosed: false,
-      code: `羈絆 ${count}/${total}`,
+      code: `線索 ${count}/${total}`,
       title: count === 0 ? '？？？・心靈特質待觀察' : `？？？・已收集 ${count}/${total} 項特徵`,
       fullTitle:
         count === 0
-          ? '【尚未揭曉】需透過約會與劇情互動觀察其心靈特質'
-          : `【心靈觀察中：已解鎖 ${count}/${total} 項特徵】尚未達確診門檻`,
+          ? '【尚未揭曉】需推進 15 事件決策樹並收集行為線索'
+          : `【心靈觀察中：已解鎖 ${count}/${total} 項特徵】達診斷標準後揭曉`,
       clusterLabel: '未分類',
       badgeColor: '#9f6b8c',
-      progressText: `🔍 心靈線索 ${count}/${total}`
+      progressText: `🔍 診斷線索 ${count}/${total}`
     };
+  }
+
+  // ==================== 跨地點動態出沒與章節阻擋 (Gate) 計算 ====================
+  getNextEventForChar(charId) {
+    const cs = this.state.characters[charId];
+    const events = this.getEventsForChar(charId);
+    const nextIdx = Math.min(cs.eventCompleted || 0, events.length - 1);
+    return events[nextIdx];
+  }
+
+  checkGateStatus(charId, targetEventNum) {
+    const cs = this.state.characters[charId];
+    const char = CHARACTERS.find((c) => c.id === charId);
+    if (!cs || !char) return { blocked: false };
+
+    // Gate 1: 進入 Phase II (E05+)
+    if (targetEventNum >= 5 && cs.eventCompleted < 4) {
+      return {
+        blocked: true,
+        gateTitle: '🔒 第一章節阻擋 (Gate 1)',
+        reason: `請先依序完成 ${char.name} 的 Phase I 事件（E01～E04，含三人同場事件）。`
+      };
+    }
+    if (targetEventNum >= 5 && cs.security < 25) {
+      return {
+        blocked: true,
+        gateTitle: '🔒 心防阻擋：依戀安全感不足 (Gate 1)',
+        reason: `${char.name} 目前對你仍抱有戒心（當前安全感 ${cs.security}%，需達 25% 以上）。請先進行「🌸 甜蜜日常對話」或共同事件提升安全感！`
+      };
+    }
+
+    // Gate 2: 進入 Phase III (E09+)
+    if (targetEventNum >= 9 && cs.eventCompleted < 8) {
+      return {
+        blocked: true,
+        gateTitle: '🔒 第二章節阻擋 (Gate 2)',
+        reason: `請先完成 ${char.name} 的 Phase II 事件（E05～E08，包含「🌍 深夜強震共同事件」）。`
+      };
+    }
+    if (targetEventNum >= 9 && (cs.affection < 38 || cs.security < 32)) {
+      return {
+        blocked: true,
+        gateTitle: '🔒 深層防線阻擋 (Gate 2)',
+        reason: `進入風暴期前，需與 ${char.name} 建立足夠羈絆（需 親密度 ≥ 38% 且 安全感 ≥ 32%；目前 親密 ${cs.affection}% / 安全 ${cs.security}%）。可透過日常閒聊或重溫事件提升！`
+      };
+    }
+
+    // Gate 3: 進入 Phase IV 過去養成故事 (E13+)
+    if (targetEventNum >= 13 && !this.isDiagnosed(charId)) {
+      return {
+        blocked: true,
+        gateTitle: '🔒 終章記憶鎖定 (Gate 3)',
+        reason: `需先完成 E12【心門對峙】並達成「🥇 靈魂真名（DSM-5-TR 診斷揭曉）」成就，${char.name} 才會向你敞開童年與人格疾患養成故事！`
+      };
+    }
+
+    return { blocked: false };
+  }
+
+  // 取得某地點當前出現的角色列表（角色會隨當前可觸發事件地點 & 漫步週期在 4 個地點間動態移動！）
+  getCharactersAtLocation(locationId) {
+    return CHARACTERS.filter((char) => {
+      const lore = CHARACTER_EXTENDED_LORE[char.id];
+      const nextEv = this.getNextEventForChar(char.id);
+      const roamLoc = lore.scheduleLocations[(this.state.roamCycle + Number(char.number)) % lore.scheduleLocations.length];
+      return nextEv?.locationId === locationId || roamLoc === locationId;
+    });
   }
 
   maskUndiagnosedText(text = '', charId) {
@@ -276,19 +368,12 @@ class EdgeOfLoveGame {
 
     this.state = fresh;
     this.activeScene = null;
+    this.activeMainTab = 'locations';
+    this.activeLocationId = 'apartment';
     this.autoSave();
     audio.playSelect();
     this.render();
     this.showToast(`🌸 歡迎入住棲遲公寓，${this.state.player.name}！十二段命定邂逅即將展開。`);
-  }
-
-  advanceTime() {
-    this.state.timeSlotIndex += 1;
-    if (this.state.timeSlotIndex >= TIME_SLOTS.length) {
-      this.state.timeSlotIndex = 0;
-      this.state.day += 1;
-    }
-    this.autoSave();
   }
 
   clampStat(val) {
@@ -326,16 +411,16 @@ class EdgeOfLoveGame {
 
     if (newlyAdded) {
       const crit = char.criteria.find((cr) => cr.id === criterionId);
-      if (currentCount >= total && !cs.diagnosed) {
+      if (currentCount >= total && cs.eventCompleted >= 11 && !cs.diagnosed) {
         cs.diagnosed = true;
         audio.playUnlockDSM();
         this.showToast(
-          `✨ 符合 DSM-5-TR 診斷標準！正式揭曉【${char.name}】心靈真相：${char.dsmTitle} (${char.dsmCode})`
+          `🥇 達成成就【靈魂真名】！正式揭曉 ${char.name} 臨床診斷：${char.dsmTitle} (${char.dsmCode})`
         );
       } else if (crit) {
         audio.playChime(660, 0.14);
         this.showToast(
-          `🌸 解鎖【${char.name}】心靈線索：「${crit.title}」（進度 ${currentCount}/${total}）`
+          `🌸 觀察到【${char.name}】心靈特徵：「${crit.title}」（線索 ${currentCount}/${total}）`
         );
       }
       this.autoSave();
@@ -343,49 +428,129 @@ class EdgeOfLoveGame {
     return newlyAdded;
   }
 
-  syncCriteriaByChapterProgress(charId, chapterIndexZeroBased) {
+  // ==================== 啟動 15 事件決策樹中的特定事件 ====================
+  startEvent(charId, requestedEventNum = null) {
     const char = CHARACTERS.find((c) => c.id === charId);
-    if (!char) return;
-    const total = char.criteria.length;
-    if (chapterIndexZeroBased === 0 && total >= 1) {
-      this.unlockCriterion(charId, char.criteria[0].id);
-    } else if (chapterIndexZeroBased === 1 && total >= 2) {
-      this.unlockCriterion(charId, char.criteria[0].id);
-      this.unlockCriterion(charId, char.criteria[1].id);
-      if (total >= 4) {
-        this.unlockCriterion(charId, char.criteria[2].id);
-      }
-    } else if (chapterIndexZeroBased >= 2) {
-      char.criteria.forEach((cr) => this.unlockCriterion(charId, cr.id));
-    }
-  }
-
-  startChapter(charId, chapterNum = null) {
-    const char = CHARACTERS.find((c) => c.id === charId);
-    const scenario = ALL_SCENARIOS[charId];
     const cs = this.state.characters[charId];
-    if (!char || !scenario || !cs) return;
+    const events = this.getEventsForChar(charId);
+    if (!char || !cs || !events.length) return;
 
-    const targetChapIndex =
-      chapterNum !== null ? chapterNum - 1 : Math.min(cs.chapterCompleted, scenario.chapters.length - 1);
-    const chapter = scenario.chapters[targetChapIndex];
-    if (!chapter) return;
+    const targetEvNum =
+      requestedEventNum !== null ? Number(requestedEventNum) : Math.min((cs.eventCompleted || 0) + 1, 15);
+
+    const gateCheck = this.checkGateStatus(charId, targetEvNum);
+    if (gateCheck.blocked) {
+      audio.playTriggerWarning();
+      this.showToast(`${gateCheck.gateTitle}：${gateCheck.reason}`);
+      return;
+    }
+
+    if (targetEvNum === 15) {
+      this.showEndingForCharacter(charId);
+      return;
+    }
+
+    const evObj = events.find((e) => e.eventNumber === targetEvNum) || events[0];
+    this.activeLocationId = evObj.locationId || char.locationId;
 
     audio.playSelect();
     this.activeScene = {
-      mode: 'chapter',
+      mode: 'event',
       charId,
-      chapterIndex: targetChapIndex,
-      chapter,
+      partnerId: evObj.partnerId || null,
+      eventNumber: evObj.eventNumber,
+      eventData: evObj,
+      locationId: evObj.locationId,
       nodeIndex: 0,
-      expression: chapter.nodes[0]?.expression || 'neutral',
+      expression: evObj.nodes[0]?.expression || 'neutral',
       awaitingNextAfterChoice: false,
       lastChoiceOutcome: null
     };
 
-    if (chapter.nodes[0]?.unlockCriterion) {
-      this.unlockCriterion(charId, chapter.nodes[0].unlockCriterion);
+    if (evObj.nodes[0]?.unlockCriterion) {
+      this.unlockCriterion(charId, evObj.nodes[0].unlockCriterion);
     }
+
+    this.autoSave();
+    this.render();
+  }
+
+  // 直接從地圖觸發「共同天災事件（深夜強震 E08 / 強烈颱風 E10）」
+  triggerSharedDisasterModal(disasterType = 'quake') {
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return;
+
+    const isQuake = disasterType === 'quake';
+    const title = isQuake
+      ? '🌍 共同事件 I：《深夜六級強震・搖晃的防線》(Event 08)'
+      : '🌊 共同事件 II：《強烈颱風過境・孤島之夜》(Event 10)';
+    const subtitle = isQuake
+      ? '深夜 23:47，棲遲公寓突遭六級強震並全棟斷電！在警報與餘震中，你要第一時間衝向誰的身邊？'
+      : '十年一遇的強烈颱風封鎖整座街區，停水停電的暴風雨之夜，你要與誰共度這場考驗親密與邊界的孤島之夜？';
+
+    modalRoot.innerHTML = `
+      <div class="modal-backdrop" data-action="close-modal">
+        <div class="modal-window" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <div>
+              <h2>${title}</h2>
+              <p>${subtitle}</p>
+            </div>
+            <button class="btn-close" data-action="close-modal">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="disaster-char-grid">
+              ${CHARACTERS.map((c) => {
+                const cs = this.state.characters[c.id];
+                const done = isQuake ? cs.sharedQuakeDone : cs.sharedTyphoonDone;
+                return `
+                  <button
+                    class="disaster-char-pick"
+                    data-action="launch-shared-disaster"
+                    data-char-id="${c.id}"
+                    data-disaster="${disasterType}"
+                  >
+                    <img src="./assets/characters/${c.id}.png" alt="${c.name}" />
+                    <div>
+                      <strong>#${c.number} ${c.name}</strong>
+                      <small>${LOCATIONS.find((l) => l.id === c.locationId)?.name}</small>
+                      <span class="disaster-status-tag ${done ? 'done' : ''}">
+                        ${done ? '✅ 已共度此事件（可重溫）' : '⚡ 點擊立即前往陪伴'}
+                      </span>
+                    </div>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  launchSharedDisasterForChar(charId, disasterType) {
+    this.closeModals();
+    const events = this.getEventsForChar(charId);
+    const evNum = disasterType === 'quake' ? 8 : 10;
+    const evObj = events.find((e) => e.eventNumber === evNum);
+    const char = CHARACTERS.find((c) => c.id === charId);
+    if (!evObj || !char) return;
+
+    this.activeLocationId = evObj.locationId || char.locationId;
+    audio.playSelect();
+
+    this.activeScene = {
+      mode: 'event',
+      charId,
+      partnerId: null,
+      eventNumber: evObj.eventNumber,
+      eventData: evObj,
+      locationId: evObj.locationId,
+      nodeIndex: 0,
+      expression: evObj.nodes[0]?.expression || 'vulnerable',
+      awaitingNextAfterChoice: false,
+      lastChoiceOutcome: null
+    };
 
     this.autoSave();
     this.render();
@@ -402,12 +567,12 @@ class EdgeOfLoveGame {
     cs.dailyTalkIndex += 1;
 
     this.applyStats(charId, talk.stats);
-    this.advanceTime();
     audio.playSelect();
 
     this.activeScene = {
       mode: 'daily',
       charId,
+      locationId: this.activeLocationId !== 'apartment' ? this.activeLocationId : char.locationId,
       talk,
       expression: 'smile'
     };
@@ -424,11 +589,11 @@ class EdgeOfLoveGame {
 
     let endingKey = forcedEndingKey;
     if (!endingKey) {
-      if (cs.security < 30 || cs.affection < 25) {
+      if (cs.security < 32 || cs.affection < 28) {
         endingKey = 'triggerEnd';
-      } else if (cs.affection >= 50 && cs.boundary < 42) {
+      } else if (cs.affection >= 50 && cs.boundary < 45) {
         endingKey = 'codependentEnd';
-      } else if (cs.affection >= 58 && cs.security >= 52 && cs.boundary >= 48) {
+      } else if (cs.affection >= 60 && cs.security >= 52 && cs.boundary >= 48) {
         endingKey = 'trueEnd';
       } else {
         endingKey = 'normalEnd';
@@ -438,6 +603,9 @@ class EdgeOfLoveGame {
     if (!cs.unlockedEndings.includes(endingKey)) {
       cs.unlockedEndings.push(endingKey);
     }
+    if (cs.eventCompleted < 15) {
+      cs.eventCompleted = 15;
+    }
 
     const isGood = endingKey === 'trueEnd' || endingKey === 'normalEnd';
     audio.playEndingChord(isGood);
@@ -445,6 +613,7 @@ class EdgeOfLoveGame {
     this.activeScene = {
       mode: 'ending',
       charId,
+      locationId: char.locationId,
       endingKey,
       endingData: scenario.endings[endingKey],
       expression:
@@ -470,13 +639,15 @@ class EdgeOfLoveGame {
       return;
     }
 
-    const { charId, chapter, nodeIndex, awaitingNextAfterChoice, chapterIndex } = this.activeScene;
+    const { charId, eventData, eventNumber, nodeIndex, awaitingNextAfterChoice, partnerId } = this.activeScene;
+    const nodes = eventData.nodes;
+
     if (awaitingNextAfterChoice) {
       this.activeScene.awaitingNextAfterChoice = false;
       this.activeScene.lastChoiceOutcome = null;
-      if (nodeIndex + 1 < chapter.nodes.length) {
+      if (nodeIndex + 1 < nodes.length) {
         this.activeScene.nodeIndex += 1;
-        const nextNode = chapter.nodes[this.activeScene.nodeIndex];
+        const nextNode = nodes[this.activeScene.nodeIndex];
         this.activeScene.expression = nextNode.expression || 'neutral';
         if (nextNode.unlockCriterion) {
           this.unlockCriterion(charId, nextNode.unlockCriterion);
@@ -484,33 +655,19 @@ class EdgeOfLoveGame {
         this.autoSave();
         this.render();
       } else {
-        const cs = this.state.characters[charId];
-        if (cs.chapterCompleted <= chapterIndex) {
-          cs.chapterCompleted = chapterIndex + 1;
-        }
-        this.syncCriteriaByChapterProgress(charId, chapterIndex);
-        this.advanceTime();
-
-        if (cs.chapterCompleted >= 3) {
-          this.showEndingForCharacter(charId);
-        } else {
-          this.activeScene = null;
-          this.autoSave();
-          this.showToast(`✨ 已完成第 ${chapterIndex + 1} 章羈絆劇情！`);
-          this.render();
-        }
+        this.completeCurrentEvent(charId, eventNumber, eventData, partnerId);
       }
       return;
     }
 
-    const currentNode = chapter.nodes[nodeIndex];
+    const currentNode = nodes[nodeIndex];
     if (currentNode.choices && currentNode.choices.length > 0) {
       return;
     }
 
-    if (nodeIndex + 1 < chapter.nodes.length) {
+    if (nodeIndex + 1 < nodes.length) {
       this.activeScene.nodeIndex += 1;
-      const nextNode = chapter.nodes[this.activeScene.nodeIndex];
+      const nextNode = nodes[this.activeScene.nodeIndex];
       this.activeScene.expression = nextNode.expression || 'neutral';
       if (nextNode.unlockCriterion) {
         this.unlockCriterion(charId, nextNode.unlockCriterion);
@@ -518,13 +675,78 @@ class EdgeOfLoveGame {
       audio.playChime(480, 0.06);
       this.autoSave();
       this.render();
+    } else {
+      this.completeCurrentEvent(charId, eventNumber, eventData, partnerId);
     }
   }
 
+  completeCurrentEvent(charId, eventNumber, eventData, partnerId) {
+    const char = CHARACTERS.find((c) => c.id === charId);
+    const cs = this.state.characters[charId];
+    if (!char || !cs) return;
+
+    if (cs.eventCompleted < eventNumber) {
+      cs.eventCompleted = eventNumber;
+    }
+    cs.chapterCompleted = Math.min(3, Math.floor(cs.eventCompleted / 4));
+
+    if (eventData.criterionId) {
+      this.unlockCriterion(charId, eventData.criterionId);
+    }
+
+    if (eventData.type === 'shared_quake') {
+      cs.sharedQuakeDone = true;
+    }
+    if (eventData.type === 'shared_typhoon') {
+      cs.sharedTyphoonDone = true;
+    }
+
+    // 三人同場事件同時提升同場夥伴的好感與安全感
+    if (partnerId && this.state.characters[partnerId]) {
+      this.applyStats(partnerId, { affection: 5, security: 5 });
+    }
+
+    // 若完成 E12，確保所有臨床準則與診斷正式揭曉（達成🥇靈魂真名成就）
+    if (eventNumber >= 12 || eventData.unlockDiagnosisOnComplete) {
+      char.criteria.forEach((cr) => {
+        if (!cs.unlockedCriteria.includes(cr.id)) {
+          cs.unlockedCriteria.push(cr.id);
+        }
+      });
+      if (!cs.diagnosed) {
+        cs.diagnosed = true;
+        audio.playUnlockDSM();
+        this.showToast(`🥇 達成成就【靈魂真名】！正式揭曉 ${char.name} 臨床診斷：${char.dsmTitle} (${char.dsmCode})`);
+      }
+    }
+
+    // 若完成 E13，正式解鎖「成長背景與人格疾患養成故事」（達成👑記憶深處的迴響成就）
+    if (eventNumber >= 13 || eventData.unlockBackstoryOnComplete) {
+      if (!cs.backstoryUnlocked) {
+        cs.backstoryUnlocked = true;
+        audio.playUnlockDSM();
+        this.showToast(`👑 達成終極成就【記憶深處的迴響】！已解鎖 ${char.name} 的成長背景與人格疾患養成故事！`);
+      }
+    }
+
+    // 推進街區動態漫步週期，讓角色移動到不同地點
+    this.state.roamCycle = (this.state.roamCycle || 0) + 1;
+
+    if (eventNumber === 14) {
+      this.showEndingForCharacter(charId);
+      return;
+    }
+
+    this.activeScene = null;
+    this.autoSave();
+    this.showToast(`✨ 已完成【${char.name}】劇情事件 E${String(eventNumber).padStart(2, '0')}！`);
+    this.render();
+  }
+
   handleChoiceSelect(choiceIndex) {
-    if (!this.activeScene || this.activeScene.mode !== 'chapter') return;
-    const { charId, chapter, nodeIndex, chapterIndex } = this.activeScene;
-    const currentNode = chapter.nodes[nodeIndex];
+    if (!this.activeScene || this.activeScene.mode !== 'event') return;
+    const { charId, eventData, nodeIndex } = this.activeScene;
+    const currentNode = eventData.nodes[nodeIndex];
     const choice = currentNode?.choices?.[choiceIndex];
     if (!choice) return;
 
@@ -538,10 +760,6 @@ class EdgeOfLoveGame {
 
     if (choice.unlockCriterion) {
       this.unlockCriterion(charId, choice.unlockCriterion);
-    }
-
-    if (chapterIndex >= 2 && nodeIndex + 1 >= chapter.nodes.length) {
-      this.syncCriteriaByChapterProgress(charId, chapterIndex);
     }
 
     this.activeScene.expression = choice.nextExpression || 'neutral';
@@ -570,7 +788,7 @@ class EdgeOfLoveGame {
     setTimeout(() => {
       el.classList.add('toast-fadeout');
       setTimeout(() => el.remove(), 350);
-    }, 3600);
+    }, 3800);
   }
 
   bindGlobalEvents() {
@@ -611,40 +829,44 @@ class EdgeOfLoveGame {
           audio.playChime(520, 0.06);
           this.render();
           break;
+        case 'roam-shuffle':
+          this.state.roamCycle = (this.state.roamCycle || 0) + 1;
+          this.autoSave();
+          audio.playChime(580, 0.08);
+          this.render();
+          this.showToast('🌸 漫步街區：房客們已移動至新的日常活動場所！');
+          break;
+        case 'open-shared-disaster':
+          this.triggerSharedDisasterModal(target.dataset.disaster || 'quake');
+          break;
+        case 'launch-shared-disaster':
+          this.launchSharedDisasterForChar(target.dataset.charId, target.dataset.disaster);
+          break;
+        case 'open-event-tree-modal':
+          this.renderEventTreeModal(target.dataset.charId);
+          break;
         case 'filter-roster':
           this.selectedFilter = target.dataset.filter;
           audio.playChime(520, 0.06);
           this.render();
           break;
-        case 'start-chapter': {
-          const char = CHARACTERS.find((c) => c.id === target.dataset.charId);
-          if (char) {
-            this.activeLocationId = char.locationId;
-          }
-          this.startChapter(
+        case 'start-event':
+        case 'start-chapter':
+          this.closeModals();
+          this.startEvent(
             target.dataset.charId,
-            target.dataset.chapter ? Number(target.dataset.chapter) : null
+            target.dataset.eventNum ? Number(target.dataset.eventNum) : null
           );
           break;
-        }
-        case 'start-daily': {
-          const char = CHARACTERS.find((c) => c.id === target.dataset.charId);
-          if (char) {
-            this.activeLocationId = char.locationId;
-          }
+        case 'start-daily':
           this.startDailyTalk(target.dataset.charId);
           break;
-        }
         case 'show-ending': {
           const cid = target.dataset.charId;
           const cs = this.state.characters[cid];
-          if (!this.isDiagnosed(cid) && cs.chapterCompleted < 3) {
-            this.showToast('🔒 請先完成該角色的 3 章羈絆劇情，達診斷標準後即可解鎖戀愛結局！');
+          if (!this.isDiagnosed(cid) && cs.eventCompleted < 12) {
+            this.showToast('🔒 請先推進該角色的劇情事件至 E12 並達成【靈魂真名】成就，即可解鎖命定結局！');
             return;
-          }
-          const char = CHARACTERS.find((c) => c.id === cid);
-          if (char) {
-            this.activeLocationId = char.locationId;
           }
           this.showEndingForCharacter(cid, target.dataset.endingKey || null);
           break;
@@ -661,26 +883,22 @@ class EdgeOfLoveGame {
           this.render();
           break;
         case 'open-compendium':
-          if (this.activeScene && target.dataset.charId) {
-            this.renderCompendiumModal(target.dataset.charId);
-          } else {
-            this.activeMainTab = 'relationships';
-            this.activeScene = null;
-            this.closeModals();
-            this.render();
-            if (target.dataset.charId) {
-              setTimeout(() => {
-                const cardEl = document.getElementById(`rel-char-card-${target.dataset.charId}`);
-                cardEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 60);
-            }
+          this.activeMainTab = 'relationships';
+          this.activeScene = null;
+          this.closeModals();
+          this.render();
+          if (target.dataset.charId) {
+            setTimeout(() => {
+              const cardEl = document.getElementById(`rel-char-card-${target.dataset.charId}`);
+              cardEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 60);
           }
           break;
         case 'open-prompt-studio':
           this.renderPromptStudioModal(
             target.dataset.charId || (this.activeScene ? this.activeScene.charId : 'shen_mo'),
             this.activeScene?.expression || 'smile',
-            this.activeScene?.chapterIndex !== undefined ? this.activeScene.chapterIndex + 1 : 1
+            1
           );
           break;
         case 'copy-prompt': {
@@ -705,7 +923,7 @@ class EdgeOfLoveGame {
           if (confirm('確定要重新開始遊戲嗎？（將重置目前攻略進度，並返回初始創角畫面重新開始）')) {
             localStorage.removeItem(STORAGE_KEY_AUTOSAVE);
             sessionStorage.removeItem(STORAGE_KEY_SESSION);
-            localStorage.removeItem('edge_of_love_autosave');
+            localStorage.removeItem('edge_of_love_browser_save_v2');
             this.state = this.getDefaultState();
             this.activeScene = null;
             this.activeMainTab = 'locations';
@@ -739,6 +957,7 @@ class EdgeOfLoveGame {
       return 'apartment';
     }
     if (this.activeScene) {
+      if (this.activeScene.locationId) return this.activeScene.locationId;
       const char = CHARACTERS.find((c) => c.id === this.activeScene.charId);
       return char?.locationId || 'apartment';
     }
@@ -775,13 +994,23 @@ class EdgeOfLoveGame {
     if (cs.affection >= 50 && cs.boundary < 42) {
       return { label: '🥀 危險依附・界線模糊', color: '#a855f7', lineDash: '5,4' };
     }
-    if (cs.affection >= 35 || cs.chapterCompleted >= 1) {
+    if (cs.affection >= 35 || cs.eventCompleted >= 2) {
       return { label: '🌸 曖昧升溫・心動試探', color: '#fbbf24', lineDash: '' };
     }
     if (diag.diagnosed) {
       return { label: '✨ 已讀懂靈魂真相', color: '#38bdf8', lineDash: '' };
     }
     return { label: '🏠 棲遲公寓房客（初識）', color: '#94a3b8', lineDash: '4,4' };
+  }
+
+  getTotalAchievementsCount() {
+    let unlocked = 0;
+    const total = CHARACTERS.length * 4;
+    CHARACTERS.forEach((c) => {
+      const achs = getCharacterAchievements(c, this.state.characters[c.id], this.isDiagnosed(c.id));
+      unlocked += achs.filter((a) => a.unlocked).length;
+    });
+    return { unlocked, total };
   }
 
   // ==================== 畫面渲染 ====================
@@ -823,7 +1052,7 @@ class EdgeOfLoveGame {
   }
 
   renderMainPageTabs() {
-    const diagnosedCount = CHARACTERS.filter((c) => this.isDiagnosed(c.id)).length;
+    const achSummary = this.getTotalAchievementsCount();
     const sceneId = this.getCurrentBackgroundSceneId();
     const bgInfo = getSceneBackground(sceneId);
 
@@ -842,7 +1071,7 @@ class EdgeOfLoveGame {
             data-action="switch-main-tab"
             data-tab="relationships"
           >
-            💞 人物關係圖（已解鎖診斷 ${diagnosedCount}/12）
+            💞 人物關係圖 ＆ 心靈成就（🏆 ${achSummary.unlocked}/${achSummary.total}）
           </button>
         </div>
 
@@ -853,8 +1082,9 @@ class EdgeOfLoveGame {
     `;
   }
 
+  // 頂部導覽列（已移除時間數/天數，改為角色心靈成就統計）
   renderTopNavbar() {
-    const diagnosedCount = CHARACTERS.filter((c) => this.isDiagnosed(c.id)).length;
+    const achSummary = this.getTotalAchievementsCount();
 
     return `
       <header class="top-navbar">
@@ -864,8 +1094,7 @@ class EdgeOfLoveGame {
             <h1 class="brand-title">愛的邊緣 <span class="brand-sub">EDGE OF LOVE</span></h1>
             <p class="brand-meta">
               主角：<strong>${this.state.player.name}</strong>（${this.state.player.sexLabel}・代名詞「${this.state.player.pronoun}」）
-              ｜ Day ${this.state.day}・${TIME_SLOTS[this.state.timeSlotIndex]}
-              ${this.lastSavedTime ? `｜ <span class="saved-indicator">♥ 記憶已同步 (${this.lastSavedTime})</span>` : ''}
+              ${this.lastSavedTime ? `｜ <span class="saved-indicator">♥ 記憶已自動保存 (${this.lastSavedTime})</span>` : ''}
             </p>
           </div>
         </div>
@@ -883,7 +1112,7 @@ class EdgeOfLoveGame {
             data-action="switch-main-tab"
             data-tab="relationships"
           >
-            💞 人物關係圖 (${diagnosedCount}/12 已解鎖診斷)
+            💞 人物關係圖 (🏆 成就 ${achSummary.unlocked}/${achSummary.total})
           </button>
           <button class="nav-btn btn-gold" data-action="open-prompt-studio">
             🎨 角色動作 Prompt 庫
@@ -913,12 +1142,11 @@ class EdgeOfLoveGame {
             <span class="creator-badge">✦ 戀與心靈羈絆・唯美戀愛養成 ✦</span>
             <h1>愛的邊緣 <small style="font-size:1.1rem; font-weight:400; display:block; margin-top:4px;">Edge of Love</small></h1>
             <p>
-              十二位迷人卻各自懷抱心靈秘密的棲遲公寓房客，十二段刻骨銘心的命定愛戀。<br/>
-              最初你並不知道他們隱藏著什麼樣的心理防衛——唯有在每一次心動與試探中收集線索，才能在達標的那一刻，揭開他們靈魂深處真正的名字。
+              十二位迷人卻各自懷抱心靈秘密的棲遲公寓房客，每人 15 段跨地點邂逅、三人修羅場與共同天災事件。<br/>
+              最初你只知道他們現在的身分——唯有在心動與試探中突破心防，才能解鎖他們的真實診斷與童年養成故事。
             </p>
           </div>
 
-          <!-- 戀與製作人風格拱門立繪展示牆 -->
           <div class="otome-showcase-strip">
             ${showcaseChars
               .map(
@@ -957,7 +1185,7 @@ class EdgeOfLoveGame {
               <select id="player-trait-select">
                 <option value="balanced">⚖️ 溫柔直覺者（心動、安全感、邊界均衡發展）</option>
                 <option value="empathy">💗 傾聽共情者（全角色初始【親密度 +8】，更快觸發心動瞬間）</option>
-                <option value="stability">🛡️ 暖陽陪伴者（全角色初始【安全感 +10】，溫柔安撫對方不安）</option>
+                <option value="stability">🛡️ 暖陽陪伴者（全角色初始【安全感 +10】，更容易突破章節阻擋 Gate）</option>
                 <option value="boundary">🧭 清醒獨立者（全角色初始【健康邊界 +10】，守護健康雙向戀愛）</option>
               </select>
             </div>
@@ -971,20 +1199,29 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 頁籤 1：現在要去哪跟誰講話 ====================
+  // ==================== 頁籤 1：現在要去哪跟誰講話（動態跨地點出沒 ＋ 共同天災事件 ＋ 三人同場） ====================
   renderLocationExplorer() {
     const isApartmentOverview = !this.activeLocationId || this.activeLocationId === 'apartment';
     const activeLoc = LOCATIONS.find((l) => l.id === this.activeLocationId) || null;
-    const charsHere = activeLoc
-      ? CHARACTERS.filter((c) => activeLoc.characters.includes(c.id))
-      : [];
+    const charsHere = activeLoc ? this.getCharactersAtLocation(activeLoc.id) : [];
 
     return `
       <section class="location-panel">
         <div class="panel-header">
           <div>
             <h2>📍 現在要去哪・跟誰講話</h2>
-            <p>未進入特定場所時，背景為「棲遲公寓」；點選任一場景或與角色展開對話時，整個頁面底層將切換為該場景專屬背景圖。</p>
+            <p>角色不會只停留在單一場所，而會隨 15 個劇情事件進度與日常漫步在 6 大地點間移動，並可能觸發「三人同處一室」或「章節阻擋」。</p>
+          </div>
+          <div class="loc-header-actions">
+            <button class="nav-btn btn-gold" data-action="roam-shuffle">
+              🔄 漫步切換街區偶遇位置
+            </button>
+            <button class="nav-btn btn-accent" data-action="open-shared-disaster" data-disaster="quake">
+              🌍 共同事件 I：深夜強震
+            </button>
+            <button class="nav-btn btn-accent" data-action="open-shared-disaster" data-disaster="typhoon">
+              🌊 共同事件 II：強烈颱風
+            </button>
           </div>
         </div>
 
@@ -1001,8 +1238,9 @@ class EdgeOfLoveGame {
             </div>
           </button>
 
-          ${LOCATIONS.map(
-            (loc) => `
+          ${LOCATIONS.map((loc) => {
+            const cList = this.getCharactersAtLocation(loc.id);
+            return `
               <button
                 class="loc-tab ${loc.id === this.activeLocationId ? 'active' : ''}"
                 data-action="select-location"
@@ -1011,11 +1249,11 @@ class EdgeOfLoveGame {
                 <span class="loc-icon">${loc.icon}</span>
                 <div class="loc-tab-text">
                   <strong>${loc.name}</strong>
-                  <small>${loc.characters.length} 位可對話對象</small>
+                  <small>目前有 ${cList.length} 位角色在場</small>
                 </div>
               </button>
-            `
-          ).join('')}
+            `;
+          }).join('')}
         </div>
 
         ${
@@ -1024,7 +1262,7 @@ class EdgeOfLoveGame {
               <div class="apartment-locations-overview">
                 ${LOCATIONS.map((loc) => {
                   const locBg = getSceneBackground(loc.id);
-                  const locChars = CHARACTERS.filter((c) => loc.characters.includes(c.id));
+                  const locChars = this.getCharactersAtLocation(loc.id);
                   return `
                     <div class="scene-overview-card">
                       <div
@@ -1034,7 +1272,7 @@ class EdgeOfLoveGame {
                         data-location-id="${loc.id}"
                       >
                         <div class="scene-overview-Shade"></div>
-                        <span class="scene-enter-pill">✨ 點擊切換至此場景</span>
+                        <span class="scene-enter-pill">✨ 點擊進入此場景</span>
                         <div class="scene-overview-title">
                           <h3>${loc.icon} ${loc.name}</h3>
                           <p>${loc.desc}</p>
@@ -1042,27 +1280,32 @@ class EdgeOfLoveGame {
                       </div>
 
                       <div class="scene-overview-chars">
-                        <div class="scene-who-label">💬 在這裡可以跟誰講話：</div>
+                        <div class="scene-who-label">
+                          💬 目前在這裡可以跟誰講話（${locChars.length >= 2 ? '✨ 多人同場空間' : '單人獨處'}）：
+                        </div>
                         ${locChars
                           .map((char) => {
                             const cs = this.state.characters[char.id];
-                            const diag = this.getDiagnosisDisplay(char);
+                            const nextEv = this.getNextEventForChar(char.id);
+                            const gate = this.checkGateStatus(char.id, nextEv.eventNumber);
                             return `
                               <div class="scene-mini-char-row" style="--char-color: ${char.themeColor}">
                                 <img src="./assets/characters/${char.id}.png" alt="${char.name}" class="scene-mini-Face" />
                                 <div class="scene-mini-info">
                                   <div class="scene-mini-name">
                                     <strong>#${char.number} ${char.name}</strong>
-                                    <span class="dsm-tag ${diag.diagnosed ? 'diag-unlocked' : 'diag-locked'}">${diag.title}</span>
+                                    <span class="dsm-tag ${gate.blocked ? 'diag-locked' : 'diag-unlocked'}">
+                                      ${gate.blocked ? gate.gateTitle : `進度 E${String(nextEv.eventNumber).padStart(2, '0')}/15`}
+                                    </span>
                                   </div>
-                                  <small>${char.occupation}｜💗 ${cs.affection}%・🛡️ ${cs.security}%・🧭 ${cs.boundary}%</small>
+                                  <small>${nextEv.title}</small>
                                 </div>
                                 <div class="scene-mini-btns">
-                                  <button class="btn-action-primary" data-action="start-chapter" data-char-id="${char.id}">
-                                    ${cs.chapterCompleted < 3 ? `💖 Ch.${cs.chapterCompleted + 1} 對話` : '✨ 重溫劇情'}
+                                  <button class="btn-action-primary" data-action="start-event" data-char-id="${char.id}">
+                                    ${gate.blocked ? '🔒 突破阻擋' : `💖 觸發 ${nextEv.code}`}
                                   </button>
                                   <button class="btn-action-secondary" data-action="start-daily" data-char-id="${char.id}">
-                                    🌸 日常閒聊
+                                    🌸 閒聊
                                   </button>
                                 </div>
                               </div>
@@ -1083,14 +1326,17 @@ class EdgeOfLoveGame {
                     <p>${activeLoc.desc}</p>
                   </div>
                   <button class="nav-btn" data-action="select-location" data-location-id="apartment">
-                    🏰 返回棲遲公寓總覽（無特定場景）
+                    🏰 返回棲遲公寓總覽（預設公寓背景）
                   </button>
                 </div>
                 <div class="loc-char-cards">
                   ${charsHere
                     .map((char) => {
                       const cs = this.state.characters[char.id];
-                      const diag = this.getDiagnosisDisplay(char);
+                      const lore = CHARACTER_EXTENDED_LORE[char.id];
+                      const nextEv = this.getNextEventForChar(char.id);
+                      const gate = this.checkGateStatus(char.id, nextEv.eventNumber);
+                      const achs = getCharacterAchievements(char, cs, this.isDiagnosed(char.id));
                       return `
                         <div class="loc-char-spot" style="--char-color: ${char.themeColor}">
                           <div class="loc-char-avatar">
@@ -1100,22 +1346,23 @@ class EdgeOfLoveGame {
                             <div class="loc-char-top">
                               <span class="char-num">#${char.number}</span>
                               <strong>${char.name}</strong>
-                              <span class="dsm-tag ${diag.diagnosed ? 'diag-unlocked' : 'diag-locked'}">
-                                ${diag.title}
-                              </span>
+                              <span class="dsm-tag">事件進度：${cs.eventCompleted} / 15</span>
                             </div>
                             <p class="char-quote">${char.tagline}</p>
-                            <div class="loc-char-meta">
-                              <span>${char.occupation}</span>
-                              <span>・${char.genderLabel}</span>
-                              <span>・💗 心動 ${cs.affection}%</span>
+                            <p class="loc-current-bg-text"><strong>🟢 現在背景：</strong>${lore.currentBackground}</p>
+                            <div class="loc-next-event-box ${gate.blocked ? 'is-gated' : ''}">
+                              <strong>${gate.blocked ? gate.gateTitle : `🎬 下一事件：${nextEv.title}`}</strong>
+                              <small>${gate.blocked ? gate.reason : `類型：${nextEv.type === 'trio' ? '👥 三人同場事件' : nextEv.type.startsWith('shared') ? '🌍 共同天災事件' : '💖 個人劇情事件'}`}</small>
                             </div>
                             <div class="loc-char-buttons">
-                              <button class="btn-action-primary" data-action="start-chapter" data-char-id="${char.id}">
-                                ${cs.chapterCompleted < 3 ? `💖 進入第 ${cs.chapterCompleted + 1} 章約會對話` : '✨ 重溫羈絆劇情'}
+                              <button class="btn-action-primary" data-action="start-event" data-char-id="${char.id}">
+                                ${gate.blocked ? '🔒 查看阻擋條件' : `💖 進行 ${nextEv.code} 劇情`}
                               </button>
                               <button class="btn-action-secondary" data-action="start-daily" data-char-id="${char.id}">
-                                🌸 甜蜜日常對話
+                                🌸 日常對話 (+安全感)
+                              </button>
+                              <button class="btn-action-secondary" data-action="open-event-tree-modal" data-char-id="${char.id}">
+                                🌳 15 事件決策樹 (${achs.filter((a) => a.unlocked).length}/4 成就)
                               </button>
                             </div>
                           </div>
@@ -1131,32 +1378,26 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 頁籤 2：人物關係圖（結合視覺關係星圖＋12 位可攻略房客名冊＋已解鎖診斷） ====================
+  // ==================== 頁籤 2：人物關係圖（互動關係星圖 ＋ 12 房客雙層背景 ＋ 角色心靈成就 ＋ 15 事件樹） ====================
   renderRelationshipGraphTab() {
+    const achSummary = this.getTotalAchievementsCount();
     const diagnosedCount = CHARACTERS.filter((c) => this.isDiagnosed(c.id)).length;
-    const totalCriteria = CHARACTERS.reduce((acc, c) => acc + c.criteria.length, 0);
-    const unlockedCriteria = Object.values(this.state.characters).reduce(
-      (acc, cs) => acc + cs.unlockedCriteria.length,
-      0
-    );
 
     return `
       <section class="relationship-graph-panel">
         <div class="panel-header">
           <div>
-            <h2>💞 棲遲公寓・人物關係圖 ＆ 心靈診斷解鎖檔案</h2>
+            <h2>💞 棲遲公寓・人物關係圖 ＆ 角色心靈成就檔案</h2>
             <p>
-              以主角 <strong>${this.state.player.name}</strong> 為中心，呈現與 12 位可攻略房客的即時情感羈絆、三維關係數值，以及隨劇情解鎖的 DSM-5-TR 臨床診斷（目前已解鎖診斷：<strong>${diagnosedCount} / 12</strong> 人，累積行為線索：<strong>${unlockedCriteria} / ${totalCriteria}</strong>）。
+              以主角 <strong>${this.state.player.name}</strong> 為核心，呈現與 12 位可攻略房客的關係連線、<strong>4 階段心靈成就徽章（目前已解鎖 ${achSummary.unlocked} / ${achSummary.total} 枚成就，揭曉 ${diagnosedCount} / 12 人臨床診斷）</strong>，以及每位角色的「🟢 現在背景」與探索完成後解鎖的「👑 成長背景與人格疾患養成故事」。
             </p>
           </div>
         </div>
 
-        <!-- 互動式人物關係網絡圖 -->
         <div class="rel-web-container">
           ${this.renderRelationshipWebDiagram()}
         </div>
 
-        <!-- 12 位可攻略房客名冊與已解鎖診斷詳情 -->
         ${this.renderCharacterRoster()}
       </section>
     `;
@@ -1175,7 +1416,8 @@ class EdgeOfLoveGame {
       const cs = this.state.characters[char.id];
       const diag = this.getDiagnosisDisplay(char);
       const rel = this.getRelationshipStatusInfo(char, cs);
-      return { char, cs, diag, rel, x, y };
+      const achs = getCharacterAchievements(char, cs, diag.diagnosed);
+      return { char, cs, diag, rel, achs, x, y };
     });
 
     return `
@@ -1188,12 +1430,10 @@ class EdgeOfLoveGame {
             </radialGradient>
           </defs>
 
-          <!-- 背景星軌圓環 -->
           <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="rgba(253,230,138,0.22)" stroke-width="1.5" stroke-dasharray="6,6" />
           <ellipse cx="${cx}" cy="${cy}" rx="${Math.round(rx * 0.55)}" ry="${Math.round(ry * 0.55)}" fill="none" stroke="rgba(244,114,182,0.18)" stroke-width="1" />
           <circle cx="${cx}" cy="${cy}" r="120" fill="url(#centerHubGlow)" />
 
-          <!-- 主角與 12 角色的關係連線與關係標籤 -->
           ${nodes
             .map(({ char, cs, rel, x, y }) => {
               const mx = Math.round((cx + x) / 2);
@@ -1211,9 +1451,9 @@ class EdgeOfLoveGame {
                     stroke-dasharray="${rel.lineDash}"
                     opacity="0.78"
                   />
-                  <rect x="${mx - 54}" y="${my - 11}" width="108" height="22" rx="11" fill="rgba(26, 12, 38, 0.88)" stroke="${rel.color}" stroke-width="1" />
-                  <text x="${mx}" y="${my + 4}" text-anchor="middle" fill="#fce7f3" font-size="10.5" font-weight="600">
-                    💗${cs.affection}%｜${rel.label.slice(0, 6)}
+                  <rect x="${mx - 56}" y="${my - 11}" width="112" height="22" rx="11" fill="rgba(26, 12, 38, 0.88)" stroke="${rel.color}" stroke-width="1" />
+                  <text x="${mx}" y="${my + 4}" text-anchor="middle" fill="#fce7f3" font-size="10.2" font-weight="600">
+                    E${String(cs.eventCompleted).padStart(2, '0')}/15｜${rel.label.slice(0, 6)}
                   </text>
                 </g>
               `;
@@ -1221,35 +1461,34 @@ class EdgeOfLoveGame {
             .join('')}
         </svg>
 
-        <!-- 中央主角節點 -->
         <div class="rel-center-protagonist" style="left: 50%; top: 50%;">
           <div class="protag-avatar-ring">🌸</div>
           <strong>${this.state.player.name}</strong>
           <small>棲遲公寓主角（${this.state.player.pronoun}）</small>
         </div>
 
-        <!-- 12 位角色圓形頭像關係節點 -->
         ${nodes
-          .map(({ char, cs, diag, rel, x, y }) => {
+          .map(({ char, cs, diag, rel, achs, x, y }) => {
             const leftPct = ((x / 1120) * 100).toFixed(2);
             const topPct = ((y / 660) * 100).toFixed(2);
+            const badgesStr = achs.map((a) => (a.unlocked ? a.icon : '⚪')).join('');
             return `
               <button
                 class="rel-char-node ${diag.diagnosed ? 'is-diagnosed' : ''}"
                 style="left: ${leftPct}%; top: ${topPct}%; --node-color: ${rel.color}"
                 data-action="focus-rel-card"
                 data-char-id="${char.id}"
-                title="點擊捲動至 ${char.name} 的詳細關係與診斷卡"
+                title="點擊捲動至 ${char.name} 的詳細關係、背景與成就卡"
               >
                 <div class="rel-node-avatar-wrap">
                   <img src="./assets/characters/${char.id}.png" alt="${char.name}" />
                   <span class="rel-node-num">#${char.number}</span>
                 </div>
                 <div class="rel-node-caption">
-                  <strong>${char.name}</strong>
+                  <strong>${char.name} <small>${badgesStr}</small></strong>
                   <span class="rel-node-status" style="color:${rel.color}">${rel.label}</span>
                   <small class="rel-node-diag ${diag.diagnosed ? 'unlocked' : ''}">
-                    ${diag.diagnosed ? `✅ ${char.dsmTitle}` : `🔒 診斷線索 ${cs.unlockedCriteria.length}/${char.criteria.length}`}
+                    ${diag.diagnosed ? `🥇 ${char.dsmTitle}` : `🔒 事件 ${cs.eventCompleted}/15`}
                   </small>
                 </div>
               </button>
@@ -1275,8 +1514,8 @@ class EdgeOfLoveGame {
       <section class="roster-panel">
         <div class="panel-header roster-header">
           <div>
-            <h2>✨ 12 位可攻略房客名冊 ＆ DSM-5-TR 診斷解鎖紀錄</h2>
-            <p>整合每位房客的關係數值、約會進度與心靈觀察線索。當收集滿該角色所有行為線索達診斷標準時，將正式顯示其人格障礙診斷與臨床解析。</p>
+            <h2>✨ 12 位可攻略房客名冊（現在背景 ＆ 成長養成故事 ＆ 專屬成就）</h2>
+            <p>直接顯示每位角色的「🟢 現在背景」與跨地點動態行蹤；當推進完第 13 個事件後，將解鎖「👑 成長背景與人格疾患養成故事」。</p>
           </div>
 
           <div class="cluster-filters">
@@ -1284,10 +1523,10 @@ class EdgeOfLoveGame {
               全部房客 (12)
             </button>
             <button class="filter-btn ${this.selectedFilter === 'OBSERVING' ? 'active' : ''}" data-action="filter-roster" data-filter="OBSERVING">
-              🔍 診斷待解鎖 (${observingCount})
+              🔍 探索中 (${observingCount})
             </button>
             <button class="filter-btn ${this.selectedFilter === 'DIAGNOSED' ? 'active' : ''}" data-action="filter-roster" data-filter="DIAGNOSED">
-              💖 已解鎖診斷 (${diagnosedCount})
+              🥇 已解鎖診斷成就 (${diagnosedCount})
             </button>
           </div>
         </div>
@@ -1296,7 +1535,7 @@ class EdgeOfLoveGame {
           ${
             filteredChars.length > 0
               ? filteredChars.map((char) => this.renderCharacterCard(char)).join('')
-              : `<div style="grid-column: 1/-1; text-align:center; padding: 36px; color:#f5d0fe;">目前尚無符合此篩選條件的角色，快去「📍 現在去哪・跟誰講話」推進約會劇情吧！</div>`
+              : `<div style="grid-column: 1/-1; text-align:center; padding: 36px; color:#f5d0fe;">目前尚無符合此篩選條件的角色，快去推進事件吧！</div>`
           }
         </div>
       </section>
@@ -1305,20 +1544,28 @@ class EdgeOfLoveGame {
 
   renderCharacterCard(char) {
     const cs = this.state.characters[char.id];
+    const lore = CHARACTER_EXTENDED_LORE[char.id];
     const diag = this.getDiagnosisDisplay(char);
     const rel = this.getRelationshipStatusInfo(char, cs);
     const promptInfo = CHARACTER_PROMPTS[char.id];
+    const achs = getCharacterAchievements(char, cs, diag.diagnosed);
+    const nextEv = this.getNextEventForChar(char.id);
+    const gate = this.checkGateStatus(char.id, nextEv.eventNumber);
+    const backstoryUnlocked = Boolean(cs.backstoryUnlocked || cs.eventCompleted >= 13);
+
+    const scheduleNames = lore.scheduleLocations
+      .map((lid) => LOCATIONS.find((l) => l.id === lid)?.name.split('・')[1] || LOCATIONS.find((l) => l.id === lid)?.name)
+      .join(' ➔ ');
 
     return `
       <article id="rel-char-card-${char.id}" class="char-card otome-gacha-card" style="--char-color: ${char.themeColor}">
-        <!-- 上半部：戀與製作人拱門卡面與立繪 -->
-        <div class="gacha-card-visual" data-action="start-chapter" data-char-id="${char.id}">
+        <div class="gacha-card-visual" data-action="start-event" data-char-id="${char.id}">
           <div class="gacha-arch-window">
             <img src="${promptInfo?.imagePath || `./assets/characters/${char.id}.png`}" alt="${char.name}" class="gacha-char-img" loading="lazy" />
             <div class="gacha-gradient-veil"></div>
             <span class="gacha-rarity-badge">${promptInfo?.rarity || 'SSR'}</span>
             <span class="gacha-clue-pill ${diag.diagnosed ? 'unlocked' : ''}">
-              ${diag.code}
+              事件 ${cs.eventCompleted}/15
             </span>
             <div class="gacha-bottom-title">
               <div class="gacha-name-line">
@@ -1331,14 +1578,23 @@ class EdgeOfLoveGame {
           </div>
         </div>
 
-        <!-- 下半部：關係狀態、心靈診斷解鎖詳情、三維戀愛數值與操作按鈕 -->
         <div class="gacha-card-body">
           <div class="rel-status-banner" style="border-color:${rel.color}; color:${rel.color}">
             <span>當前關係：<strong>${rel.label}</strong></span>
           </div>
 
-          <div class="char-dsm-name ${diag.diagnosed ? '' : 'undiscovered-dsm'}">
-            ${diag.fullTitle}
+          <!-- 角色專屬 4 枚心靈成就徽章列 -->
+          <div class="char-achievements-row">
+            ${achs
+              .map(
+                (a) => `
+                  <div class="ach-pill ${a.unlocked ? 'unlocked' : 'locked'}" title="${a.desc}">
+                    <span>${a.unlocked ? a.icon : '🔒'}</span>
+                    <small>${a.title}</small>
+                  </div>
+                `
+              )
+              .join('')}
           </div>
 
           <div class="char-tags-row">
@@ -1346,8 +1602,24 @@ class EdgeOfLoveGame {
             <span class="orient-tag">${char.orientationLabel}</span>
           </div>
 
-          <p class="char-bio">${char.shortBio}</p>
+          <!-- 1. 公開顯示：現在背景與跨地點出沒路線 -->
+          <div class="char-lore-box current-bg-box">
+            <strong>🟢 現在背景（公開）：</strong>
+            <p>${lore.currentBackground}</p>
+            <small class="char-roam-locations">📍 出沒地點：${scheduleNames}</small>
+          </div>
 
+          <!-- 2. 探索完解鎖：成長背景與人格疾患養成故事 -->
+          <div class="char-lore-box growth-bg-box ${backstoryUnlocked ? 'unlocked' : 'locked'}">
+            <strong>${backstoryUnlocked ? `👑 成長背景＆人格疾患養成故事：${lore.growthBackstory.title}` : '🔒 成長背景＆人格疾患養成故事（待探索完解鎖）'}</strong>
+            ${
+              backstoryUnlocked
+                ? `<p>${lore.growthBackstory.story}</p>`
+                : `<p class="locked-placeholder">需推進此角色劇情至第 13 事件【E13 過去的房間】並突破心防後，才會揭曉是什麼樣的童年與成長經歷造就了${char.pronoun}今日的人格特質。</p>`
+            }
+          </div>
+
+          <!-- 三維度關係數值 -->
           <div class="stats-bars">
             <div class="stat-row">
               <div class="stat-label"><span>💗 心動親密 (Affection)</span><strong>${cs.affection}%</strong></div>
@@ -1366,8 +1638,8 @@ class EdgeOfLoveGame {
           <!-- 內嵌漸進式 DSM-5-TR 診斷與行為觀察線索抽屜 -->
           <details class="card-dsm-dossier" ${diag.diagnosed ? 'open' : ''}>
             <summary>
-              <span>🧠 臨床觀察線索 ＆ 診斷狀態（${cs.unlockedCriteria.length}/${char.criteria.length}）</span>
-              <strong>${diag.diagnosed ? `✅ ${char.dsmCode}` : '🔒 待解鎖'}</strong>
+              <span>🥇 臨床真相成就（線索 ${cs.unlockedCriteria.length}/${char.criteria.length}）</span>
+              <strong>${diag.diagnosed ? `✅ ${char.dsmTitle}` : '🔒 待達診斷標準'}</strong>
             </summary>
             <div class="card-dsm-body">
               ${
@@ -1381,7 +1653,7 @@ class EdgeOfLoveGame {
                   `
                   : `
                     <p class="card-dsm-locked-tip">
-                      🔒 尚未符合 DSM-5-TR 確診門檻（需透過約會劇情收集滿 ${char.criteria.length} 項行為特徵後正式揭曉）。
+                      🔒 尚未符合 DSM-5-TR 確診門檻（需推進事件並收集滿 ${char.criteria.length} 項核心行為特徵後正式揭曉）。
                     </p>
                   `
               }
@@ -1392,7 +1664,7 @@ class EdgeOfLoveGame {
                     return `
                       <li class="${isUnlocked ? 'unlocked' : 'locked'}">
                         <strong>${isUnlocked ? `✅ ${cr.title}` : `🔒 待觀察行為特徵 #${idx + 1}`}</strong>
-                        <span>${isUnlocked ? this.maskUndiagnosedText(cr.desc, char.id) : '推進與該角色的約會對話即可記錄此特徵'}</span>
+                        <span>${isUnlocked ? this.maskUndiagnosedText(cr.desc, char.id) : '推進與該角色的跨地點事件即可記錄此特徵'}</span>
                       </li>
                     `;
                   })
@@ -1401,39 +1673,17 @@ class EdgeOfLoveGame {
             </div>
           </details>
 
-          <div class="chapter-progress-row">
-            <span>約會章節：</span>
-            <div class="chap-pills">
-              ${[1, 2, 3]
-                .map(
-                  (num) => `
-                    <button
-                      class="chap-pill ${cs.chapterCompleted >= num ? 'done' : cs.chapterCompleted + 1 === num ? 'current' : ''}"
-                      data-action="start-chapter"
-                      data-char-id="${char.id}"
-                      data-chapter="${num}"
-                      title="進行第 ${num} 章"
-                    >
-                      Ch.${num}
-                    </button>
-                  `
-                )
-                .join('')}
-            </div>
-            <span class="criteria-count">${diag.progressText}</span>
-          </div>
-
           <div class="char-card-actions">
-            <button class="btn-card-main" data-action="start-chapter" data-char-id="${char.id}">
-              ${cs.chapterCompleted < 3 ? `💖 第 ${cs.chapterCompleted + 1} 章約會` : '✨ 重溫約會'}
+            <button class="btn-card-main" data-action="start-event" data-char-id="${char.id}">
+              ${gate.blocked ? '🔒 阻擋中' : cs.eventCompleted < 15 ? `💖 推進 ${nextEv.code}` : '✨ 重溫事件'}
+            </button>
+            <button class="btn-card-sub" data-action="open-event-tree-modal" data-char-id="${char.id}" title="開啟 15 事件完整決策樹">
+              🌳 決策樹(${cs.eventCompleted}/15)
             </button>
             <button class="btn-card-sub" data-action="start-daily" data-char-id="${char.id}">
               🌸 日常
             </button>
-            <button class="btn-card-sub" data-action="show-ending" data-char-id="${char.id}">
-              ${diag.diagnosed || cs.chapterCompleted >= 3 ? '🎬 結局' : '🔒 結局'}
-            </button>
-            <button class="btn-card-icon" data-action="open-prompt-studio" data-char-id="${char.id}" title="查看此角色之立繪與劇情動作生成 Prompt">
+            <button class="btn-card-icon" data-action="open-prompt-studio" data-char-id="${char.id}" title="動作生成 Prompt">
               🎨
             </button>
           </div>
@@ -1442,10 +1692,91 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 視覺小說對話與結局舞台 ====================
+  // ==================== 彈窗：15 事件決策樹＆章節阻擋總覽 ====================
+  renderEventTreeModal(charId) {
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) return;
+
+    const char = CHARACTERS.find((c) => c.id === charId) || CHARACTERS[0];
+    const cs = this.state.characters[char.id];
+    const events = this.getEventsForChar(char.id);
+    const achs = getCharacterAchievements(char, cs, this.isDiagnosed(char.id));
+
+    modalRoot.innerHTML = `
+      <div class="modal-backdrop" data-action="close-modal">
+        <div class="modal-window" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <div>
+              <h2>🌳 #${char.number} ${char.name} — 15 事件戀愛養成決策樹（進度 ${cs.eventCompleted} / 15）</h2>
+              <p>涵蓋四階段劇情、跨地點移動、三人同場事件、兩大共同天災（強震／颱風）、三道心防阻擋（Gate）與成長養成故事解鎖。</p>
+            </div>
+            <button class="btn-close" data-action="close-modal">✕</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="char-achievements-row" style="margin-bottom:14px;">
+              ${achs
+                .map(
+                  (a) => `
+                    <div class="ach-pill ${a.unlocked ? 'unlocked' : 'locked'}">
+                      <span>${a.unlocked ? a.icon : '🔒'}</span>
+                      <strong>${a.title}</strong>：<span>${a.desc}</span>
+                    </div>
+                  `
+                )
+                .join('')}
+            </div>
+
+            <div class="decision-tree-list">
+              ${events
+                .map((ev) => {
+                  const isDone = cs.eventCompleted >= ev.eventNumber;
+                  const isCurrent = cs.eventCompleted + 1 === ev.eventNumber;
+                  const gate = this.checkGateStatus(char.id, ev.eventNumber);
+                  const locObj = LOCATIONS.find((l) => l.id === ev.locationId);
+                  const gateBanner =
+                    ev.eventNumber === 5 || ev.eventNumber === 9 || ev.eventNumber === 13
+                      ? `<div class="tree-gate-divider ${gate.blocked ? 'locked' : 'passed'}">
+                           ${gate.blocked ? `${gate.gateTitle}：${gate.reason}` : `✅ 已突破章節心防阻擋 (Gate ${ev.eventNumber === 5 ? 1 : ev.eventNumber === 9 ? 2 : 3})`}
+                         </div>`
+                      : '';
+
+                  return `
+                    ${gateBanner}
+                    <div class="tree-event-row ${isDone ? 'done' : isCurrent ? 'current' : 'locked'}">
+                      <div class="tree-ev-left">
+                        <span class="tree-ev-code">${ev.code}</span>
+                        <div>
+                          <strong>${ev.title}</strong>
+                          <small>📍 地點：${locObj?.icon || ''} ${locObj?.name || ''} ｜ ${ev.phaseName}</small>
+                        </div>
+                      </div>
+                      <div class="tree-ev-right">
+                        <button
+                          class="btn-action-primary"
+                          data-action="start-event"
+                          data-char-id="${char.id}"
+                          data-event-num="${ev.eventNumber}"
+                        >
+                          ${isDone ? '✨ 重溫事件' : gate.blocked ? '🔒 阻擋中' : '💖 立即進行'}
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ==================== 視覺小說對話與結局舞台（支援單人＆三人同場雙立繪） ====================
   renderActiveScene() {
-    const { charId, mode, expression } = this.activeScene;
+    const { charId, partnerId, mode, expression } = this.activeScene;
     const char = CHARACTERS.find((c) => c.id === charId);
+    const partnerChar = partnerId ? CHARACTERS.find((c) => c.id === partnerId) : null;
     const cs = this.state.characters[charId];
     const route = this.getRouteType(char);
     const diag = this.getDiagnosisDisplay(char);
@@ -1458,24 +1789,25 @@ class EdgeOfLoveGame {
       return this.renderDailyScene(char, cs, route, diag);
     }
 
-    const { chapter, nodeIndex, awaitingNextAfterChoice, lastChoiceOutcome, chapterIndex } = this.activeScene;
-    const node = chapter.nodes[nodeIndex];
-    const currentActionPrompt = buildCharacterActionPrompt(char.id, expression, chapterIndex + 1);
+    const { eventData, eventNumber, nodeIndex, awaitingNextAfterChoice, lastChoiceOutcome } = this.activeScene;
+    const node = eventData.nodes[nodeIndex];
+    const locObj = LOCATIONS.find((l) => l.id === eventData.locationId);
+    const currentActionPrompt = buildCharacterActionPrompt(char.id, expression, Math.min(3, Math.ceil(eventNumber / 4)));
 
     return `
       <section class="vn-stage" style="--char-color: ${char.themeColor}">
         <div class="vn-top-bar">
           <div class="vn-loc-info">
-            <span class="vn-chap-badge">${chapter.title}</span>
-            <strong>📍 ${chapter.location}</strong>
-            <small>🎧 ${chapter.ambience}</small>
+            <span class="vn-chap-badge">${eventData.code} / E15</span>
+            <strong>${eventData.title}</strong>
+            <small>📍 ${locObj?.name || ''} ｜ 🎧 ${eventData.ambience}</small>
           </div>
           <div class="vn-top-buttons">
-            <button class="nav-btn btn-gold" data-action="open-prompt-studio" data-char-id="${char.id}">
-              🎨 本幕動作 Prompt
+            <button class="nav-btn" data-action="open-event-tree-modal" data-char-id="${char.id}">
+              🌳 15 事件樹
             </button>
-            <button class="nav-btn" data-action="open-compendium" data-char-id="${char.id}">
-              📋 心靈線索 (${cs.unlockedCriteria.length}/${char.criteria.length})
+            <button class="nav-btn btn-gold" data-action="open-prompt-studio" data-char-id="${char.id}">
+              🎨 動作 Prompt
             </button>
             <button class="nav-btn" data-action="exit-scene">
               ↩ 返回地圖
@@ -1484,18 +1816,35 @@ class EdgeOfLoveGame {
         </div>
 
         <div class="vn-main-grid">
-          <!-- 左側：戀與製作人拱門角色立繪與心動波形 -->
+          <!-- 左側：角色立繪（若為三人同場事件則同時並排顯示 2 位角色立繪！） -->
           <div class="vn-portrait-column">
-            <div class="vn-portrait-frame">
-              ${renderCharacterSVG(char, expression, 'portrait')}
-              <div class="vn-emotion-tag">
-                ✨ 當下神情：${this.getEmotionLabel(expression)}
-              </div>
-            </div>
+            ${
+              partnerChar
+                ? `
+                  <div class="vn-trio-portraits">
+                    <div class="trio-p-card">
+                      ${renderCharacterSVG(char, expression, 'portrait')}
+                      <span class="trio-p-label">#${char.number} ${char.name}</span>
+                    </div>
+                    <div class="trio-p-card">
+                      ${renderCharacterSVG(partnerChar, 'neutral', 'portrait')}
+                      <span class="trio-p-label">#${partnerChar.number} ${partnerChar.name}</span>
+                    </div>
+                  </div>
+                `
+                : `
+                  <div class="vn-portrait-frame">
+                    ${renderCharacterSVG(char, expression, 'portrait')}
+                    <div class="vn-emotion-tag">
+                      ✨ 當下神情：${this.getEmotionLabel(expression)}
+                    </div>
+                  </div>
+                `
+            }
 
             <div class="vn-ecg-box">
               <div class="ecg-header">
-                <span>💓 心動與防衛頻率（${diag.diagnosed ? char.dsmTitle : '真相探索中'}）</span>
+                <span>💓 心動與防衛頻率（${diag.diagnosed ? char.dsmTitle : `線索 ${cs.unlockedCriteria.length}/${char.criteria.length}`}）</span>
                 <span class="route-pill ${route.badgeClass}">${route.label}</span>
               </div>
               ${this.renderECGSVG(expression, char.themeColor)}
@@ -1513,16 +1862,18 @@ class EdgeOfLoveGame {
               <div class="speaker-banner">
                 <span class="speaker-name">
                   ${
-                    node.speaker === 'char'
-                      ? `${char.name}（${diag.diagnosed ? char.dsmTitle : `${char.occupation}・心靈線索 ${cs.unlockedCriteria.length}/${char.criteria.length}`}）`
-                      : '✦ 情境與心動描寫 ✦'
+                    partnerChar
+                      ? `👥 三人同場互動：${char.name} ＆ ${partnerChar.name} ＆ ${this.state.player.name}`
+                      : node.speaker === 'char'
+                      ? `${char.name}（${diag.diagnosed ? char.dsmTitle : `${char.occupation}・事件 ${eventNumber}/15`}）`
+                      : '✦ 場景與心動描寫 ✦'
                   }
                 </span>
-                <span class="node-step">SCENE ${nodeIndex + 1} / ${chapter.nodes.length}</span>
+                <span class="node-step">STEP ${nodeIndex + 1} / ${eventData.nodes.length}</span>
               </div>
 
               <div class="dialogue-text">
-                ${this.formatText(node.text)}
+                ${this.formatText(node.text).replaceAll('\n', '<br/><br/>')}
               </div>
 
               ${
@@ -1530,7 +1881,7 @@ class EdgeOfLoveGame {
                   ? `
                     <div class="choice-outcome-box">
                       <div class="outcome-reply">
-                        <strong>💖 ${char.name}的回應：</strong>
+                        <strong>💖 互動回應：</strong>
                         <p>${lastChoiceOutcome.reply}</p>
                       </div>
                       <div class="outcome-deltas">
@@ -1547,7 +1898,7 @@ class EdgeOfLoveGame {
                   : node.choices && node.choices.length > 0
                   ? `
                     <div class="vn-choices-list">
-                      <div class="choices-prompt">✨ 請選擇你的回應方式（兼具溫柔共情與健康界線更能觸動真心）：</div>
+                      <div class="choices-prompt">✨ 請選擇你的回應方式（影響親密度、安全感、健康邊界與後續章節阻擋）：</div>
                       ${node.choices
                         .map(
                           (ch, idx) => `
@@ -1574,11 +1925,10 @@ class EdgeOfLoveGame {
               }
             </div>
 
-            <!-- 底部相處備忘與本幕動作 Prompt 預覽 -->
             <div class="vn-hint-card">
               <div><strong>💌 戀愛相處提示：</strong> ${this.maskUndiagnosedText(char.strategyHint, char.id)}</div>
               <details class="scene-prompt-details">
-                <summary>🎨 展開本幕角色動作生成 Prompt（供後續動態生成 CG 動作）</summary>
+                <summary>🎨 展開本幕角色動作生成 Prompt</summary>
                 <div class="scene-prompt-box">
                   <textarea id="live-scene-prompt" readonly rows="3">${currentActionPrompt}</textarea>
                   <button class="nav-btn btn-gold" data-action="copy-prompt" data-target-id="live-scene-prompt">複製 Prompt</button>
@@ -1598,7 +1948,7 @@ class EdgeOfLoveGame {
         <div class="vn-top-bar">
           <div class="vn-loc-info">
             <span class="vn-chap-badge">甜蜜日常互動</span>
-            <strong>🌸 ${talk.title}（${diag.title}）</strong>
+            <strong>🌸 ${talk.title}（可提升依戀安全感突破 Gate）</strong>
           </div>
           <button class="nav-btn" data-action="exit-scene">↩ 返回</button>
         </div>
@@ -1645,6 +1995,7 @@ class EdgeOfLoveGame {
 
   renderEndingScene(char, cs, route, diag) {
     const { endingKey, endingData, expression } = this.activeScene;
+    const lore = CHARACTER_EXTENDED_LORE[char.id];
     const storyText = this.formatText(endingData.romanticText);
 
     const badgeColors = {
@@ -1658,10 +2009,10 @@ class EdgeOfLoveGame {
       <section class="vn-stage ending-stage" style="--char-color: ${char.themeColor}">
         <div class="vn-top-bar">
           <div class="vn-loc-info">
-            <span class="vn-chap-badge" style="background:${badgeColors[endingKey]}">命定結局＆心靈真相揭曉</span>
-            <strong>${char.name} — ${diag.diagnosed ? `${char.dsmTitle} (${char.dsmCode})` : diag.title}</strong>
+            <span class="vn-chap-badge" style="background:${badgeColors[endingKey]}">E15 命定結局＆養成真相全解鎖</span>
+            <strong>${char.name} — ${char.dsmTitle} (${char.dsmCode})</strong>
           </div>
-          <button class="nav-btn" data-action="exit-scene">↩ 返回卡冊</button>
+          <button class="nav-btn" data-action="exit-scene">↩ 返回</button>
         </div>
 
         <div class="vn-main-grid">
@@ -1694,9 +2045,12 @@ class EdgeOfLoveGame {
               </div>
 
               <div class="ending-clinical-box">
-                <strong>🧠 心靈真相檔案揭曉：【${char.dsmTitle} (${char.dsmTitleEn}, ${char.dsmCode})】</strong>
+                <strong>🥇 臨床診斷檔案：【${char.dsmTitle} (${char.dsmTitleEn}, ${char.dsmCode})】</strong>
                 <p style="margin-top:6px;">${char.clinicalOverview}</p>
                 <p style="margin-top:8px; color:#f5d0fe;">${char.differentialNote}</p>
+                <hr style="border-color:rgba(253,224,165,0.25); margin:10px 0;" />
+                <strong>👑 成長背景與人格疾患養成故事：${lore.growthBackstory.title}</strong>
+                <p style="margin-top:6px;">${lore.growthBackstory.story}</p>
               </div>
 
               <div class="ending-switcher">
@@ -1729,14 +2083,12 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 彈窗：角色立繪與劇情動作 Prompt 工坊 ====================
   renderPromptStudioModal(selectedCharId = 'shen_mo', selectedEmo = 'smile', selectedChap = 1) {
     const modalRoot = document.getElementById('modal-root');
     if (!modalRoot) return;
 
     const char = CHARACTERS.find((c) => c.id === selectedCharId) || CHARACTERS[0];
     const pData = CHARACTER_PROMPTS[char.id];
-    const dynamicPrompt = buildCharacterActionPrompt(char.id, selectedEmo, selectedChap);
 
     modalRoot.innerHTML = `
       <div class="modal-backdrop" data-action="close-modal">
@@ -1750,7 +2102,6 @@ class EdgeOfLoveGame {
           </div>
 
           <div class="modal-body">
-            <!-- 12 角色快速切換列 -->
             <div class="prompt-char-selector">
               ${CHARACTERS.map(
                 (c) => `
@@ -1775,7 +2126,7 @@ class EdgeOfLoveGame {
 
                 <div class="prompt-block">
                   <div class="prompt-block-head">
-                    <strong>1. 角色固定外觀錨點 (Appearance Anchor - 保持跨動作臉部與服裝一致)</strong>
+                    <strong>1. 角色固定外觀錨點 (Appearance Anchor)</strong>
                     <button class="nav-btn" data-action="copy-prompt" data-target-id="anchor-prompt-text">複製</button>
                   </div>
                   <textarea id="anchor-prompt-text" readonly rows="3">${pData.appearanceAnchor}</textarea>
@@ -1791,7 +2142,7 @@ class EdgeOfLoveGame {
 
                 <div class="prompt-block">
                   <div class="prompt-block-head">
-                    <strong>3. 各章節劇情專屬動作 Prompts（可直接用於生成新動作差分）</strong>
+                    <strong>3. 各章節劇情專屬動作 Prompts</strong>
                   </div>
                   ${pData.storyActions
                     .map(
@@ -1815,92 +2166,11 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 彈窗：漸進式 DSM-5-TR 心靈檔案館 & 存檔系統 ====================
-  renderCompendiumModal(focusCharId = null) {
-    const modalRoot = document.getElementById('modal-root');
-    if (!modalRoot) return;
-
-    const charsToShow = focusCharId ? CHARACTERS.filter((c) => c.id === focusCharId) : CHARACTERS;
-
-    modalRoot.innerHTML = `
-      <div class="modal-backdrop" data-action="close-modal">
-        <div class="modal-window" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <div>
-              <h2>📖 心靈羈絆圖鑑（行為觀察紀錄 ＆ DSM-5-TR 診斷揭曉）</h2>
-              <p>唯有在跨情境約會中收集滿該角色的核心行為線索，符合診斷標準後才會正式揭曉其人格障礙名稱與臨床解析。</p>
-            </div>
-            <div class="modal-header-btns">
-              ${
-                focusCharId
-                  ? `<button class="nav-btn" data-action="open-compendium">顯示全部 12 位角色</button>`
-                  : ''
-              }
-              <button class="btn-close" data-action="close-modal">✕</button>
-            </div>
-          </div>
-
-          <div class="modal-body compendium-list">
-            ${charsToShow
-              .map((char) => {
-                const cs = this.state.characters[char.id];
-                const diag = this.getDiagnosisDisplay(char);
-
-                return `
-                  <div class="compendium-card" style="--char-color: ${char.themeColor}">
-                    <div class="comp-head">
-                      <div>
-                        <span class="comp-code">${diag.diagnosed ? `${char.dsmCode}｜Cluster ${char.cluster}` : `🔍 心靈線索進度：${cs.unlockedCriteria.length} / ${char.criteria.length}`}</span>
-                        <h3>#${char.number} ${char.name} — ${diag.diagnosed ? `${char.dsmTitle} (${char.dsmTitleEn})` : '🔒 心靈真相未揭曉（需達診斷標準）'}</h3>
-                        <p class="comp-meta">${char.genderLabel}｜${char.orientationLabel}｜${char.occupation}</p>
-                      </div>
-                    </div>
-
-                    ${
-                      diag.diagnosed
-                        ? `
-                          <p class="comp-overview"><strong>🧠 臨床核心特徵：</strong>${char.clinicalOverview}</p>
-                          <p class="comp-diff">${char.differentialNote}</p>
-                          <p class="comp-hint"><strong>💌 戀愛相處關鍵：</strong>${char.strategyHint}</p>
-                        `
-                        : `
-                          <div class="comp-locked-banner">
-                            🔒 <strong>尚未達 DSM-5-TR 確診門檻（目前已觀察到 ${cs.unlockedCriteria.length} / ${char.criteria.length} 項特徵）</strong><br/>
-                            <span>提示：請與 ${char.name} 進行第 1～3 章約會劇情互動。當收集滿 ${char.criteria.length} 項核心準則時，將正式揭曉其心靈真相與臨床鑑別分析。</span>
-                          </div>
-                        `
-                    }
-
-                    <div class="comp-criteria-grid">
-                      ${char.criteria
-                        .map((cr, idx) => {
-                          const unlocked = cs.unlockedCriteria.includes(cr.id);
-                          return `
-                            <div class="crit-item ${unlocked ? 'unlocked' : 'locked'}">
-                              <div class="crit-top">
-                                <span>${unlocked ? '✅ 已觀察到行為特徵' : `🔒 待觀察線索 #${idx + 1}`}</span>
-                                <strong>${unlocked ? cr.title : '？？？'}</strong>
-                              </div>
-                              <p>${unlocked ? this.maskUndiagnosedText(cr.desc, char.id) : '（推進與該角色的約會章節即可觀察並記錄此特徵）'}</p>
-                            </div>
-                          `;
-                        })
-                        .join('')}
-                    </div>
-                  </div>
-                `;
-              })
-              .join('')}
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
   renderSaveModal() {
     const modalRoot = document.getElementById('modal-root');
     if (!modalRoot) return;
 
+    const achSummary = this.getTotalAchievementsCount();
     const slots = [1, 2, 3].map((num) => {
       const raw =
         localStorage.getItem(`edge_of_love_slot_${num}`) ||
@@ -1922,7 +2192,7 @@ class EdgeOfLoveGame {
           <div class="modal-header">
             <div>
               <h2>💾 戀愛記憶存檔與讀檔</h2>
-              <p>所有進度皆已即時保存在瀏覽器 Session / LocalStorage 中，下次打開網頁會自動接續！</p>
+              <p>所有進度皆即時保存在瀏覽器 Session / LocalStorage 中，下次打開網頁會自動接續！</p>
             </div>
             <button class="btn-close" data-action="close-modal">✕</button>
           </div>
@@ -1931,7 +2201,7 @@ class EdgeOfLoveGame {
             <div class="save-slot-card" style="border-color:#f472b6;">
               <div>
                 <strong style="color:#f9a8d4;">⚡ 瀏覽器自動接續記憶 (Session Auto-Resume)</strong>
-                <p>主角：${this.state.player.name}｜Day ${this.state.day}・已揭曉真相 ${CHARACTERS.filter((c) => this.isDiagnosed(c.id)).length}/12 人</p>
+                <p>主角：${this.state.player.name}｜已解鎖心靈成就 ${achSummary.unlocked}/${achSummary.total}</p>
                 <small>狀態：已同步於瀏覽器，關閉分頁或下次開啟時將自動載入</small>
               </div>
             </div>
@@ -1939,20 +2209,13 @@ class EdgeOfLoveGame {
             ${slots
               .map(({ num, info }) => {
                 const st = info?.state;
-                const diagCount = st
-                  ? CHARACTERS.filter(
-                      (c) =>
-                        st.characters?.[c.id]?.diagnosed ||
-                        (st.characters?.[c.id]?.unlockedCriteria?.length || 0) >= c.criteria.length
-                    ).length
-                  : 0;
                 return `
                   <div class="save-slot-card">
                     <div>
                       <strong>手動記憶槽位 #${num}</strong>
                       ${
                         st
-                          ? `<p>主角：${st.player.name}｜Day ${st.day}｜已揭曉真相 ${diagCount}/12 人</p>
+                          ? `<p>主角：${st.player.name}</p>
                              <small>儲存時間：${info.savedAt}</small>`
                           : `<p style="color:#cbd5e1;">— 空白槽位 —</p>`
                       }
@@ -1971,8 +2234,8 @@ class EdgeOfLoveGame {
               .join('')}
 
             <div style="margin-top:8px; display:flex; justify-content:flex-end;">
-              <button class="nav-btn" style="color:#fda4af; border-color:rgba(253,164,175,0.4);" data-action="clear-all-saves">
-                🗑️ 清除所有存檔並重開新局
+              <button class="nav-btn btn-restart" data-action="restart-game">
+                🗑️ 清除所有存檔並重新開始
               </button>
             </div>
           </div>
@@ -1992,7 +2255,7 @@ class EdgeOfLoveGame {
     return map[expr] || map.neutral;
   }
 
-  renderECGSVG(expression, color) {
+  renderECGSVG(expression) {
     let pathData = 'M 0 25 L 40 25 L 50 10 L 60 40 L 70 25 L 140 25 L 150 8 L 160 42 L 170 25 L 240 25';
     let strokeColor = '#f472b6';
     if (expression === 'triggered') {
