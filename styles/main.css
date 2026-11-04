@@ -1,17 +1,21 @@
-/* 《愛的邊緣》(Edge of Love) — 現代暗黑微霓虹心理學視覺小說樣式表 */
+/* 《愛的邊緣》(Edge of Love) — 《戀與製作人》唯美浪漫 SSR 拱門金框與珠光戀愛視覺樣式表 */
 
 :root {
-  --bg-deep: #070a12;
-  --bg-panel: rgba(15, 23, 42, 0.84);
-  --bg-card: rgba(30, 41, 59, 0.65);
-  --border-subtle: rgba(148, 163, 184, 0.18);
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
-  --accent-primary: #ec4899;
-  --accent-indigo: #6366f1;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  --bg-romantic-1: #241734;
+  --bg-romantic-2: #3b224c;
+  --bg-romantic-3: #5c3260;
+  --bg-panel: rgba(43, 25, 62, 0.78);
+  --bg-card: rgba(58, 34, 79, 0.72);
+  --gold-primary: #f6d365;
+  --gold-secondary: #fda085;
+  --gold-border: rgba(253, 224, 165, 0.48);
+  --rose-primary: #f472b6;
+  --rose-glow: rgba(244, 114, 182, 0.45);
+  --text-main: #fff8fb;
+  --text-Soft: #f5d0fe;
+  --text-muted: #d8b4e2;
+  --font-serif: "Noto Serif TC", "Songti TC", "PMingLiU", "Times New Roman", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
 }
 
 * {
@@ -22,18 +26,23 @@
 
 body {
   font-family: var(--font-sans);
-  background: radial-gradient(circle at 18% 12%, #1e1b4b 0%, #090d16 48%, #05070c 100%);
+  background:
+    radial-gradient(circle at 15% 15%, rgba(253, 164, 175, 0.28) 0%, transparent 40%),
+    radial-gradient(circle at 85% 22%, rgba(253, 224, 71, 0.18) 0%, transparent 38%),
+    radial-gradient(circle at 50% 80%, rgba(192, 132, 252, 0.25) 0%, transparent 50%),
+    linear-gradient(145deg, #1f132b 0%, #371f47 45%, #4d295a 80%, #2a183b 100%);
+  background-attachment: fixed;
   color: var(--text-main);
   min-height: 100vh;
-  line-height: 1.65;
+  line-height: 1.68;
   overflow-x: hidden;
 }
 
-button, input, select {
+button, input, select, textarea {
   font-family: inherit;
 }
 
-/* ==================== 頂部導覽列 ==================== */
+/* ==================== 頂部唯美導覽列 ==================== */
 .top-navbar {
   position: sticky;
   top: 0;
@@ -43,10 +52,11 @@ button, input, select {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 12px 24px;
-  background: rgba(9, 13, 22, 0.9);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 26px;
+  background: linear-gradient(90deg, rgba(34, 19, 48, 0.92), rgba(59, 31, 77, 0.92));
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gold-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
 
 .brand-group {
@@ -57,31 +67,43 @@ button, input, select {
 
 .brand-logo {
   font-size: 28px;
-  filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.6));
+  filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.8));
 }
 
 .brand-title {
-  font-size: 1.2rem;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  background: linear-gradient(90deg, #fff1f2, #fde68a, #f9a8d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .brand-sub {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 2px 8px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 10px;
   border-radius: 99px;
-  background: rgba(99, 102, 241, 0.22);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: rgba(244, 114, 182, 0.22);
+  color: #fce7f3;
+  border: 1px solid rgba(253, 224, 165, 0.5);
+  -webkit-text-fill-color: #fce7f3;
 }
 
 .brand-meta {
   font-size: 0.82rem;
   color: var(--text-muted);
+}
+
+.saved-indicator {
+  color: #fde68a;
+  font-weight: 600;
 }
 
 .nav-actions {
@@ -92,39 +114,47 @@ button, input, select {
 }
 
 .stat-pill {
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid var(--border-subtle);
-  padding: 6px 12px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--gold-border);
+  padding: 6px 13px;
+  border-radius: 99px;
   font-size: 0.82rem;
   display: flex;
   gap: 6px;
+  color: #fde68a;
 }
 
 .nav-btn {
-  background: rgba(30, 41, 59, 0.85);
+  background: rgba(68, 38, 89, 0.78);
   color: var(--text-main);
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  padding: 7px 13px;
-  border-radius: 8px;
-  font-size: 0.84rem;
+  border: 1px solid rgba(253, 224, 165, 0.38);
+  padding: 7px 14px;
+  border-radius: 99px;
+  font-size: 0.83rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .nav-btn:hover {
-  background: rgba(51, 65, 85, 0.95);
-  border-color: #cbd5e1;
+  background: rgba(244, 114, 182, 0.35);
+  border-color: #fde68a;
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(244, 114, 182, 0.35);
 }
 
 .nav-btn.btn-accent {
-  background: linear-gradient(135deg, #4f46e5, #9333ea);
-  border-color: rgba(192, 132, 252, 0.5);
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  border-color: #fde68a;
 }
 
-/* ==================== 初始創角畫面 ==================== */
+.nav-btn.btn-gold {
+  background: linear-gradient(135deg, #d97706, #ec4899);
+  border-color: #fef08a;
+  color: #fff;
+}
+
+/* ==================== 初始創角畫面（戀與製作人拱門畫廊風） ==================== */
 .creator-screen {
   min-height: 100vh;
   display: flex;
@@ -135,37 +165,39 @@ button, input, select {
 
 .creator-card {
   width: 100%;
-  max-width: 820px;
-  background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-radius: 20px;
+  max-width: 940px;
+  background: linear-gradient(160deg, rgba(49, 27, 68, 0.9), rgba(32, 18, 46, 0.94));
+  border: 1.5px solid var(--gold-border);
+  border-radius: 26px;
   padding: 36px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 70px rgba(15, 7, 26, 0.75), inset 0 0 30px rgba(244, 114, 182, 0.12);
+  backdrop-filter: blur(18px);
 }
 
 .creator-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 22px;
 }
 
 .creator-badge {
   display: inline-block;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #f472b6;
-  background: rgba(236, 72, 153, 0.14);
-  border: 1px solid rgba(236, 72, 153, 0.35);
-  padding: 4px 12px;
+  letter-spacing: 0.16em;
+  color: #fef08a;
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.25), rgba(168, 85, 247, 0.25));
+  border: 1px solid var(--gold-border);
+  padding: 5px 16px;
   border-radius: 99px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .creator-header h1 {
-  font-size: 2rem;
+  font-family: var(--font-serif);
+  font-size: 2.35rem;
+  letter-spacing: 0.12em;
   margin-bottom: 10px;
-  background: linear-gradient(90deg, #f8fafc, #f472b6, #818cf8);
+  background: linear-gradient(90deg, #ffffff, #fde68a, #f9a8d4, #ffffff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -173,12 +205,66 @@ button, input, select {
 .creator-header p {
   color: var(--text-muted);
   font-size: 0.94rem;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* 戀與製作人拱門展示條 */
+.otome-showcase-strip {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin: 20px 0 26px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(253, 224, 165, 0.32);
+  border-radius: 20px;
+}
+
+@media (max-width: 768px) {
+  .otome-showcase-strip {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.showcase-pillar {
+  position: relative;
+  height: 155px;
+  border-radius: 60px 60px 10px 10px;
+  overflow: hidden;
+  border: 1.5px solid rgba(253, 224, 165, 0.65);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.showcase-pillar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.35s ease;
+}
+
+.showcase-pillar:hover img {
+  transform: scale(1.08);
+}
+
+.pillar-name {
+  position: absolute;
+  bottom: 0;
+  inset-inline: 0;
+  background: linear-gradient(transparent, rgba(28, 14, 41, 0.92));
+  color: #fde68a;
+  font-family: var(--font-serif);
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 14px 4px 4px;
 }
 
 .creator-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .form-row {
@@ -190,85 +276,43 @@ button, input, select {
 .form-row label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: #fde68a;
 }
 
 .form-row input[type="text"],
 .form-row select {
-  background: rgba(9, 13, 22, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(24, 13, 36, 0.78);
+  border: 1px solid var(--gold-border);
   color: var(--text-main);
   padding: 11px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.95rem;
 }
 
-.checkbox-row {
-  background: rgba(30, 41, 59, 0.5);
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--border-subtle);
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 0.85rem !important;
-  font-weight: 400 !important;
-  color: #cbd5e1 !important;
-  cursor: pointer;
-}
-
-.checkbox-label input {
-  margin-top: 4px;
-}
-
-.creator-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.preview-cluster-box {
-  background: rgba(9, 13, 22, 0.65);
-  border-left: 3px solid;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.preview-cluster-box span {
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
 .btn-primary-large {
-  margin-top: 8px;
-  background: linear-gradient(135deg, #ec4899, #6366f1);
+  margin-top: 10px;
+  background: linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #f59e0b 100%);
   color: #ffffff;
-  border: none;
+  border: 1.5px solid #fef08a;
   padding: 15px 24px;
-  border-radius: 12px;
-  font-size: 1.05rem;
-  font-weight: 700;
+  border-radius: 99px;
+  font-family: var(--font-serif);
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.35);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 10px 30px rgba(236, 72, 153, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary-large:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(236, 72, 153, 0.5);
+  box-shadow: 0 14px 36px rgba(236, 72, 153, 0.65);
 }
 
 /* ==================== 主頁探索與名冊容器 ==================== */
 .hub-container {
-  max-width: 1360px;
+  max-width: 1380px;
   margin: 0 auto;
   padding: 24px;
   display: flex;
@@ -279,14 +323,17 @@ button, input, select {
 .location-panel,
 .roster-panel {
   background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: 18px;
+  border: 1px solid var(--gold-border);
+  border-radius: 22px;
   padding: 24px;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 40px rgba(17, 8, 28, 0.5);
 }
 
 .panel-header h2 {
-  font-size: 1.25rem;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: #fde68a;
   margin-bottom: 4px;
 }
 
@@ -308,23 +355,24 @@ button, input, select {
   align-items: center;
   gap: 10px;
   padding: 11px 14px;
-  background: rgba(30, 41, 59, 0.55);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(253, 224, 165, 0.25);
+  border-radius: 14px;
   color: var(--text-main);
   text-align: left;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .loc-tab:hover {
-  background: rgba(51, 65, 85, 0.75);
+  background: rgba(244, 114, 182, 0.2);
+  border-color: var(--gold-border);
 }
 
 .loc-tab.active {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.28), rgba(236, 72, 153, 0.22));
-  border-color: #818cf8;
-  box-shadow: 0 0 18px rgba(99, 102, 241, 0.25);
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.38), rgba(168, 85, 247, 0.35));
+  border-color: #fde68a;
+  box-shadow: 0 0 20px rgba(244, 114, 182, 0.32);
 }
 
 .loc-icon {
@@ -342,18 +390,20 @@ button, input, select {
 
 .loc-tab-text small {
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: #f9a8d4;
 }
 
 .active-location-stage {
-  background: rgba(9, 13, 22, 0.65);
-  border: 1px solid var(--border-subtle);
-  border-radius: 14px;
+  background: rgba(26, 14, 40, 0.65);
+  border: 1px solid rgba(253, 224, 165, 0.28);
+  border-radius: 16px;
   padding: 18px;
 }
 
 .loc-stage-info h3 {
-  font-size: 1.05rem;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: #fce7f3;
   margin-bottom: 4px;
 }
 
@@ -366,28 +416,53 @@ button, input, select {
 .loc-char-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .loc-char-spot {
   display: flex;
-  gap: 14px;
-  background: rgba(30, 41, 59, 0.65);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-left: 4px solid var(--char-color);
-  border-radius: 12px;
+  gap: 16px;
+  background: linear-gradient(135deg, rgba(64, 34, 88, 0.75), rgba(38, 20, 56, 0.85));
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
   padding: 14px;
   align-items: center;
 }
 
 .loc-char-avatar {
-  width: 82px;
-  height: 82px;
+  width: 90px;
+  height: 112px;
   flex-shrink: 0;
-  border-radius: 50%;
-  background: rgba(9, 13, 22, 0.8);
-  border: 2px solid var(--char-color);
+  border-radius: 45px 45px 10px 10px;
+  border: 2px solid #fde68a;
   overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.otome-mini-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.otome-char-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.otome-rarity-mini {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.6rem;
+  font-weight: 900;
+  font-style: italic;
+  padding: 1px 5px;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #fef08a, #f59e0b);
+  color: #451a03;
 }
 
 .loc-char-detail {
@@ -405,57 +480,36 @@ button, input, select {
 }
 
 .char-num {
-  font-family: monospace;
-  font-weight: 700;
-  color: var(--char-color);
+  font-family: var(--font-serif);
+  font-weight: 800;
+  color: #fde68a;
 }
 
 .dsm-tag {
   font-size: 0.74rem;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid var(--char-color);
-  color: #e2e8f0;
+  padding: 2px 9px;
+  border-radius: 99px;
+  background: rgba(24, 13, 36, 0.75);
+  border: 1px solid var(--gold-border);
+  color: #fce7f3;
 }
 
 .dsm-tag.diag-locked {
-  border-color: rgba(148, 163, 184, 0.35);
-  color: #94a3b8;
+  border-color: rgba(216, 180, 226, 0.4);
+  color: #e9d5ff;
   border-style: dashed;
 }
 
 .dsm-tag.diag-unlocked {
-  background: rgba(16, 185, 129, 0.16);
-  border-color: #10b981;
-  color: #34d399;
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.35), rgba(245, 158, 11, 0.35));
+  border-color: #fde68a;
+  color: #fef08a;
   font-weight: 700;
-}
-
-.undiscovered-dsm {
-  color: #94a3b8 !important;
-  font-weight: 500 !important;
-  font-style: italic;
-}
-
-.comp-locked-banner {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px dashed rgba(148, 163, 184, 0.38);
-  padding: 12px 14px;
-  border-radius: 10px;
-  font-size: 0.84rem;
-  color: #cbd5e1;
-  line-height: 1.6;
-}
-
-.comp-locked-banner span {
-  color: #94a3b8;
-  font-size: 0.8rem;
 }
 
 .char-quote {
   font-size: 0.82rem;
-  color: #cbd5e1;
+  color: #fce7f3;
   font-style: italic;
 }
 
@@ -474,40 +528,14 @@ button, input, select {
   margin-top: 4px;
 }
 
-/* ==================== 路線與標籤徽章 ==================== */
-.route-pill {
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
-}
-
-.route-romantic {
-  background: rgba(236, 72, 153, 0.2);
-  color: #f472b6;
-  border: 1px solid rgba(236, 72, 153, 0.45);
-}
-
-.route-soulmate {
-  background: rgba(56, 189, 248, 0.18);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.45);
-}
-
-.route-ace {
-  background: rgba(168, 85, 247, 0.22);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.45);
-}
-
-/* ==================== 12 角色全名冊網格 ==================== */
+/* ==================== 12 角色《戀與製作人》SSR 拱門卡冊 ==================== */
 .roster-header {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .cluster-filters {
@@ -517,149 +545,209 @@ button, input, select {
 }
 
 .filter-btn {
-  background: rgba(30, 41, 59, 0.75);
+  background: rgba(255, 255, 255, 0.08);
   color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
-  padding: 6px 12px;
+  border: 1px solid rgba(253, 224, 165, 0.3);
+  padding: 6px 14px;
   border-radius: 99px;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.18s ease;
 }
 
 .filter-btn.active,
 .filter-btn:hover {
-  background: #4f46e5;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
   color: #ffffff;
-  border-color: #818cf8;
+  border-color: #fde68a;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
 }
 
 .roster-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(365px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(335px, 1fr));
+  gap: 22px;
 }
 
-.char-card {
-  background: var(--bg-card);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-top: 3px solid var(--char-color);
-  border-radius: 16px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.char-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-}
-
-.char-card-top {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-}
-
-.char-mini-portrait {
-  position: relative;
-  width: 86px;
-  height: 86px;
-  border-radius: 14px;
-  background: rgba(9, 13, 22, 0.85);
-  border: 1.5px solid var(--char-color);
+.otome-gacha-card {
+  background: linear-gradient(170deg, rgba(67, 36, 92, 0.88), rgba(34, 18, 50, 0.95));
+  border: 1.5px solid var(--gold-border);
+  border-radius: 22px;
   overflow: hidden;
-  flex-shrink: 0;
-}
-
-.cluster-badge {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #fff;
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-family: monospace;
-}
-
-.char-head-info {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  box-shadow: 0 14px 34px rgba(12, 5, 22, 0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.char-title-row {
+.otome-gacha-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 44px rgba(236, 72, 153, 0.35);
+  border-color: #fef08a;
+}
+
+/* 戀與製作人拱門卡面窗 */
+.gacha-card-visual {
+  padding: 14px 14px 0;
+  cursor: pointer;
+}
+
+.gacha-arch-window {
+  position: relative;
+  height: 290px;
+  border-radius: 135px 135px 14px 14px;
+  overflow: hidden;
+  border: 2px solid #fde68a;
+  box-shadow: inset 0 0 24px rgba(244, 114, 182, 0.35), 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.gacha-char-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: transform 0.4s ease;
+}
+
+.otome-gacha-card:hover .gacha-char-img {
+  transform: scale(1.05);
+}
+
+.gacha-gradient-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(24, 11, 38, 0.92) 0%, rgba(24, 11, 38, 0.2) 42%, transparent 100%);
+}
+
+.gacha-rarity-badge {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fef9c3 0%, #f59e0b 75%, #b45309 100%);
+  border: 2px solid #ffffff;
+  color: #451a03;
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.8);
+}
+
+.gacha-clue-pill {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  background: rgba(31, 16, 48, 0.85);
+  border: 1px solid var(--gold-border);
+  color: #fde68a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.gacha-clue-pill.unlocked {
+  background: linear-gradient(135deg, #ec4899, #f59e0b);
+  color: #fff;
+}
+
+.gacha-bottom-title {
+  position: absolute;
+  bottom: 10px;
+  inset-inline: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.gacha-name-line {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 8px;
 }
 
-.char-number {
-  font-family: monospace;
-  font-weight: 800;
-  color: var(--char-color);
+.gacha-name-line h3 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-.char-title-row h3 {
-  font-size: 1.1rem;
+.gacha-name-line small {
+  color: #fde68a;
+  font-size: 0.8rem;
 }
 
-.char-title-row small {
+.gacha-occ {
   font-size: 0.78rem;
-  color: var(--text-muted);
-  font-weight: 400;
+  color: #f5d0fe;
+}
+
+.gacha-card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
 }
 
 .char-dsm-name {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: var(--char-color);
+  color: #fde68a;
+  background: rgba(24, 13, 36, 0.6);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border-left: 3px solid #ec4899;
 }
 
-.char-occ {
-  font-size: 0.76rem;
-  color: var(--text-muted);
+.undiscovered-dsm {
+  color: #e9d5ff !important;
+  font-weight: 500 !important;
+  font-style: italic;
+  border-left-color: #a855f7;
 }
 
 .char-tags-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 3px;
+  gap: 6px;
 }
 
 .gender-tag,
 .orient-tag {
-  font-size: 0.7rem;
-  background: rgba(15, 23, 42, 0.75);
-  color: #cbd5e1;
-  padding: 2px 7px;
-  border-radius: 6px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fce7f3;
+  padding: 2px 8px;
+  border-radius: 99px;
+  border: 1px solid rgba(253, 224, 165, 0.25);
 }
 
 .char-bio {
   font-size: 0.82rem;
-  color: #cbd5e1;
+  color: #f3e8ff;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 /* 三維數值條 */
 .stats-bars {
-  background: rgba(9, 13, 22, 0.65);
+  background: rgba(24, 12, 36, 0.62);
+  border: 1px solid rgba(253, 224, 165, 0.2);
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
 }
 
 .stat-row {
@@ -672,12 +760,12 @@ button, input, select {
   display: flex;
   justify-content: space-between;
   font-size: 0.74rem;
-  color: #cbd5e1;
+  color: #fce7f3;
 }
 
 .stat-track {
   height: 6px;
-  background: rgba(51, 65, 85, 0.6);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 99px;
   overflow: hidden;
 }
@@ -688,42 +776,43 @@ button, input, select {
   transition: width 0.35s ease;
 }
 
-.fill-affection { background: linear-gradient(90deg, #f43f5e, #ec4899); }
-.fill-security  { background: linear-gradient(90deg, #38bdf8, #6366f1); }
-.fill-boundary  { background: linear-gradient(90deg, #10b981, #34d399); }
+.fill-affection { background: linear-gradient(90deg, #f43f5e, #f472b6, #fde047); }
+.fill-security  { background: linear-gradient(90deg, #a855f7, #38bdf8); }
+.fill-boundary  { background: linear-gradient(90deg, #10b981, #fde68a); }
 
 .chapter-progress-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
 }
 
 .chap-pills {
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 
 .chap-pill {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(24, 12, 36, 0.8);
+  border: 1px solid rgba(253, 224, 165, 0.32);
   color: var(--text-muted);
   padding: 3px 9px;
-  border-radius: 6px;
-  font-size: 0.74rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
   cursor: pointer;
 }
 
 .chap-pill.done {
-  background: rgba(16, 185, 129, 0.2);
-  border-color: #10b981;
-  color: #34d399;
+  background: rgba(236, 72, 153, 0.3);
+  border-color: #f472b6;
+  color: #fce7f3;
 }
 
 .chap-pill.current {
-  border-color: var(--char-color);
-  color: #fff;
+  border-color: #fde68a;
+  color: #fde68a;
+  font-weight: 700;
 }
 
 .char-card-actions {
@@ -735,38 +824,43 @@ button, input, select {
 .btn-card-main,
 .btn-action-primary {
   flex: 1.4;
-  background: linear-gradient(135deg, var(--char-color), #4f46e5);
+  background: linear-gradient(135deg, #ec4899, #a855f7);
   color: #fff;
-  border: none;
+  border: 1px solid #fde68a;
   padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 0.82rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.35);
 }
 
 .btn-card-sub,
 .btn-action-secondary {
-  background: rgba(15, 23, 42, 0.85);
-  color: #e2e8f0;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(34, 18, 50, 0.85);
+  color: #fce7f3;
+  border: 1px solid rgba(253, 224, 165, 0.35);
   padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+  border-radius: 99px;
+  font-size: 0.78rem;
   cursor: pointer;
 }
 
 .btn-card-icon {
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: 8px;
-  padding: 8px 10px;
+  background: rgba(34, 18, 50, 0.85);
+  border: 1px solid rgba(253, 224, 165, 0.35);
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
-/* ==================== 視覺小說對話舞台 (VN Stage) ==================== */
+/* ==================== 視覺小說戀愛舞台 (VN Stage) ==================== */
 .vn-stage {
-  max-width: 1260px;
+  max-width: 1280px;
   margin: 20px auto;
   padding: 0 20px 32px;
 }
@@ -778,8 +872,8 @@ button, input, select {
   align-items: center;
   gap: 12px;
   background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: 14px;
+  border: 1px solid var(--gold-border);
+  border-radius: 18px;
   padding: 14px 20px;
   margin-bottom: 18px;
 }
@@ -792,12 +886,12 @@ button, input, select {
 }
 
 .vn-chap-badge {
-  background: var(--char-color);
+  background: linear-gradient(135deg, #ec4899, #f59e0b);
   color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 4px 12px;
+  border-radius: 99px;
 }
 
 .vn-loc-info small {
@@ -806,17 +900,18 @@ button, input, select {
 
 .vn-top-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
 .vn-main-grid {
   display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 20px;
+  grid-template-columns: 365px 1fr;
+  gap: 22px;
   align-items: start;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 920px) {
   .vn-main-grid {
     grid-template-columns: 1fr;
   }
@@ -830,37 +925,147 @@ button, input, select {
 
 .vn-portrait-frame {
   position: relative;
-  background: radial-gradient(circle at 50% 35%, rgba(30, 41, 59, 0.9), rgba(9, 13, 22, 0.96));
-  border: 1.5px solid var(--char-color);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  background: linear-gradient(160deg, rgba(68, 35, 92, 0.9), rgba(28, 14, 42, 0.96));
+  border: 2px solid #fde68a;
+  border-radius: 26px;
+  padding: 14px;
+  box-shadow: 0 18px 46px rgba(12, 4, 22, 0.65);
 }
 
-.char-svg {
+/* 戀與製作人完整立繪拱門卡 */
+.otome-portrait-card {
+  position: relative;
   width: 100%;
-  height: auto;
-  display: block;
+}
+
+.otome-arch-frame {
+  position: relative;
+  height: 410px;
+  border-radius: 170px 170px 18px 18px;
+  overflow: hidden;
+  border: 2px solid rgba(253, 224, 165, 0.85);
+  box-shadow: inset 0 0 30px rgba(244, 114, 182, 0.4);
+}
+
+.otome-char-img-full {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+/* 根據劇情情緒動態變化光影與濾鏡 */
+.otome-expr-smile .otome-char-img-full {
+  transform: scale(1.03);
+  filter: brightness(1.06) saturate(1.12);
+}
+
+.otome-expr-vulnerable .otome-char-img-full {
+  filter: contrast(0.96) saturate(1.08) drop-shadow(0 0 12px rgba(147, 197, 253, 0.5));
+}
+
+.otome-expr-anxious .otome-char-img-full {
+  filter: sepia(0.15) contrast(1.06);
+}
+
+.otome-expr-triggered .otome-char-img-full {
+  transform: scale(1.04);
+  filter: contrast(1.16) saturate(1.22);
+}
+
+.otome-lighting-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 20%, rgba(253, 224, 165, 0.18), transparent 60%),
+              linear-gradient(to top, rgba(28, 12, 42, 0.78) 0%, transparent 32%);
+  pointer-events: none;
+}
+
+.otome-bokeh-sparkles .sparkle {
+  position: absolute;
+  color: #fef08a;
+  font-size: 1.1rem;
+  opacity: 0.8;
+  animation: floatSparkle 3.2s ease-in-out infinite;
+  pointer-events: none;
+  text-shadow: 0 0 8px #f472b6;
+}
+
+.sparkle.s1 { top: 14%; left: 12%; animation-delay: 0s; }
+.sparkle.s2 { top: 22%; right: 14%; animation-delay: 0.8s; }
+.sparkle.s3 { bottom: 26%; left: 16%; animation-delay: 1.5s; }
+.sparkle.s4 { bottom: 18%; right: 12%; animation-delay: 2.1s; color: #f9a8d4; }
+
+@keyframes floatSparkle {
+  0%, 100% { transform: translateY(0) scale(0.9); opacity: 0.45; }
+  50% { transform: translateY(-8px) scale(1.2); opacity: 1; }
+}
+
+.otome-rarity-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fef9c3 0%, #f59e0b 70%, #b45309 100%);
+  border: 2.5px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.85);
+}
+
+.otome-rarity-badge span {
+  font-family: var(--font-serif);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #451a03;
+}
+
+.otome-card-signature {
+  position: absolute;
+  bottom: 20px;
+  inset-inline: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  pointer-events: none;
+}
+
+.sig-name {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+}
+
+.sig-en {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: #fde68a;
 }
 
 .vn-emotion-tag {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(9, 13, 22, 0.85);
-  border: 1px solid var(--char-color);
-  padding: 4px 12px;
+  margin-top: 10px;
+  text-align: center;
+  background: rgba(24, 12, 36, 0.8);
+  border: 1px solid var(--gold-border);
+  padding: 5px 12px;
   border-radius: 99px;
-  font-size: 0.76rem;
-  white-space: nowrap;
+  font-size: 0.78rem;
+  color: #fce7f3;
 }
 
-/* 心電圖與即時數值盒 */
+/* 心動波形盒 */
 .vn-ecg-box {
   background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: 14px;
+  border: 1px solid var(--gold-border);
+  border-radius: 18px;
   padding: 14px;
 }
 
@@ -876,8 +1081,8 @@ button, input, select {
 .ecg-svg {
   width: 100%;
   height: 44px;
-  background: rgba(5, 7, 12, 0.8);
-  border-radius: 8px;
+  background: rgba(20, 10, 32, 0.8);
+  border-radius: 10px;
   margin-bottom: 10px;
 }
 
@@ -888,18 +1093,19 @@ button, input, select {
 }
 
 @keyframes ecgPulse {
-  0% { stroke-dashoffset: 400; opacity: 0.4; }
+  0% { stroke-dashoffset: 400; opacity: 0.45; }
   50% { opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0.4; }
+  100% { stroke-dashoffset: 0; opacity: 0.45; }
 }
 
 .vn-live-stats {
   display: flex;
   justify-content: space-around;
   font-size: 0.84rem;
-  background: rgba(9, 13, 22, 0.65);
+  background: rgba(24, 12, 36, 0.65);
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 10px;
+  color: #fde68a;
 }
 
 /* 對話主面板 */
@@ -910,40 +1116,42 @@ button, input, select {
 }
 
 .vn-dialogue-box {
-  background: var(--bg-panel);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  border-top: 3px solid var(--char-color);
-  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(52, 28, 74, 0.88), rgba(31, 16, 48, 0.94));
+  border: 1.5px solid var(--gold-border);
+  border-radius: 22px;
   padding: 28px;
-  min-height: 420px;
+  min-height: 440px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  box-shadow: 0 16px 40px rgba(14, 6, 24, 0.55);
 }
 
 .speaker-banner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid rgba(253, 224, 165, 0.3);
   padding-bottom: 10px;
 }
 
 .speaker-name {
-  font-size: 1.08rem;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
   font-weight: 800;
-  color: var(--char-color);
+  color: #fde68a;
 }
 
 .node-step {
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: #f9a8d4;
 }
 
 .dialogue-text {
-  font-size: 1.04rem;
-  line-height: 1.85;
-  color: #f8fafc;
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: #fff8fb;
 }
 
 .vn-choices-list {
@@ -954,8 +1162,8 @@ button, input, select {
 }
 
 .choices-prompt {
-  font-size: 0.85rem;
-  color: #cbd5e1;
+  font-size: 0.86rem;
+  color: #fde68a;
   font-weight: 600;
 }
 
@@ -963,32 +1171,33 @@ button, input, select {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: rgba(30, 41, 59, 0.78);
-  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(74, 40, 102, 0.72);
+  border: 1px solid rgba(253, 224, 165, 0.42);
   color: var(--text-main);
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 14px 18px;
+  border-radius: 16px;
   text-align: left;
-  font-size: 0.94rem;
-  line-height: 1.55;
+  font-size: 0.95rem;
+  line-height: 1.58;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .vn-choice-btn:hover {
-  background: rgba(51, 65, 85, 0.95);
-  border-color: var(--char-color);
-  transform: translateX(4px);
+  background: linear-gradient(90deg, rgba(236, 72, 153, 0.42), rgba(168, 85, 247, 0.42));
+  border-color: #fef08a;
+  transform: translateX(5px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.32);
 }
 
 .choice-idx {
-  background: var(--char-color);
+  background: linear-gradient(135deg, #f472b6, #f59e0b);
   color: #fff;
   font-weight: 800;
   font-size: 0.78rem;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -997,9 +1206,9 @@ button, input, select {
 }
 
 .choice-outcome-box {
-  background: rgba(9, 13, 22, 0.8);
-  border: 1px solid var(--char-color);
-  border-radius: 14px;
+  background: rgba(28, 14, 44, 0.85);
+  border: 1.5px solid #f472b6;
+  border-radius: 16px;
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -1009,7 +1218,7 @@ button, input, select {
 .outcome-reply p {
   margin-top: 6px;
   font-size: 0.98rem;
-  color: #f1f5f9;
+  color: #fff1f2;
 }
 
 .outcome-deltas {
@@ -1021,110 +1230,87 @@ button, input, select {
 .delta-badge {
   font-size: 0.8rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 99px;
 }
 
 .delta-badge.pos {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.45);
+  background: rgba(236, 72, 153, 0.25);
+  color: #fbcfe8;
+  border: 1px solid #f472b6;
 }
 
 .delta-badge.neg {
-  background: rgba(239, 68, 68, 0.2);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(225, 29, 72, 0.25);
+  color: #fda4af;
+  border: 1px solid #fb7185;
 }
 
 .outcome-psych-note {
-  background: rgba(99, 102, 241, 0.14);
-  border-left: 3px solid #818cf8;
-  padding: 10px 12px;
-  border-radius: 6px;
+  background: rgba(253, 224, 165, 0.12);
+  border-left: 3px solid #fde68a;
+  padding: 10px 14px;
+  border-radius: 8px;
   font-size: 0.86rem;
-  color: #e0e7ff;
+  color: #fef3c7;
 }
 
 .btn-vn-continue {
   align-self: flex-end;
-  background: linear-gradient(135deg, var(--char-color), #4f46e5);
+  background: linear-gradient(135deg, #ec4899, #f59e0b);
   color: #fff;
-  border: none;
-  padding: 11px 22px;
-  border-radius: 10px;
-  font-size: 0.94rem;
+  border: 1px solid #fef08a;
+  padding: 11px 24px;
+  border-radius: 99px;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(236, 72, 153, 0.4);
 }
 
 .vn-hint-card {
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 0.84rem;
-  color: #cbd5e1;
-}
-
-/* 結局畫面 */
-.ending-header {
-  border-left: 4px solid;
-  padding-left: 14px;
-}
-
-.ending-sub {
-  font-size: 0.86rem;
-  color: var(--text-muted);
-}
-
-.ending-clinical-box {
-  background: rgba(9, 13, 22, 0.75);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 16px;
-  font-size: 0.88rem;
-}
-
-.ending-switcher {
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 14px;
+  background: rgba(43, 25, 62, 0.72);
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 0.85rem;
+  color: #fce7f3;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 0.82rem;
-  color: var(--text-muted);
+  gap: 10px;
 }
 
-.ending-switch-btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.btn-end-tab {
-  background: rgba(30, 41, 59, 0.8);
-  color: #cbd5e1;
-  border: 1px solid var(--border-subtle);
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+.scene-prompt-details summary {
   cursor: pointer;
+  color: #fde68a;
+  font-weight: 600;
+  font-size: 0.82rem;
 }
 
-.btn-end-tab.active {
-  background: var(--char-color);
-  color: #fff;
-  border-color: #fff;
+.scene-prompt-box {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
-/* ==================== 彈窗：心靈檔案館 & 存檔 ==================== */
+.scene-prompt-box textarea {
+  flex: 1;
+  background: rgba(20, 10, 32, 0.85);
+  border: 1px solid var(--gold-border);
+  color: #fce7f3;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+}
+
+/* ==================== 彈窗：Prompt 工坊、圖鑑與存檔 ==================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(5, 7, 12, 0.82);
-  backdrop-filter: blur(8px);
+  background: rgba(16, 8, 26, 0.82);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1133,19 +1319,19 @@ button, input, select {
 
 .modal-window {
   width: 100%;
-  max-width: 1020px;
+  max-width: 1080px;
   max-height: 88vh;
-  background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: 18px;
+  background: linear-gradient(160deg, #2d1842, #1c0f2b);
+  border: 1.5px solid var(--gold-border);
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8);
 }
 
 .modal-small {
-  max-width: 580px;
+  max-width: 600px;
 }
 
 .modal-header {
@@ -1154,12 +1340,14 @@ button, input, select {
   align-items: center;
   gap: 12px;
   padding: 18px 24px;
-  border-bottom: 1px solid var(--border-subtle);
-  background: rgba(9, 13, 22, 0.8);
+  border-bottom: 1px solid var(--gold-border);
+  background: rgba(20, 10, 32, 0.75);
 }
 
 .modal-header h2 {
-  font-size: 1.15rem;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  color: #fde68a;
 }
 
 .modal-header p {
@@ -1167,19 +1355,13 @@ button, input, select {
   color: var(--text-muted);
 }
 
-.modal-header-btns {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 .btn-close {
   background: transparent;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--gold-border);
   color: var(--text-main);
   width: 34px;
   height: 34px;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
 }
 
@@ -1191,11 +1373,89 @@ button, input, select {
   gap: 18px;
 }
 
+/* Prompt 工坊樣式 */
+.prompt-char-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.prompt-studio-grid {
+  display: grid;
+  grid-template-columns: 310px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .prompt-studio-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.prompt-details-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.prompt-details-col h3 {
+  font-family: var(--font-serif);
+  color: #fde68a;
+}
+
+.prompt-block {
+  background: rgba(24, 12, 36, 0.72);
+  border: 1px solid rgba(253, 224, 165, 0.3);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prompt-block-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.86rem;
+  color: #f9a8d4;
+}
+
+.prompt-block textarea {
+  width: 100%;
+  background: rgba(14, 7, 22, 0.9);
+  border: 1px solid rgba(253, 224, 165, 0.25);
+  color: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.action-prompt-item {
+  border-top: 1px dashed rgba(253, 224, 165, 0.25);
+  padding-top: 10px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.action-prompt-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #fde68a;
+}
+
+/* 圖鑑與存檔卡片 */
 .compendium-card {
-  background: rgba(30, 41, 59, 0.55);
-  border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--char-color);
-  border-radius: 12px;
+  background: rgba(58, 32, 82, 0.55);
+  border: 1px solid var(--gold-border);
+  border-left: 4px solid #f472b6;
+  border-radius: 14px;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -1203,74 +1463,65 @@ button, input, select {
 }
 
 .comp-code {
-  font-family: monospace;
   font-size: 0.78rem;
-  color: var(--char-color);
+  color: #fde68a;
   font-weight: 700;
 }
 
-.comp-meta {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.comp-overview,
-.comp-diff,
-.comp-hint {
-  font-size: 0.86rem;
-}
-
-.comp-diff {
-  color: #a5b4fc;
+.comp-locked-banner {
+  background: rgba(24, 12, 36, 0.75);
+  border: 1px dashed rgba(253, 224, 165, 0.45);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  color: #fce7f3;
 }
 
 .comp-criteria-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 10px;
-  margin-top: 4px;
 }
 
 .crit-item {
-  background: rgba(9, 13, 22, 0.7);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
+  background: rgba(24, 12, 36, 0.75);
+  border: 1px solid rgba(253, 224, 165, 0.25);
+  border-radius: 10px;
   padding: 10px;
   font-size: 0.8rem;
 }
 
 .crit-item.unlocked {
-  border-color: rgba(16, 185, 129, 0.5);
+  border-color: #f472b6;
 }
 
 .crit-item.locked {
-  opacity: 0.65;
-}
-
-.crit-top {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 4px;
-}
-
-.crit-top span {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  opacity: 0.68;
 }
 
 .save-slot-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(30, 41, 59, 0.65);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
+  background: rgba(58, 32, 82, 0.65);
+  border: 1px solid var(--gold-border);
+  border-radius: 14px;
   padding: 14px 16px;
 }
 
 .save-slot-btns {
   display: flex;
   gap: 8px;
+}
+
+.route-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 99px;
+  background: rgba(236, 72, 153, 0.25);
+  color: #fbcfe8;
+  border: 1px solid #f472b6;
 }
 
 /* Toast 通知 */
@@ -1285,13 +1536,13 @@ button, input, select {
 }
 
 .toast-item {
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid #818cf8;
+  background: linear-gradient(135deg, rgba(58, 30, 82, 0.96), rgba(34, 16, 52, 0.96));
+  border: 1.5px solid #fde68a;
   color: #fff;
-  padding: 11px 16px;
-  border-radius: 10px;
+  padding: 12px 18px;
+  border-radius: 99px;
   font-size: 0.86rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 28px rgba(236, 72, 153, 0.45);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
