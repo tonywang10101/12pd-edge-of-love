@@ -1,22 +1,22 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、共同天災（強震／颱風）、角色雙層背景與心靈成就控制器
 
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=8';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=8';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=8';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=8';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=9';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=9';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=9';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=9';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
   SHARED_DISASTER_REACTIONS,
   getCharacter15Events,
   getCharacterAchievements
-} from './data/eventTreeEngine.js?v=8';
+} from './data/eventTreeEngine.js?v=9';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=8';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=8';
-import { audio } from './ui/audioEngine.js?v=8';
+} from './data/characterPrompts.js?v=9';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=9';
+import { audio } from './ui/audioEngine.js?v=9';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
@@ -36,6 +36,9 @@ class EdgeOfLoveGame {
     this.activeLocationId = 'apartment'; // 'apartment' (無特定場景時預設為棲遲公寓) 或 6 大場景 ID
     this.lastSavedTime = null;
     this.eventCache = {};
+    this.dsmWidgetOpen = false;
+    this.dsmWidgetCharId = null;
+    this.dsmWidgetTab = 'criteria'; // 'criteria' (12角色與準則核對) | 'general' (DSM-5-TR 通則與四大類群)
   }
 
   getEventsForChar(charId) {
@@ -452,6 +455,7 @@ class EdgeOfLoveGame {
 
     const evObj = events.find((e) => e.eventNumber === targetEvNum) || events[0];
     this.activeLocationId = evObj.locationId || char.locationId;
+    this.dsmWidgetCharId = charId;
 
     audio.playSelect();
     this.activeScene = {
@@ -533,6 +537,7 @@ class EdgeOfLoveGame {
     if (!evObj || !char) return;
 
     this.activeLocationId = evObj.locationId || char.locationId;
+    this.dsmWidgetCharId = charId;
     audio.playSelect();
 
     this.activeScene = {
@@ -563,6 +568,7 @@ class EdgeOfLoveGame {
     cs.dailyTalkIndex += 1;
 
     this.applyStats(charId, talk.stats);
+    this.dsmWidgetCharId = charId;
     audio.playSelect();
 
     if (!Array.isArray(cs.diary)) cs.diary = [];
@@ -951,6 +957,31 @@ class EdgeOfLoveGame {
         case 'open-save-modal':
           this.renderSaveModal();
           break;
+        case 'toggle-dsm-widget':
+          this.dsmWidgetOpen = !this.dsmWidgetOpen;
+          if (target.dataset.charId) {
+            this.dsmWidgetCharId = target.dataset.charId;
+          } else if (!this.dsmWidgetCharId) {
+            this.dsmWidgetCharId = this.activeScene?.charId || 'shen_mo';
+          }
+          audio.playChime(560, 0.06);
+          this.render();
+          break;
+        case 'close-dsm-widget':
+          this.dsmWidgetOpen = false;
+          this.render();
+          break;
+        case 'select-dsm-widget-char':
+          this.dsmWidgetCharId = target.dataset.charId || 'shen_mo';
+          this.dsmWidgetTab = 'criteria';
+          audio.playChime(520, 0.05);
+          this.render();
+          break;
+        case 'switch-dsm-widget-tab':
+          this.dsmWidgetTab = target.dataset.tab || 'criteria';
+          audio.playChime(540, 0.05);
+          this.render();
+          break;
         case 'save-slot':
           this.saveToSlot(Number(target.dataset.slot));
           break;
@@ -1072,6 +1103,7 @@ class EdgeOfLoveGame {
         ${bgLayer}
         ${this.renderTopNavbar()}
         ${this.renderActiveScene()}
+        ${this.renderSideDsmCriteriaWidget()}
       `;
       return;
     }
@@ -1087,6 +1119,7 @@ class EdgeOfLoveGame {
             : this.renderLocationExplorer()
         }
       </main>
+      ${this.renderSideDsmCriteriaWidget()}
     `;
   }
 
@@ -1152,6 +1185,13 @@ class EdgeOfLoveGame {
             data-tab="relationships"
           >
             💞 人物關係圖 (🏆 成就 ${achSummary.unlocked}/${achSummary.total})
+          </button>
+          <button
+            class="nav-btn ${this.dsmWidgetOpen ? 'btn-accent' : 'btn-gold'}"
+            data-action="toggle-dsm-widget"
+            title="隨時從畫面右側叫出 DSM-5-TR 人格疾患診斷準則隨身小工具"
+          >
+            🩺 診斷準則小工具
           </button>
           <button class="nav-btn" data-action="open-save-modal">
             💾 記憶存檔
@@ -1916,6 +1956,9 @@ class EdgeOfLoveGame {
             <small>📍 ${locObj?.name || ''} ｜ 🎧 ${eventData.ambience}</small>
           </div>
           <div class="vn-top-buttons">
+            <button class="nav-btn btn-gold" data-action="toggle-dsm-widget" data-char-id="${char.id}">
+              🩺 叫出人格疾患準則
+            </button>
             <button class="nav-btn" data-action="open-event-tree-modal" data-char-id="${char.id}">
               🌳 15 事件樹
             </button>
@@ -2215,6 +2258,189 @@ class EdgeOfLoveGame {
           </div>
         </div>
       </section>
+    `;
+  }
+
+  // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格疾患診斷準則手冊 ====================
+  renderSideDsmCriteriaWidget() {
+    const selectedCharId = this.dsmWidgetCharId || this.activeScene?.charId || 'shen_mo';
+    const char = CHARACTERS.find((c) => c.id === selectedCharId) || CHARACTERS[0];
+    const cs = this.state.characters[char.id];
+    const diag = this.getDiagnosisDisplay(char);
+    const totalUnlockedClues = CHARACTERS.reduce(
+      (acc, c) => acc + (this.state.characters[c.id]?.unlockedCriteria?.length || 0),
+      0
+    );
+    const totalClues = CHARACTERS.reduce((acc, c) => acc + c.criteria.length, 0);
+
+    return `
+      <aside class="dsm-side-widget-container ${this.dsmWidgetOpen ? 'is-open' : ''}">
+        <!-- 右側固定貼邊呼出把手（點擊可隨時展開／收合） -->
+        <button
+          class="dsm-side-launcher-tab"
+          data-action="toggle-dsm-widget"
+          title="點擊展開／收合 DSM-5-TR 人格疾患準則隨身小工具"
+        >
+          <span class="launcher-icon">🩺</span>
+          <span class="launcher-text">人格疾患準則</span>
+          <span class="launcher-badge">${totalUnlockedClues}/${totalClues}</span>
+        </button>
+
+        <!-- 側邊滑出式準則抽屜面板 -->
+        <div class="dsm-side-drawer">
+          <div class="dsm-drawer-header">
+            <div>
+              <h3>🩺 DSM-5-TR 人格疾患準則小工具</h3>
+              <p>隨時對照 12 種人格疾患診斷準則與目前已觀察到的行為線索</p>
+            </div>
+            <button class="btn-close" data-action="close-dsm-widget" title="收合小工具">✕</button>
+          </div>
+
+          <!-- 切換頁籤：各角色診斷準則核對 vs DSM-5-TR 通用準則＆四大類群 -->
+          <div class="dsm-drawer-tabs">
+            <button
+              class="dsm-tab-btn ${this.dsmWidgetTab === 'criteria' ? 'active' : ''}"
+              data-action="switch-dsm-widget-tab"
+              data-tab="criteria"
+            >
+              📋 12 角色與診斷準則 (${totalUnlockedClues}/${totalClues})
+            </button>
+            <button
+              class="dsm-tab-btn ${this.dsmWidgetTab === 'general' ? 'active' : ''}"
+              data-action="switch-dsm-widget-tab"
+              data-tab="general"
+            >
+              📖 DSM-5-TR 通用定義＆類群
+            </button>
+          </div>
+
+          <div class="dsm-drawer-body">
+            ${
+              this.dsmWidgetTab === 'general'
+                ? `
+                  <div class="dsm-general-guide">
+                    <div class="dsm-guide-card">
+                      <h4>📌 一般人格障礙症通用診斷準則 (General PD Criteria)</h4>
+                      <ul class="dsm-guide-list">
+                        <li><strong>準則 A（核心偏離）</strong>：內在經驗與行為模式顯著偏離其文化預期，且表現在以下<strong>至少兩個領域</strong>：
+                          <ol>
+                            <li><strong>認知 (Cognition)</strong>：對自己、他人及事件的知覺與解讀方式。</li>
+                            <li><strong>情感 (Affectivity)</strong>：情緒反應的範圍、強度、易變性及適切性。</li>
+                            <li><strong>人際功能 (Interpersonal functioning)</strong>：與他人建立親密與界線的模式。</li>
+                            <li><strong>衝動控制 (Impulse control)</strong>：對行為衝動的調節能力。</li>
+                          </ol>
+                        </li>
+                        <li><strong>準則 B（僵化與廣泛性）</strong>：此持久模式在廣泛的個人與社交情境中皆缺乏彈性且普遍存在。</li>
+                        <li><strong>準則 C（臨床苦惱或損害）</strong>：引起具臨床意義的苦惱，或損害社交、職業及其他重要功能領域。</li>
+                        <li><strong>準則 D（長期穩定）</strong>：模式穩定且歷時長久，其發病至少可追溯至青少年期或成年早期。</li>
+                      </ul>
+                    </div>
+
+                    <div class="dsm-guide-card">
+                      <h4>🧭 DSM-5-TR 四大類群 (Clusters) 分類速覽</h4>
+                      ${Object.values(CLUSTERS)
+                        .map(
+                          (cl) => `
+                            <div class="dsm-cluster-item" style="border-left-color: ${cl.color}">
+                              <strong style="color: ${cl.color}">${cl.name}</strong>
+                              <p>${cl.desc}</p>
+                            </div>
+                          `
+                        )
+                        .join('')}
+                    </div>
+                  </div>
+                `
+                : `
+                  <!-- 12 位角色快速切換膠囊列 -->
+                  <div class="dsm-char-pills">
+                    ${CHARACTERS.map((c) => {
+                      const cState = this.state.characters[c.id];
+                      const isDiag = this.isDiagnosed(c.id);
+                      const isCurScene = this.activeScene?.charId === c.id;
+                      return `
+                        <button
+                          class="dsm-char-pill ${c.id === char.id ? 'active' : ''} ${isDiag ? 'diagnosed' : ''}"
+                          data-action="select-dsm-widget-char"
+                          data-char-id="${c.id}"
+                        >
+                          <img src="./assets/characters/${c.id}.png" alt="${c.name}" />
+                          <div class="dsm-pill-meta">
+                            <strong>#${c.number} ${c.name} ${isCurScene ? '💬' : ''}</strong>
+                            <small>${isDiag ? `🥇 ${c.dsmCode}` : `線索 ${cState.unlockedCriteria.length}/${c.criteria.length}`}</small>
+                          </div>
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+
+                  <!-- 當前選中角色的診斷準則詳情 -->
+                  <div class="dsm-selected-char-box" style="--char-color: ${char.themeColor}">
+                    <div class="dsm-char-head">
+                      <img src="./assets/characters/${char.id}.png" alt="${char.name}" class="dsm-char-thumb" />
+                      <div>
+                        <div class="dsm-char-title-row">
+                          <strong>#${char.number} ${char.name}</strong>
+                          <span class="dsm-status-tag ${diag.diagnosed ? 'unlocked' : 'locked'}">
+                            ${diag.diagnosed ? `🥇 已確診：${char.dsmCode}` : `🔍 觀察中 (${cs.unlockedCriteria.length}/${char.criteria.length})`}
+                          </span>
+                        </div>
+                        <p class="dsm-disorder-name">
+                          ${
+                            diag.diagnosed
+                              ? `${char.dsmTitle} (${char.dsmTitleEn})`
+                              : '🔒 真實人格疾患名稱將於集滿下方準則並完成 E12 後揭曉'
+                          }
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- 核心診斷準則核對清單 -->
+                    <div class="dsm-criteria-section-title">
+                      <span>📋 DSM-5-TR 核心診斷準則核對表</span>
+                      <small>做出劇情選擇後即可解鎖對應準則</small>
+                    </div>
+
+                    <div class="dsm-criteria-checklist">
+                      ${char.criteria
+                        .map((cr, idx) => {
+                          const isUnlocked = cs.unlockedCriteria.includes(cr.id);
+                          return `
+                            <div class="dsm-crit-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                              <div class="dsm-crit-top">
+                                <span class="dsm-crit-code">${cr.code}</span>
+                                <strong>${isUnlocked ? `✅ ${cr.title}` : `🔒 待觀察準則 #${idx + 1}（${cr.code}）`}</strong>
+                              </div>
+                              <p class="dsm-crit-desc">
+                                ${
+                                  isUnlocked
+                                    ? this.maskUndiagnosedText(cr.desc, char.id)
+                                    : '尚未在互動中觀察到此項行為依據。推進與該角色的跨地點事件並做出選擇後即可記錄。'
+                                }
+                              </p>
+                            </div>
+                          `;
+                        })
+                        .join('')}
+                    </div>
+
+                    <!-- 臨床概覽與鑑別診斷（已確診時完整顯示，未確診時顯示去標籤化觀察摘要） -->
+                    <div class="dsm-clinical-notes-box">
+                      <div class="dsm-note-item">
+                        <strong>🔬 臨床核心特徵 (Criterion A 概覽)：</strong>
+                        <p>${this.maskUndiagnosedText(char.clinicalOverview, char.id)}</p>
+                      </div>
+                      <div class="dsm-note-item">
+                        <strong>⚖️ 臨床鑑別診斷重點 (Differential Diagnosis)：</strong>
+                        <p>${this.maskUndiagnosedText(char.differentialNote, char.id)}</p>
+                      </div>
+                    </div>
+                  </div>
+                `
+            }
+          </div>
+        </div>
+      </aside>
     `;
   }
 
