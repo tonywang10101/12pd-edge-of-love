@@ -1,26 +1,22 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、共同天災（強震／颱風）、角色雙層背景與心靈成就控制器
 
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=6';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=6';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=6';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=6';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=7';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=7';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=7';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=7';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
   SHARED_DISASTER_REACTIONS,
   getCharacter15Events,
   getCharacterAchievements
-} from './data/eventTreeEngine.js?v=6';
+} from './data/eventTreeEngine.js?v=7';
 import {
-  MASTER_STYLE_PROMPT,
-  EMOTION_ACTION_MODIFIERS,
   CHARACTER_PROMPTS,
-  SCENE_BACKGROUNDS,
-  buildCharacterActionPrompt,
   getSceneBackground
-} from './data/characterPrompts.js?v=6';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=6';
-import { audio } from './ui/audioEngine.js?v=6';
+} from './data/characterPrompts.js?v=7';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=7';
+import { audio } from './ui/audioEngine.js?v=7';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
@@ -64,7 +60,8 @@ class EdgeOfLoveGame {
         sharedTyphoonDone: false,
         backstoryUnlocked: false,
         unlockedEndings: [],
-        dailyTalkIndex: 0
+        dailyTalkIndex: 0,
+        diary: []
       };
     });
 
@@ -135,6 +132,9 @@ class EdgeOfLoveGame {
         }
         if (typeof cs.backstoryUnlocked !== 'boolean') {
           cs.backstoryUnlocked = cs.eventCompleted >= 13;
+        }
+        if (!Array.isArray(cs.diary)) {
+          cs.diary = [];
         }
       }
     });
@@ -467,10 +467,6 @@ class EdgeOfLoveGame {
       lastChoiceOutcome: null
     };
 
-    if (evObj.nodes[0]?.unlockCriterion) {
-      this.unlockCriterion(charId, evObj.nodes[0].unlockCriterion);
-    }
-
     this.autoSave();
     this.render();
   }
@@ -569,6 +565,20 @@ class EdgeOfLoveGame {
     this.applyStats(charId, talk.stats);
     audio.playSelect();
 
+    if (!Array.isArray(cs.diary)) cs.diary = [];
+    cs.diary.unshift({
+      id: `daily_${Date.now()}`,
+      type: 'daily',
+      code: '🌸 日常',
+      title: `日常互動：${talk.title}`,
+      context: this.formatText(talk.prompt),
+      choiceText: '主動關懷與溫暖陪伴',
+      reaction: this.formatText(talk.response),
+      dsmJudgment: '【日常安全感累積】穩定、不具威脅性的日常陪伴，能逐步降低其人際防禦並提升依戀安全感。',
+      criterionBasis: null,
+      recordedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+    });
+
     this.activeScene = {
       mode: 'daily',
       charId,
@@ -649,9 +659,6 @@ class EdgeOfLoveGame {
         this.activeScene.nodeIndex += 1;
         const nextNode = nodes[this.activeScene.nodeIndex];
         this.activeScene.expression = nextNode.expression || 'neutral';
-        if (nextNode.unlockCriterion) {
-          this.unlockCriterion(charId, nextNode.unlockCriterion);
-        }
         this.autoSave();
         this.render();
       } else {
@@ -669,9 +676,6 @@ class EdgeOfLoveGame {
       this.activeScene.nodeIndex += 1;
       const nextNode = nodes[this.activeScene.nodeIndex];
       this.activeScene.expression = nextNode.expression || 'neutral';
-      if (nextNode.unlockCriterion) {
-        this.unlockCriterion(charId, nextNode.unlockCriterion);
-      }
       audio.playChime(480, 0.06);
       this.autoSave();
       this.render();
@@ -746,9 +750,11 @@ class EdgeOfLoveGame {
   handleChoiceSelect(choiceIndex) {
     if (!this.activeScene || this.activeScene.mode !== 'event') return;
     const { charId, eventData, nodeIndex } = this.activeScene;
+    const char = CHARACTERS.find((c) => c.id === charId);
+    const cs = this.state.characters[charId];
     const currentNode = eventData.nodes[nodeIndex];
     const choice = currentNode?.choices?.[choiceIndex];
-    if (!choice) return;
+    if (!choice || !char || !cs) return;
 
     this.applyStats(charId, choice.stats);
 
@@ -758,17 +764,65 @@ class EdgeOfLoveGame {
       audio.playSelect();
     }
 
+    // 重要：DSM 相關判斷與診斷依據僅在玩家「做出選擇後」才觸發與揭露！
+    const criteriaIdsToUnlock = new Set();
+    eventData.nodes.slice(0, nodeIndex + 1).forEach((n) => {
+      if (n.unlockCriterion) criteriaIdsToUnlock.add(n.unlockCriterion);
+    });
     if (choice.unlockCriterion) {
-      this.unlockCriterion(charId, choice.unlockCriterion);
+      criteriaIdsToUnlock.add(choice.unlockCriterion);
     }
+    if (eventData.criterionId) {
+      criteriaIdsToUnlock.add(eventData.criterionId);
+    }
+
+    let criterionBasisObj = null;
+    criteriaIdsToUnlock.forEach((cid) => {
+      this.unlockCriterion(charId, cid);
+      const foundCrit = char.criteria.find((cr) => cr.id === cid);
+      if (foundCrit) {
+        criterionBasisObj = {
+          id: foundCrit.id,
+          title: foundCrit.title,
+          desc: this.maskUndiagnosedText(foundCrit.desc, charId)
+        };
+      }
+    });
+
+    // 整理前段情境與對方台詞摘要（供相處日記完整收錄）
+    const sceneContextSummary = eventData.nodes
+      .slice(0, nodeIndex + 1)
+      .map((n) => this.formatText(n.text))
+      .join(' ');
+
+    const replyFormatted = this.formatText(choice.reply);
+    const dsmJudgmentFormatted = this.maskUndiagnosedText(choice.psychNote, charId);
 
     this.activeScene.expression = choice.nextExpression || 'neutral';
     this.activeScene.awaitingNextAfterChoice = true;
     this.activeScene.lastChoiceOutcome = {
-      reply: this.formatText(choice.reply),
-      psychNote: this.maskUndiagnosedText(choice.psychNote, charId),
+      choiceText: this.formatText(choice.text),
+      reply: replyFormatted,
+      psychNote: dsmJudgmentFormatted,
+      criterionBasis: criterionBasisObj,
       stats: choice.stats
     };
+
+    // 自動將本次「情境、選擇、對方反應、以及區隔出的 DSM 臨床判斷與依據」寫入過往相處日記
+    if (!Array.isArray(cs.diary)) cs.diary = [];
+    cs.diary.unshift({
+      id: `${eventData.code}_${nodeIndex}_${Date.now()}`,
+      type: 'event',
+      code: eventData.code,
+      title: eventData.title,
+      context: sceneContextSummary,
+      choiceText: this.formatText(choice.text),
+      reaction: replyFormatted,
+      dsmJudgment: dsmJudgmentFormatted,
+      criterionBasis: criterionBasisObj,
+      stats: choice.stats,
+      recordedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+    });
 
     this.autoSave();
     this.render();
@@ -894,21 +948,6 @@ class EdgeOfLoveGame {
             }, 60);
           }
           break;
-        case 'open-prompt-studio':
-          this.renderPromptStudioModal(
-            target.dataset.charId || (this.activeScene ? this.activeScene.charId : 'shen_mo'),
-            this.activeScene?.expression || 'smile',
-            1
-          );
-          break;
-        case 'copy-prompt': {
-          const textEl = document.getElementById(target.dataset.targetId);
-          if (textEl) {
-            navigator.clipboard?.writeText(textEl.value || textEl.textContent);
-            this.showToast('✨ 已複製生成 Prompt 至剪貼簿！');
-          }
-          break;
-        }
         case 'open-save-modal':
           this.renderSaveModal();
           break;
@@ -1113,9 +1152,6 @@ class EdgeOfLoveGame {
             data-tab="relationships"
           >
             💞 人物關係圖 (🏆 成就 ${achSummary.unlocked}/${achSummary.total})
-          </button>
-          <button class="nav-btn btn-gold" data-action="open-prompt-studio">
-            🎨 角色動作 Prompt 庫
           </button>
           <button class="nav-btn" data-action="open-save-modal">
             💾 記憶存檔
@@ -1635,6 +1671,9 @@ class EdgeOfLoveGame {
             </div>
           </div>
 
+          <!-- 內嵌過往相處日記抽屜（預設折疊，點擊展開查看與該角色的過往對話反應與 DSM 觀察依據） -->
+          ${this.renderCharacterDiaryDrawer(char, cs, false)}
+
           <!-- 內嵌漸進式 DSM-5-TR 診斷與行為觀察線索抽屜 -->
           <details class="card-dsm-dossier" ${diag.diagnosed ? 'open' : ''}>
             <summary>
@@ -1682,9 +1721,6 @@ class EdgeOfLoveGame {
             </button>
             <button class="btn-card-sub" data-action="start-daily" data-char-id="${char.id}">
               🌸 日常
-            </button>
-            <button class="btn-card-icon" data-action="open-prompt-studio" data-char-id="${char.id}" title="動作生成 Prompt">
-              🎨
             </button>
           </div>
         </div>
@@ -1772,7 +1808,83 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 視覺小說對話與結局舞台（支援單人＆三人同場雙立繪） ====================
+  // ==================== 過往相處日記（預設折疊，點擊展開查看過往互動與已記錄之 DSM 觀察判斷） ====================
+  renderCharacterDiaryDrawer(char, cs, isSceneView = true) {
+    const diaryEntries = Array.isArray(cs.diary) ? cs.diary : [];
+    const drawerClass = isSceneView ? 'vn-diary-drawer' : 'card-diary-dossier';
+
+    return `
+      <details class="${drawerClass}">
+        <summary>
+          <div class="diary-summary-left">
+            <span class="diary-icon">📔</span>
+            <strong>過往相處日記（與 ${char.name} 的互動＆心靈觀察紀錄）</strong>
+          </div>
+          <span class="diary-count-pill">
+            共 ${diaryEntries.length} 篇紀錄・點擊展開 ▾
+          </span>
+        </summary>
+        <div class="diary-drawer-body">
+          ${
+            diaryEntries.length === 0
+              ? `
+                <div class="diary-empty-state">
+                  <p>💌 目前尚無與 <strong>${char.name}</strong> 的過往相處日記。</p>
+                  <small>當你在劇情橋段中做出選擇或進行日常互動後，雙方的對話反應與「DSM 臨床觀察判斷＆依據」都會自動收錄至此日記中！</small>
+                </div>
+              `
+              : `
+                <div class="diary-entries-list">
+                  ${diaryEntries
+                    .map(
+                      (entry, idx) => `
+                        <div class="diary-entry-card">
+                          <div class="diary-entry-header">
+                            <span class="diary-entry-badge">${entry.code || `#${diaryEntries.length - idx}`}</span>
+                            <strong>${entry.title}</strong>
+                            ${entry.recordedAt ? `<small class="diary-time">${entry.recordedAt}</small>` : ''}
+                          </div>
+
+                          <!-- 1. 情境與對方反應區 -->
+                          <div class="diary-story-block">
+                            <p class="diary-choice-line"><strong>💬 你的選擇：</strong>${entry.choiceText}</p>
+                            <p class="diary-reaction-line"><strong>💖 ${char.name}的反應：</strong>${entry.reaction}</p>
+                          </div>
+
+                          <!-- 2. 獨立區隔之 DSM 相關判斷與診斷依據 -->
+                          ${
+                            entry.dsmJudgment || entry.criterionBasis
+                              ? `
+                                <div class="diary-dsm-block">
+                                  <div class="diary-dsm-title">🩺 DSM 臨床判斷與行為依據</div>
+                                  ${entry.dsmJudgment ? `<p class="diary-dsm-note">${entry.dsmJudgment}</p>` : ''}
+                                  ${
+                                    entry.criterionBasis
+                                      ? `
+                                        <div class="diary-criterion-tag">
+                                          <strong>📋 對應診斷準則依據【${entry.criterionBasis.title}】：</strong>
+                                          <span>${entry.criterionBasis.desc}</span>
+                                        </div>
+                                      `
+                                      : ''
+                                  }
+                                </div>
+                              `
+                              : ''
+                          }
+                        </div>
+                      `
+                    )
+                    .join('')}
+                </div>
+              `
+          }
+        </div>
+      </details>
+    `;
+  }
+
+  // ==================== 視覺小說對話與結局舞台（專注情境與對方反應，選擇後才顯示獨立區隔之 DSM 判斷） ====================
   renderActiveScene() {
     const { charId, partnerId, mode, expression } = this.activeScene;
     const char = CHARACTERS.find((c) => c.id === charId);
@@ -1792,22 +1904,20 @@ class EdgeOfLoveGame {
     const { eventData, eventNumber, nodeIndex, awaitingNextAfterChoice, lastChoiceOutcome } = this.activeScene;
     const node = eventData.nodes[nodeIndex];
     const locObj = LOCATIONS.find((l) => l.id === eventData.locationId);
-    const currentActionPrompt = buildCharacterActionPrompt(char.id, expression, Math.min(3, Math.ceil(eventNumber / 4)));
+    // 過濾掉事件標題中任何臨床字樣，讓橋段頁面100%專注於故事氛圍
+    const cleanEventTitle = eventData.title.replace(/（🥇.*?）|（👑.*?）/g, '');
 
     return `
       <section class="vn-stage" style="--char-color: ${char.themeColor}">
         <div class="vn-top-bar">
           <div class="vn-loc-info">
             <span class="vn-chap-badge">${eventData.code} / E15</span>
-            <strong>${eventData.title}</strong>
+            <strong>${cleanEventTitle}</strong>
             <small>📍 ${locObj?.name || ''} ｜ 🎧 ${eventData.ambience}</small>
           </div>
           <div class="vn-top-buttons">
             <button class="nav-btn" data-action="open-event-tree-modal" data-char-id="${char.id}">
               🌳 15 事件樹
-            </button>
-            <button class="nav-btn btn-gold" data-action="open-prompt-studio" data-char-id="${char.id}">
-              🎨 動作 Prompt
             </button>
             <button class="nav-btn" data-action="exit-scene">
               ↩ 返回地圖
@@ -1844,7 +1954,7 @@ class EdgeOfLoveGame {
 
             <div class="vn-ecg-box">
               <div class="ecg-header">
-                <span>💓 心動與防衛頻率（${diag.diagnosed ? char.dsmTitle : `線索 ${cs.unlockedCriteria.length}/${char.criteria.length}`}）</span>
+                <span>💓 心動共鳴頻率</span>
                 <span class="route-pill ${route.badgeClass}">${route.label}</span>
               </div>
               ${this.renderECGSVG(expression, char.themeColor)}
@@ -1856,17 +1966,17 @@ class EdgeOfLoveGame {
             </div>
           </div>
 
-          <!-- 右側：戀愛對話框與分支選項 -->
+          <!-- 右側：專注情境描寫與對方反應（DSM 醫療判斷完全區隔，且僅在做出選擇後才出現） -->
           <div class="vn-dialogue-column">
             <div class="vn-dialogue-box">
               <div class="speaker-banner">
                 <span class="speaker-name">
                   ${
                     partnerChar
-                      ? `👥 三人同場互動：${char.name} ＆ ${partnerChar.name} ＆ ${this.state.player.name}`
+                      ? `👥 三人同場情境：${char.name} ＆ ${partnerChar.name} ＆ ${this.state.player.name}`
                       : node.speaker === 'char'
-                      ? `${char.name}（${diag.diagnosed ? char.dsmTitle : `${char.occupation}・事件 ${eventNumber}/15`}）`
-                      : '✦ 場景與心動描寫 ✦'
+                      ? `${char.name}（${char.occupation}）`
+                      : '✦ 情境氛圍與神情描寫 ✦'
                   }
                 </span>
                 <span class="node-step">STEP ${nodeIndex + 1} / ${eventData.nodes.length}</span>
@@ -1879,26 +1989,55 @@ class EdgeOfLoveGame {
               ${
                 awaitingNextAfterChoice && lastChoiceOutcome
                   ? `
+                    <!-- 區塊 1：純粹的情境推進與對方情緒反應 -->
                     <div class="choice-outcome-box">
+                      <div class="outcome-selected-choice">
+                        <span>💬 你的回應：</span>${lastChoiceOutcome.choiceText}
+                      </div>
                       <div class="outcome-reply">
-                        <strong>💖 互動回應：</strong>
+                        <strong>💖 ${char.name}的反應：</strong>
                         <p>${lastChoiceOutcome.reply}</p>
                       </div>
                       <div class="outcome-deltas">
                         ${this.formatStatDeltas(lastChoiceOutcome.stats)}
                       </div>
-                      <div class="outcome-psych-note">
-                        ${lastChoiceOutcome.psychNote}
+                    </div>
+
+                    <!-- 區塊 2：做出選擇後才獨立出現的「DSM 相關判斷與診斷依據」（與上方戀愛劇情明確區隔，並同步寫入日記） -->
+                    <div class="outcome-dsm-judgment-panel">
+                      <div class="dsm-panel-header">
+                        <div class="dsm-panel-title">
+                          <span>🩺 DSM 臨床觀察判斷與依據</span>
+                          <small>（於做出選擇後解鎖分析）</small>
+                        </div>
+                        <span class="dsm-diary-saved-badge">📔 已收錄至過往相處日記</span>
                       </div>
+
+                      <div class="dsm-panel-body">
+                        <p class="dsm-psych-analysis">${lastChoiceOutcome.psychNote}</p>
+                        ${
+                          lastChoiceOutcome.criterionBasis
+                            ? `
+                              <div class="dsm-criterion-basis-box">
+                                <strong>📋 觀察依據【${lastChoiceOutcome.criterionBasis.title}】：</strong>
+                                <p>${lastChoiceOutcome.criterionBasis.desc}</p>
+                              </div>
+                            `
+                            : ''
+                        }
+                      </div>
+                    </div>
+
+                    <div class="vn-continue-row">
                       <button class="btn-vn-continue" data-action="next-node">
-                        繼續劇情 ▶
+                        繼續下一段劇情 ▶
                       </button>
                     </div>
                   `
                   : node.choices && node.choices.length > 0
                   ? `
                     <div class="vn-choices-list">
-                      <div class="choices-prompt">✨ 請選擇你的回應方式（影響親密度、安全感、健康邊界與後續章節阻擋）：</div>
+                      <div class="choices-prompt">✨ 面對眼前的${char.name}，請選擇你的回應方式（做出選擇後將揭露對方反應與臨床觀察依據）：</div>
                       ${node.choices
                         .map(
                           (ch, idx) => `
@@ -1925,16 +2064,8 @@ class EdgeOfLoveGame {
               }
             </div>
 
-            <div class="vn-hint-card">
-              <div><strong>💌 戀愛相處提示：</strong> ${this.maskUndiagnosedText(char.strategyHint, char.id)}</div>
-              <details class="scene-prompt-details">
-                <summary>🎨 展開本幕角色動作生成 Prompt</summary>
-                <div class="scene-prompt-box">
-                  <textarea id="live-scene-prompt" readonly rows="3">${currentActionPrompt}</textarea>
-                  <button class="nav-btn btn-gold" data-action="copy-prompt" data-target-id="live-scene-prompt">複製 Prompt</button>
-                </div>
-              </details>
-            </div>
+            <!-- 原本的戀愛相處提示改為「過往相處日記」（預設折疊，點擊可展開過往相處與 DSM 判斷紀錄） -->
+            ${this.renderCharacterDiaryDrawer(char, cs, true)}
           </div>
         </div>
       </section>
@@ -1987,6 +2118,8 @@ class EdgeOfLoveGame {
                 完成日常約會 ▶
               </button>
             </div>
+
+            ${this.renderCharacterDiaryDrawer(char, cs, true)}
           </div>
         </div>
       </section>
@@ -2077,92 +2210,11 @@ class EdgeOfLoveGame {
                 </button>
               </div>
             </div>
+
+            ${this.renderCharacterDiaryDrawer(char, cs, true)}
           </div>
         </div>
       </section>
-    `;
-  }
-
-  renderPromptStudioModal(selectedCharId = 'shen_mo', selectedEmo = 'smile', selectedChap = 1) {
-    const modalRoot = document.getElementById('modal-root');
-    if (!modalRoot) return;
-
-    const char = CHARACTERS.find((c) => c.id === selectedCharId) || CHARACTERS[0];
-    const pData = CHARACTER_PROMPTS[char.id];
-
-    modalRoot.innerHTML = `
-      <div class="modal-backdrop" data-action="close-modal">
-        <div class="modal-window" onclick="event.stopPropagation()">
-          <div class="modal-header">
-            <div>
-              <h2>🎨 角色立繪＆劇情動作 Prompt 工坊</h2>
-              <p>所有 12 位角色的基礎立繪與各章節動作 Prompt 已儲存於專案 <code>prompts/character_prompts.json</code> 與 <code>prompts/CHARACTER_PROMPTS.md</code>。</p>
-            </div>
-            <button class="btn-close" data-action="close-modal">✕</button>
-          </div>
-
-          <div class="modal-body">
-            <div class="prompt-char-selector">
-              ${CHARACTERS.map(
-                (c) => `
-                  <button
-                    class="filter-btn ${c.id === char.id ? 'active' : ''}"
-                    data-action="open-prompt-studio"
-                    data-char-id="${c.id}"
-                  >
-                    #${c.number} ${c.name}
-                  </button>
-                `
-              ).join('')}
-            </div>
-
-            <div class="prompt-studio-grid">
-              <div class="prompt-preview-col">
-                ${renderCharacterSVG(char, selectedEmo, 'portrait')}
-              </div>
-
-              <div class="prompt-details-col">
-                <h3>#${char.number} ${char.name} (${char.enName}) — 專屬外觀與動作生成規範</h3>
-
-                <div class="prompt-block">
-                  <div class="prompt-block-head">
-                    <strong>1. 角色固定外觀錨點 (Appearance Anchor)</strong>
-                    <button class="nav-btn" data-action="copy-prompt" data-target-id="anchor-prompt-text">複製</button>
-                  </div>
-                  <textarea id="anchor-prompt-text" readonly rows="3">${pData.appearanceAnchor}</textarea>
-                </div>
-
-                <div class="prompt-block">
-                  <div class="prompt-block-head">
-                    <strong>2. 預設《戀與製作人》SSR 角色立繪完整 Prompt</strong>
-                    <button class="nav-btn" data-action="copy-prompt" data-target-id="base-prompt-text">複製</button>
-                  </div>
-                  <textarea id="base-prompt-text" readonly rows="4">${pData.basePrompt}</textarea>
-                </div>
-
-                <div class="prompt-block">
-                  <div class="prompt-block-head">
-                    <strong>3. 各章節劇情專屬動作 Prompts</strong>
-                  </div>
-                  ${pData.storyActions
-                    .map(
-                      (act) => `
-                        <div class="action-prompt-item">
-                          <div class="action-prompt-title">
-                            <span>🎬 ${act.title}</span>
-                            <button class="nav-btn btn-gold" data-action="copy-prompt" data-target-id="chap-prompt-${act.chapter}">複製完整指令</button>
-                          </div>
-                          <textarea id="chap-prompt-${act.chapter}" readonly rows="3">${buildCharacterActionPrompt(char.id, 'smile', act.chapter)}</textarea>
-                        </div>
-                      `
-                    )
-                    .join('')}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     `;
   }
 

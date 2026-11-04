@@ -1,6 +1,6 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹引擎、跨地點動態行程、雙層背景（現在背景／成長養成故事）、三人同場與共同天災事件庫
 
-import { LOCATIONS, CHARACTERS } from './characters.js?v=6';
+import { LOCATIONS, CHARACTERS } from './characters.js?v=7';
 
 // ==================== 12 角色：跨地點動態行程 ＆ 現在背景（公開） ＆ 成長養成背景（探索完解鎖） ====================
 export const CHARACTER_EXTENDED_LORE = {
@@ -540,8 +540,7 @@ export function getCharacter15Events(charId, baseScenario) {
     {
       speaker: 'narrator',
       expression: 'neutral',
-      text: promptText,
-      unlockCriterion: unlockCritId || null
+      text: promptText
     },
     {
       speaker: 'char',

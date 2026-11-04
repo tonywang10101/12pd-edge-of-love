@@ -2289,3 +2289,265 @@ button, input, select, textarea {
 .disaster-status-tag.done {
   color: #6ee7b7;
 }
+
+/* ==================== 選擇後獨立區隔之 DSM 臨床觀察判斷區塊 & 過往相處日記抽屜 ==================== */
+.outcome-selected-choice {
+  font-size: 0.85rem;
+  color: #fbcfe8;
+  background: rgba(236, 72, 153, 0.14);
+  border-left: 3px solid #f472b6;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.outcome-selected-choice span {
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.outcome-dsm-judgment-panel {
+  background: linear-gradient(155deg, rgba(16, 26, 48, 0.92), rgba(24, 16, 44, 0.95));
+  border: 1.5px solid rgba(56, 189, 248, 0.65);
+  border-left: 5px solid #38bdf8;
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 26px rgba(8, 15, 32, 0.6);
+}
+
+.dsm-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px dashed rgba(56, 189, 248, 0.35);
+  padding-bottom: 8px;
+}
+
+.dsm-panel-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.dsm-panel-title span {
+  font-family: var(--font-serif);
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #7dd3fc;
+}
+
+.dsm-panel-title small {
+  font-size: 0.75rem;
+  color: #bae6fd;
+}
+
+.dsm-diary-saved-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #34d399;
+  color: #a7f3d0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.dsm-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dsm-psych-analysis {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: #f0f9ff;
+}
+
+.dsm-criterion-basis-box {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.84rem;
+  color: #e0f2fe;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dsm-criterion-basis-box strong {
+  color: #fde68a;
+}
+
+/* 過往相處日記（預設折疊抽屜） */
+.vn-diary-drawer,
+.card-diary-dossier {
+  background: rgba(38, 20, 58, 0.84);
+  border: 1.5px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  color: #fce7f3;
+  transition: all 0.25s ease;
+}
+
+.card-diary-dossier {
+  background: rgba(24, 11, 38, 0.76);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+}
+
+.vn-diary-drawer summary,
+.card-diary-dossier summary {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  user-select: none;
+}
+
+.vn-diary-drawer summary::-webkit-details-marker,
+.card-diary-dossier summary::-webkit-details-marker {
+  display: none;
+}
+
+.diary-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fde68a;
+  font-size: 0.9rem;
+}
+
+.card-diary-dossier .diary-summary-left {
+  font-size: 0.78rem;
+}
+
+.diary-count-pill {
+  background: rgba(236, 72, 153, 0.24);
+  border: 1px solid rgba(244, 114, 182, 0.55);
+  color: #fbcfe8;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.diary-drawer-body {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(253, 224, 165, 0.3);
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.diary-empty-state {
+  text-align: center;
+  padding: 14px 10px;
+  color: #f5d0fe;
+  font-size: 0.84rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.diary-entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diary-entry-card {
+  background: rgba(22, 10, 36, 0.88);
+  border: 1px solid rgba(253, 224, 165, 0.28);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diary-entry-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(253, 224, 165, 0.16);
+  padding-bottom: 6px;
+}
+
+.diary-entry-badge {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.diary-entry-header strong {
+  font-size: 0.85rem;
+  color: #fde68a;
+}
+
+.diary-time {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: #cbd5e1;
+}
+
+.diary-story-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: #fff1f2;
+}
+
+.diary-choice-line {
+  color: #fbcfe8;
+}
+
+.diary-dsm-block {
+  background: rgba(16, 28, 48, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-left: 3px solid #38bdf8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.79rem;
+}
+
+.diary-dsm-title {
+  font-weight: 800;
+  color: #7dd3fc;
+  font-size: 0.76rem;
+}
+
+.diary-dsm-note {
+  color: #e0f2fe;
+  line-height: 1.5;
+}
+
+.diary-criterion-tag {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(125, 211, 252, 0.25);
+  color: #bae6fd;
+  font-size: 0.75rem;
+}
+
+.diary-criterion-tag strong {
+  color: #fde68a;
+}
+
