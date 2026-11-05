@@ -1,22 +1,22 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、共同天災（強震／颱風）、角色雙層背景與心靈成就控制器
 
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=9';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=9';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=9';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=9';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=10';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=10';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=10';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=10';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
   SHARED_DISASTER_REACTIONS,
   getCharacter15Events,
   getCharacterAchievements
-} from './data/eventTreeEngine.js?v=9';
+} from './data/eventTreeEngine.js?v=10';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=9';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=9';
-import { audio } from './ui/audioEngine.js?v=9';
+} from './data/characterPrompts.js?v=10';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=10';
+import { audio } from './ui/audioEngine.js?v=10';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
@@ -78,6 +78,7 @@ class EdgeOfLoveGame {
         trait: 'balanced'
       },
       roamCycle: 0,
+      metCharacters: [],
       characters: charState
     };
   }
@@ -120,6 +121,7 @@ class EdgeOfLoveGame {
   migrateState(loadedState) {
     const def = this.getDefaultState();
     if (typeof loadedState.roamCycle !== 'number') loadedState.roamCycle = 0;
+    if (!Array.isArray(loadedState.metCharacters)) loadedState.metCharacters = CHARACTERS.map((c) => c.id);
 
     CHARACTERS.forEach((c) => {
       if (!loadedState.characters[c.id]) {
@@ -312,8 +314,66 @@ class EdgeOfLoveGame {
   }
 
   // 取得某地點當前出現的角色列表（角色會隨當前可觸發事件地點 & 漫步週期在 4 個地點間動態移動！）
+  isMet(charId) {
+    return (this.state.metCharacters || []).includes(charId);
+  }
+
+  meetCharacter(charId) {
+    if (!Array.isArray(this.state.metCharacters)) this.state.metCharacters = [];
+    if (!this.state.metCharacters.includes(charId)) {
+      this.state.metCharacters.push(charId);
+      return true;
+    }
+    return false;
+  }
+
+  // 隨機順序：每次進入一個選擇節點時產生一次，避免玩家用位置記答案
+  getChoiceOrder(node) {
+    const sc = this.activeScene;
+    const n = node?.choices?.length || 0;
+    const key = `${sc.eventNumber ?? 'daily'}_${sc.nodeIndex ?? 0}`;
+    if (!sc.choiceOrder || sc.choiceOrder.key !== key || sc.choiceOrder.order.length !== n) {
+      const order = Array.from({ length: n }, (_, i) => i);
+      for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      sc.choiceOrder = { key, order };
+    }
+    return sc.choiceOrder.order;
+  }
+
+  // 小說式推進：隨機邂逅新房客，或讓已認識的房客推進下一段故事
+  advanceNovelStory() {
+    const unmet = CHARACTERS.filter((c) => !this.isMet(c.id));
+    const metIds = CHARACTERS.filter((c) => this.isMet(c.id)).map((c) => c.id);
+    const playable = metIds.filter((id) => {
+      const cs = this.state.characters[id];
+      if ((cs.eventCompleted || 0) >= 14) return false;
+      return !this.checkGateStatus(id, Math.min((cs.eventCompleted || 0) + 1, 15)).blocked;
+    });
+    const introduce = unmet.length > 0 && (playable.length === 0 || Math.random() < 0.4);
+    if (introduce) {
+      const c = unmet[Math.floor(Math.random() * unmet.length)];
+      this.meetCharacter(c.id);
+      this.showToast('🚪 走廊盡頭的門開了——一位新的房客出現在你的生活裡。');
+      this.startEvent(c.id, 1);
+      return;
+    }
+    if (playable.length) {
+      const id = playable[Math.floor(Math.random() * playable.length)];
+      this.startEvent(id);
+      return;
+    }
+    this.state.roamCycle = (this.state.roamCycle || 0) + 1;
+    this.autoSave();
+    this.render();
+    this.showToast('🌙 今天公寓很安靜。也許，需要先讓彼此多一點信任。');
+  }
+
   getCharactersAtLocation(locationId) {
     return CHARACTERS.filter((char) => {
+      if (!this.isMet(char.id)) return false;
       const lore = CHARACTER_EXTENDED_LORE[char.id];
       const nextEv = this.getNextEventForChar(char.id);
       const roamLoc = lore.scheduleLocations[(this.state.roamCycle + Number(char.number)) % lore.scheduleLocations.length];
@@ -359,15 +419,9 @@ class EdgeOfLoveGame {
     fresh.player.pronoun = (pronounInput?.value || '她').trim() || '她';
     fresh.player.trait = traitSelect?.value || 'balanced';
 
-    Object.keys(fresh.characters).forEach((cid) => {
-      if (fresh.player.trait === 'empathy') {
-        fresh.characters[cid].affection += 8;
-      } else if (fresh.player.trait === 'stability') {
-        fresh.characters[cid].security += 10;
-      } else if (fresh.player.trait === 'boundary') {
-        fresh.characters[cid].boundary += 10;
-      }
-    });
+    // 小說式開場：隨機一位房客先出現，其餘人之後慢慢認識
+    const firstChar = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+    fresh.metCharacters = [firstChar.id];
 
     this.state = fresh;
     this.activeScene = null;
@@ -376,7 +430,7 @@ class EdgeOfLoveGame {
     this.autoSave();
     audio.playSelect();
     this.render();
-    this.showToast(`🌸 歡迎入住棲遲公寓，${this.state.player.name}！十二段命定邂逅即將展開。`);
+    this.startEvent(firstChar.id, 1);
   }
 
   clampStat(val) {
@@ -456,6 +510,8 @@ class EdgeOfLoveGame {
     const evObj = events.find((e) => e.eventNumber === targetEvNum) || events[0];
     this.activeLocationId = evObj.locationId || char.locationId;
     this.dsmWidgetCharId = charId;
+    this.meetCharacter(charId);
+    if (evObj.partnerId) this.meetCharacter(evObj.partnerId);
 
     audio.playSelect();
     this.activeScene = {
@@ -565,11 +621,44 @@ class EdgeOfLoveGame {
 
     const talks = scenario.dailyTalks || [];
     const talk = talks[cs.dailyTalkIndex % talks.length];
+    const repeatCount = Math.floor(cs.dailyTalkIndex / Math.max(1, talks.length));
     cs.dailyTalkIndex += 1;
 
-    this.applyStats(charId, talk.stats);
     this.dsmWidgetCharId = charId;
     audio.playSelect();
+
+    this.activeScene = {
+      mode: 'daily',
+      charId,
+      locationId: this.activeLocationId !== 'apartment' ? this.activeLocationId : char.locationId,
+      talk,
+      repeatCount,
+      picked: null,
+      expression: 'smile'
+    };
+
+    this.autoSave();
+    this.render();
+  }
+
+  handleDailyChoice(choiceIndex) {
+    const sc = this.activeScene;
+    if (!sc || sc.mode !== 'daily' || sc.picked) return;
+    const { charId, talk } = sc;
+    const cs = this.state.characters[charId];
+    const choice = talk.choices?.[choiceIndex];
+    if (!choice || !cs) return;
+
+    const scale = sc.repeatCount > 0 ? 0.4 : 1;
+    const stats = {};
+    Object.entries(choice.stats || {}).forEach(([k, v]) => {
+      stats[k] = v > 0 ? Math.max(1, Math.round(v * scale)) : v;
+    });
+    this.applyStats(charId, stats);
+    (stats.security || 0) < -3 ? audio.playTriggerWarning() : audio.playSelect();
+
+    sc.picked = { text: choice.text, reply: choice.reply, psychNote: choice.psychNote, stats };
+    sc.expression = (stats.security || 0) > 0 ? 'smile' : 'anxious';
 
     if (!Array.isArray(cs.diary)) cs.diary = [];
     cs.diary.unshift({
@@ -578,21 +667,12 @@ class EdgeOfLoveGame {
       code: '🌸 日常',
       title: `日常互動：${talk.title}`,
       context: this.formatText(talk.prompt),
-      choiceText: '主動關懷與溫暖陪伴',
-      reaction: this.formatText(talk.response),
-      dsmJudgment: '【日常安全感累積】穩定、不具威脅性的日常陪伴，能逐步降低其人際防禦並提升依戀安全感。',
+      choiceText: this.formatText(choice.text),
+      reaction: this.formatText(choice.reply),
+      dsmJudgment: this.maskUndiagnosedText(choice.psychNote || '', charId),
       criterionBasis: null,
       recordedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
     });
-
-    this.activeScene = {
-      mode: 'daily',
-      charId,
-      locationId: this.activeLocationId !== 'apartment' ? this.activeLocationId : char.locationId,
-      talk,
-      expression: 'smile'
-    };
-
     this.autoSave();
     this.render();
   }
@@ -762,9 +842,18 @@ class EdgeOfLoveGame {
     const choice = currentNode?.choices?.[choiceIndex];
     if (!choice || !char || !cs) return;
 
-    this.applyStats(charId, choice.stats);
+    // 重玩已完成事件的正向收益遞減，避免刷滿
+    const isReplay = (cs.eventCompleted || 0) >= this.activeScene.eventNumber;
+    let effStats = choice.stats || {};
+    if (isReplay) {
+      effStats = {};
+      Object.entries(choice.stats || {}).forEach(([k, v]) => {
+        effStats[k] = v > 0 ? Math.max(1, Math.round(v * 0.35)) : v;
+      });
+    }
+    this.applyStats(charId, effStats);
 
-    if ((choice.stats?.security || 0) < -10) {
+    if ((choice.stats?.security || 0) < -4) {
       audio.playTriggerWarning();
     } else {
       audio.playSelect();
@@ -811,7 +900,7 @@ class EdgeOfLoveGame {
       reply: replyFormatted,
       psychNote: dsmJudgmentFormatted,
       criterionBasis: criterionBasisObj,
-      stats: choice.stats
+      stats: effStats
     };
 
     // 自動將本次「情境、選擇、對方反應、以及區隔出的 DSM 臨床判斷與依據」寫入過往相處日記
@@ -826,7 +915,7 @@ class EdgeOfLoveGame {
       reaction: replyFormatted,
       dsmJudgment: dsmJudgmentFormatted,
       criterionBasis: criterionBasisObj,
-      stats: choice.stats,
+      stats: effStats,
       recordedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
     });
 
@@ -888,6 +977,12 @@ class EdgeOfLoveGame {
           this.activeMainTab = 'locations';
           audio.playChime(520, 0.06);
           this.render();
+          break;
+        case 'advance-novel-story':
+          this.advanceNovelStory();
+          break;
+        case 'daily-choice':
+          this.handleDailyChoice(Number(target.dataset.choiceIndex));
           break;
         case 'roam-shuffle':
           this.state.roamCycle = (this.state.roamCycle || 0) + 1;
@@ -1208,32 +1303,18 @@ class EdgeOfLoveGame {
   }
 
   renderCharacterCreator() {
-    const showcaseIds = ['shen_mo', 'han_xiao', 'xia_le', 'wen_yan', 'su_fei', 'gu_qingcheng', 'lin_jianwei', 'bai_xiaolu'];
-    const showcaseChars = showcaseIds.map((id) => CHARACTERS.find((c) => c.id === id)).filter(Boolean);
-
     return `
       <section class="creator-screen">
         <div class="creator-card">
           <div class="creator-header">
-            <span class="creator-badge">✦ 戀與心靈羈絆・唯美戀愛養成 ✦</span>
+            <span class="creator-badge">✦ 序章 ✦</span>
             <h1>愛的邊緣 <small style="font-size:1.1rem; font-weight:400; display:block; margin-top:4px;">Edge of Love</small></h1>
-            <p>
-              十二位迷人卻各自懷抱心靈秘密的棲遲公寓房客，每人 15 段跨地點邂逅、三人修羅場與共同天災事件。<br/>
-              最初你只知道他們現在的身分——唯有在心動與試探中突破心防，才能解鎖他們的真實診斷與童年養成故事。
+            <p style="line-height:2;">
+              入夜後下起了雨。你拖著行李站在「棲遲公寓」褪色的木門前，<br/>
+              門縫裡漏出一線暖黃的燈光，樓上傳來斷斷續續的腳步聲。<br/>
+              這棟老公寓裡住著形形色色的人。你還不認識他們——<br/>
+              但今晚，你會先遇見其中一個。
             </p>
-          </div>
-
-          <div class="otome-showcase-strip">
-            ${showcaseChars
-              .map(
-                (c) => `
-                  <div class="showcase-pillar">
-                    <img src="./assets/characters/${c.id}.png" alt="${c.name}" />
-                    <span class="pillar-name">${c.name}</span>
-                  </div>
-                `
-              )
-              .join('')}
           </div>
 
           <div class="creator-form">
@@ -1241,37 +1322,30 @@ class EdgeOfLoveGame {
               <label for="player-name-input">✦ 你的名字</label>
               <input id="player-name-input" type="text" value="${this.state.player.name}" maxlength="16" placeholder="輸入你的名字" />
             </div>
-
             <div class="form-row">
-              <label for="player-sex-select">✦ 你的性別設定</label>
-              <select id="player-sex-select" onchange="document.getElementById('player-pronoun-input').value = this.value === 'male' ? '他' : this.value === 'nonbinary' ? 'TA' : '她'">
-                <option value="female">♀ 生理女性／女性認同 (Female)</option>
-                <option value="male">♂ 生理男性／男性認同 (Male)</option>
-                <option value="nonbinary">⚧ 非二元性別／跨性別／雙性人 (Non-binary / Intersex / Queer)</option>
-              </select>
-            </div>
-
-            <div class="form-row">
-              <label for="player-pronoun-input">✦ 自訂人稱代名詞</label>
+              <label for="player-pronoun-input">✦ 別人怎麼稱呼你（人稱代名詞）</label>
               <input id="player-pronoun-input" type="text" value="她" maxlength="6" placeholder="她 / 他 / TA / 祂" />
             </div>
-
-            <div class="form-row">
-              <label for="player-trait-select">✦ 初始戀愛特質傾向（全角色初始數值加成）</label>
-              <select id="player-trait-select">
-                <option value="balanced">⚖️ 溫柔直覺者（心動、安全感、邊界均衡發展）</option>
-                <option value="empathy">💗 傾聽共情者（全角色初始【親密度 +8】，更快觸發心動瞬間）</option>
-                <option value="stability">🛡️ 暖陽陪伴者（全角色初始【安全感 +10】，更容易突破章節阻擋 Gate）</option>
-                <option value="boundary">🧭 清醒獨立者（全角色初始【健康邊界 +10】，守護健康雙向戀愛）</option>
-              </select>
-            </div>
-
             <button class="btn-primary-large" data-action="start-new-game">
-              ✨ 推開棲遲公寓大門，邂逅 12 段命定愛戀 ✨
+              📖 推開棲遲公寓木門，翻開第一頁故事
             </button>
           </div>
         </div>
       </section>
+    `;
+  }
+
+  renderNovelAdvanceCard() {
+    const total = CHARACTERS.length;
+    const met = (this.state.metCharacters || []).length;
+    return `
+      <div class="novel-advance-card">
+        <div>
+          <strong>📖 故事還在繼續</strong>
+          <p>已認識 ${met} / ${total} 位房客。不必急著選擇誰——在公寓裡走一走，故事自然會找上你。</p>
+        </div>
+        <button class="btn-primary-large" data-action="advance-novel-story">📖 繼續下一頁故事／在公寓漫步邂逅</button>
+      </div>
     `;
   }
 
@@ -1300,6 +1374,8 @@ class EdgeOfLoveGame {
             </button>
           </div>
         </div>
+
+        ${this.renderNovelAdvanceCard()}
 
         <div class="location-tabs">
           <button
@@ -1485,8 +1561,9 @@ class EdgeOfLoveGame {
     const rx = 410;
     const ry = 235;
 
-    const nodes = CHARACTERS.map((char, idx) => {
-      const angle = ((idx * 30 - 90) * Math.PI) / 180;
+    const metList = CHARACTERS.filter((c) => this.isMet(c.id));
+    const nodes = metList.map((char, idx) => {
+      const angle = ((idx * (360 / Math.max(1, metList.length)) - 90) * Math.PI) / 180;
       const x = Math.round(cx + Math.cos(angle) * rx);
       const y = Math.round(cy + Math.sin(angle) * ry);
       const cs = this.state.characters[char.id];
@@ -1576,15 +1653,17 @@ class EdgeOfLoveGame {
   }
 
   renderCharacterRoster() {
-    let filteredChars = CHARACTERS;
+    const metChars = CHARACTERS.filter((c) => this.isMet(c.id));
+    const unmetCount = CHARACTERS.length - metChars.length;
+    let filteredChars = metChars;
     if (this.selectedFilter === 'DIAGNOSED') {
-      filteredChars = CHARACTERS.filter((c) => this.isDiagnosed(c.id));
+      filteredChars = metChars.filter((c) => this.isDiagnosed(c.id));
     } else if (this.selectedFilter === 'OBSERVING') {
-      filteredChars = CHARACTERS.filter((c) => !this.isDiagnosed(c.id));
+      filteredChars = metChars.filter((c) => !this.isDiagnosed(c.id));
     }
 
-    const diagnosedCount = CHARACTERS.filter((c) => this.isDiagnosed(c.id)).length;
-    const observingCount = CHARACTERS.length - diagnosedCount;
+    const diagnosedCount = metChars.filter((c) => this.isDiagnosed(c.id)).length;
+    const observingCount = metChars.length - diagnosedCount;
 
     return `
       <section class="roster-panel">
@@ -1596,7 +1675,7 @@ class EdgeOfLoveGame {
 
           <div class="cluster-filters">
             <button class="filter-btn ${this.selectedFilter === 'ALL' ? 'active' : ''}" data-action="filter-roster" data-filter="ALL">
-              全部房客 (12)
+              已認識房客 (${metChars.length})
             </button>
             <button class="filter-btn ${this.selectedFilter === 'OBSERVING' ? 'active' : ''}" data-action="filter-roster" data-filter="OBSERVING">
               🔍 探索中 (${observingCount})
@@ -1612,6 +1691,15 @@ class EdgeOfLoveGame {
             filteredChars.length > 0
               ? filteredChars.map((char) => this.renderCharacterCard(char)).join('')
               : `<div style="grid-column: 1/-1; text-align:center; padding: 36px; color:#f5d0fe;">目前尚無符合此篩選條件的角色，快去推進事件吧！</div>`
+          }
+          ${
+            this.selectedFilter !== 'DIAGNOSED'
+              ? Array.from({ length: unmetCount })
+                  .map(
+                    () => `<div class="locked-door-card"><div class="locked-door-icon">🚪</div><strong>尚未邂逅的房客</strong><small>門後的人，會在適當的時候出現。</small></div>`
+                  )
+                  .join('')
+              : ''
           }
         </div>
       </section>
@@ -2081,15 +2169,16 @@ class EdgeOfLoveGame {
                   ? `
                     <div class="vn-choices-list">
                       <div class="choices-prompt">✨ 面對眼前的${char.name}，請選擇你的回應方式（做出選擇後將揭露對方反應與臨床觀察依據）：</div>
-                      ${node.choices
+                      ${this.getChoiceOrder(node)
+                        .map((origIdx, pos) => ({ ch: node.choices[origIdx], origIdx, pos }))
                         .map(
-                          (ch, idx) => `
+                          ({ ch, origIdx, pos }) => `
                             <button
                               class="vn-choice-btn"
                               data-action="select-choice"
-                              data-choice-index="${idx}"
+                              data-choice-index="${origIdx}"
                             >
-                              <span class="choice-idx">${String.fromCharCode(65 + idx)}</span>
+                              <span class="choice-idx">${String.fromCharCode(65 + pos)}</span>
                               <span class="choice-text">${this.formatText(ch.text)}</span>
                             </button>
                           `
@@ -2116,13 +2205,13 @@ class EdgeOfLoveGame {
   }
 
   renderDailyScene(char, cs, route, diag) {
-    const { talk } = this.activeScene;
+    const { talk, picked } = this.activeScene;
     return `
       <section class="vn-stage" style="--char-color: ${char.themeColor}">
         <div class="vn-top-bar">
           <div class="vn-loc-info">
             <span class="vn-chap-badge">甜蜜日常互動</span>
-            <strong>🌸 ${talk.title}（可提升依戀安全感突破 Gate）</strong>
+            <strong>🌸 ${talk.title}</strong>
           </div>
           <button class="nav-btn" data-action="exit-scene">↩ 返回</button>
         </div>
@@ -2151,15 +2240,39 @@ class EdgeOfLoveGame {
                 <span class="speaker-name">${char.name}・專屬日常時光</span>
               </div>
               <div class="dialogue-text">
-                <p style="color:#f5d0fe; margin-bottom:12px;">▶ 你的貼心舉動：${this.formatText(talk.prompt)}</p>
-                <p>${this.formatText(talk.response)}</p>
+                <p>${this.formatText(talk.prompt)}</p>
+                ${
+                  picked
+                    ? `<p style="color:#f5d0fe;">你：${this.formatText(picked.text)}</p><p>${this.formatText(picked.reply)}</p>`
+                    : ''
+                }
               </div>
-              <div class="outcome-deltas" style="margin: 16px 0;">
-                ${this.formatStatDeltas(talk.stats)}
-              </div>
-              <button class="btn-vn-continue" data-action="next-node">
-                完成日常約會 ▶
-              </button>
+              ${
+                picked
+                  ? `
+                <div class="outcome-dsm-judgment-panel">
+                  <div class="dsm-panel-header">
+                    <div class="dsm-panel-title"><span>🩺 DSM 臨床觀察判斷</span><small>（做出選擇後揭露，已收錄至日記）</small></div>
+                  </div>
+                  <div class="dsm-panel-body"><p>${this.maskUndiagnosedText(picked.psychNote || '', char.id)}</p></div>
+                </div>
+                <div class="outcome-deltas" style="margin: 16px 0;">${this.formatStatDeltas(picked.stats)}</div>
+                <button class="btn-vn-continue" data-action="next-node">完成日常約會 ▶</button>`
+                  : `
+                <div class="vn-choices-list">
+                  <div class="choices-prompt">✨ 你會怎麼回應？</div>
+                  ${this.getChoiceOrder(talk)
+                    .map((origIdx, pos) => ({ ch: talk.choices[origIdx], origIdx, pos }))
+                    .map(
+                      ({ ch, origIdx, pos }) => `
+                    <button class="vn-choice-btn" data-action="daily-choice" data-choice-index="${origIdx}">
+                      <span class="choice-idx">${String.fromCharCode(65 + pos)}</span>
+                      <span class="choice-text">${this.formatText(ch.text)}</span>
+                    </button>`
+                    )
+                    .join('')}
+                </div>`
+              }
             </div>
 
             ${this.renderCharacterDiaryDrawer(char, cs, true)}

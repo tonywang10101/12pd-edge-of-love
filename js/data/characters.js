@@ -99,7 +99,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為對他人普遍的不信任和猜疑，把別人的動機都解釋為充滿惡意（Criterion A）。常在沒有充分根據下懷疑別人正在利用、傷害或欺騙自己，對無心的評論讀出隱藏的貶抑或威脅，極度記仇，並在親密關係中反覆質疑伴侶的忠誠度。',
     differentialNote: '【臨床鑑別】與「思覺失調型」不同，妄想型沒有魔幻思考或奇特知覺；與「畏避型」也不同——畏避型不敢敞開心房是因為怕被嘲笑羞辱，妄想型則是怕吐露的秘密被當成攻擊自己的武器。',
     strategyHint: '切忌過度熱情的讚美（他會覺得你在諷刺或有所圖謀）或善意的謊言。保持高度透明、守時、給他掌控距離的權利，才能建立安全感。',
-    initialStats: { affection: 15, security: 10, boundary: 60 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#f1dca7',
       hairColor: '#1e1b4b',
@@ -161,7 +161,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為對社會關係普遍疏離，且在人際情境中情緒表達範圍極度受限（Criterion A）。既不渴望也不享受親密關係，幾乎總是選擇獨處活動，對與他人發生性經驗或感官享樂幾乎沒有興趣，對外界讚美或批評顯得漠不關心。',
     differentialNote: '【臨床鑑別】與「畏避型」最大的差異在於：畏避型內心非常渴望人際連結但因怕被拒絕而不敢靠近；孤僻型則是本質上缺乏對親密社交與感官刺激的需求，十分享受獨處。',
     strategyHint: '不要強行拉她去熱鬧場合，也不要逼問「妳到底在想什麼」。學會與她在同一個空間裡安靜地各自做自己的事（Parallel Play），是走進她世界的唯一方式。',
-    initialStats: { affection: 20, security: 35, boundary: 75 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#f8fafc',
       hairColor: '#0f172a',
@@ -223,7 +223,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為社交與人際缺損（對親密關係極度不自在），伴隨認知或知覺扭曲及行為古怪（Criterion A）。常見關係意念（Ideas of reference）、奇特信念或魔幻思考（第六感、心電感應、魔法儀式）、不尋常知覺經驗、言談過度抽象或隱喻，以及不會隨熟識度而減輕的社交焦慮。',
     differentialNote: '【臨床鑑別】雖有關係意念與奇特知覺，但未達思覺失調症（Schizophrenia）的持續性妄想或幻覺程度；其社交焦慮源自偏執恐懼（怕外在惡意能量），而非畏避型的自我貶低。',
     strategyHint: '不要嘲笑她的占卜與小儀式（繞過特定路磚三次），但當她因偏執恐懼而焦慮時，溫柔地幫她與現實世界建立安全的定錨。',
-    initialStats: { affection: 25, security: 15, boundary: 50 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#fef3c7',
       hairColor: '#581c87',
@@ -287,7 +287,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為漠視並侵犯他人權利（Criterion A）。具表面魅力（Superficial charm）與能言善道，實則常說謊或操弄他人以獲取利益或樂趣，衝動、不顧自身與他人安全、缺乏責任感，且對傷害他人毫無悔意（常合理化為「弱肉強食」）。',
     differentialNote: '【臨床鑑別】與「自戀型」或「做作型」不同：做作型與邊緣型的操弄是為了獲取關愛與照顧，而反社會型的操弄是為了獲取利益、權力或感官刺激，且缺乏罪惡感。',
     strategyHint: '絕對不能當乖乖聽話的獵物（邊界值過低會直接進入被榨乾拋棄的結局）。你必須識破他的謊言、立下不可侵犯的底線，才能讓他對你產生真正的敬意與執著。',
-    initialStats: { affection: 30, security: 25, boundary: 40 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#e6c29f',
       hairColor: '#111827',
@@ -343,7 +343,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為人際關係、自我形象、情感的不穩定以及明顯的衝動性（Criterion A）。瘋狂努力避免真實或想像中的被拋棄；人際關係在「極端理想化」與「極端貶抑」間擺盪；自我認同混亂；慢性空虛感；甚至在關係即將穩定時故意搞砸（Self-sabotage）。',
     differentialNote: '【臨床鑑別】邊緣型與「依賴型」都極度害怕被拋棄：但依賴型面對分離會變得更加順從討好，而邊緣型則會以空虛、暴怒與激烈要求來反應。',
     strategyHint: '不能無底線順從她的情緒勒索（會陷入毀滅性共依存），更不能冷暴力消失。需要「肯定她的感受（Validation）＋溫柔而堅定的界線（Boundary）」。',
-    initialStats: { affection: 40, security: 10, boundary: 35 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#fde8e8',
       hairColor: '#be185d',
@@ -405,7 +405,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為過度情緒化與尋求他人注意（Criterion A）。不是目光焦點時會強烈不安；常有不恰當的挑逗行為；情緒轉換極快且流於表面；高度依賴外貌吸引注意；說話偏印象派而缺乏細節；常誤以為關係比實際上更親密，卻害怕真正的深層情感親密。',
     differentialNote: '【臨床鑑別】與「自戀型」都渴望關注：但自戀型要求別人崇拜其「優越與完美」，而做作型只要能成為焦點，即使展現脆弱、依賴或出糗也在所不惜。',
     strategyHint: '不要只當台下鼓掌的觀眾。當他用誇張的表演或挑逗掩飾不安時，溫和地邀請他卸下舞台妝容，肯定那個「不需要發光也值得被愛」的他。',
-    initialStats: { affection: 35, security: 20, boundary: 45 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#ffedd5',
       hairColor: '#fb923c',
@@ -461,7 +461,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為誇大感、需要被讚美以及缺乏同理心（Criterion A）。深信自己「特別」且只能被頂尖的人理解；理所當然的特權感；具備「認知同理心」（懂別人在想什麼）卻缺乏「情感同理心」（將他人的脆弱視為軟弱）；高傲背後其實是極度脆弱、害怕暴露缺陷的自尊。',
     differentialNote: '【臨床鑑別】與「強迫型」都追求完美：強迫型總是自我批判覺得自己還不夠好，而自戀型則深信自己已經達到完美，並把錯誤歸咎於他人不懂欣賞。',
     strategyHint: '當眾否定她會引發「自戀暴怒（Narcissistic Rage）」，一味當應聲蟲則會被她看不起。在私密空間裡接住她對失敗的恐懼，讓她知道「不完美也不會失去價值」。',
-    initialStats: { affection: 15, security: 15, boundary: 55 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#fefce8',
       hairColor: '#1c1917',
@@ -519,7 +519,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為社交抑制、覺得自己不夠好，以及對負面評價極度敏感（Criterion A）。除非確定被喜歡否則不敢與人來往；在親密關係中因怕被羞辱或嘲笑而高度保留；全神貫注於觀察他人是否批評或拒絕自己，將中性表情解讀為否定。',
     differentialNote: '【臨床鑑別】與「孤僻型」最大的不同是：畏避型內心深切渴望愛與歸屬感，並為自己的孤單感到痛苦；孤僻型則對人際連結無感。',
     strategyHint: '給他百分之百明確、不曖昧的肯定，千萬不要開貶損式的玩笑或強迫他在眾人面前表現。循序漸進的安全感是打開他心門的鑰匙。',
-    initialStats: { affection: 25, security: 10, boundary: 60 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#f1f5f9',
       hairColor: '#3f3f46',
@@ -575,7 +575,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為普遍且過度需要被人照顧，導致順從、黏人行為及害怕分離（Criterion A）。沒有他人大量建議與保證就無法做日常決定；需要他人為自己的人生負起主要責任；因怕失去支持而不敢表達反對意見；甚至害怕表現得太能幹會導致被遺棄。',
     differentialNote: '【臨床鑑別】依賴型與邊緣型都害怕被拋棄，但依賴型面對分離威脅時會變得更加溫順討好、甚至急迫尋找下一個照顧者，而非像邊緣型那樣爆發憤怒。',
     strategyHint: '【最大攻略陷阱】如果你覺得她很可愛就「幫她決定所有事」，好感度雖然會暴增，但邊界值會歸零並鎖死在「病態共依存結局」！你必須溫柔地把選擇權還給她，並保證「就算妳學會獨立，我也依然愛妳」。',
-    initialStats: { affection: 45, security: 20, boundary: 25 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#fff1f2',
       hairColor: '#9d174d',
@@ -631,7 +631,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為全神貫注於秩序、完美主義以及精神與人際的控制，因而犧牲彈性、開放性與效率（Criterion A）。過度專注於規則與清單以致迷失活動主旨；完美主義妨礙任務完成；過度投入工作排斥休閒；道德標準僵化；不願授權他人；情感表達極度克制拘謹。',
     differentialNote: '【臨床鑑別】強迫型人格障礙症（OCPD）與強迫症（OCD）不同：OCPD 沒有真正的強迫思考與儀式行為（如反覆洗手防細菌），而是將僵化的秩序與控制視為正確的生活原則（自我協調 ego-syntonic）。',
     strategyHint: '不要故意弄亂他的東西來「治療」他，那只會讓他失控憤怒。在他因為計畫被打亂而陷入自我批判時，陪他體驗一次「即使不照清單走，世界也不會崩塌」的溫暖。',
-    initialStats: { affection: 20, security: 20, boundary: 70 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#f8fafc',
       hairColor: '#0f172a',
@@ -689,7 +689,7 @@ export const CHARACTERS = [
     clinicalOverview: '核心特徵為由另一身體病況（如額葉創傷、腦血管疾病、癲癇等）直接病理生理後果所導致的持續性人格改變（Criterion A & B）。常見亞型包含情緒易變型（Labile）、去抑制型（Disinhibited，衝動與不合時宜的詼諧）、冷漠型（Apathetic）等，常被周遭人認為「不像以前的自己」。',
     differentialNote: '【臨床鑑別】不同於自青少年時期即穩定存在的原發性人格障礙，F07.0 具有明確的生理病因與病前／病後的人格斷裂，當事人除了適應新性格，還必須面對他人對「舊自我」的哀悼與否定。',
     strategyHint: '千萬不要拿她車禍前的榮耀或舊照片來比較。接納她的直接、衝動與偶爾的情緒潰堤，愛上「此刻重生的她」。',
-    initialStats: { affection: 30, security: 20, boundary: 55 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#fef3c7',
       hairColor: '#78350f',
@@ -745,7 +745,7 @@ export const CHARACTERS = [
     clinicalOverview: '對應 DSM-5-TR 第 734 與 778 頁之「其他特定之人格障礙症（Other Specified PD, F60.89）」，包含被動攻擊型（Passive-Aggressive）與混合型人格特徵。表面順從合作，實則透過拖延、故意遺忘、沒效率、冷嘲熱諷與消極抵抗來表達對他人的敵意與對控制的抗拒。',
     differentialNote: '【臨床鑑別】與「依賴型」的順從不同：依賴型的順從是真心害怕失去依靠，而被動攻擊型的順從則是帶著隱性憤怒的防衛面具，背後藏著對自主權的渴望與對正面衝突的恐懼。',
     strategyHint: '不要相信他嘴上的「隨便、都可以」，也不要因為他「不小心搞砸」而對他破口大罵（這只會讓他更確信你是暴君）。溫和地戳破他的微笑面具，告訴他：「在我面前，你可以直接生氣、可以直接拒絕。」',
-    initialStats: { affection: 35, security: 15, boundary: 45 },
+    initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
       skin: '#f3e8ff',
       hairColor: '#4c1d95',

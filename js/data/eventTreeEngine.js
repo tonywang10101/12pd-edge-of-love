@@ -1,6 +1,6 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹引擎、跨地點動態行程、雙層背景（現在背景／成長養成故事）、三人同場與共同天災事件庫
 
-import { LOCATIONS, CHARACTERS } from './characters.js?v=9';
+import { LOCATIONS, CHARACTERS } from './characters.js?v=10';
 
 // ==================== 12 角色：跨地點動態行程 ＆ 現在背景（公開） ＆ 成長養成背景（探索完解鎖） ====================
 export const CHARACTER_EXTENDED_LORE = {
@@ -19,7 +19,7 @@ export const CHARACTER_EXTENDED_LORE = {
       { code: 'E01', phase: 1, loc: 'rooftop', type: 'base_chap', chapIdx: 0, title: '頂樓的雙重門鎖與試探', critIdx: 0 },
       {
         code: 'E02', phase: 1, loc: 'cafe', type: 'custom', title: '轉角監聽：密封罐裝水的戒心', critIdx: 0,
-        prompt: '在「邊界」咖啡屋角落，沈墨戴著單邊監聽耳機，面前放著一瓶未拆封的礦泉水，堅決不碰游子謙端來的手沖咖啡。',
+        prompt: '在「邊界」咖啡屋角落，沈墨戴著單邊監聽耳機，面前放著一瓶未拆封的礦泉水，堅決不碰店員端來的手沖咖啡。',
         charLine: '「開放式吧台的飲品有 17 種下藥途徑。你坐過來之前，有注意到門口那輛黑色轎車停了多久嗎？」',
         choices: [
           { text: '「我剛才有留意車牌，是附近花店的送貨車，清單在門口喔。」', reply: '他緊繃的肩膀微不可察地放鬆了一毫米：「……你觀察力比我想像中好。」', stats: { affection: 8, security: 10, boundary: 5 }, psychNote: '提供可查證的客觀事實，能有效降低高警覺者的防衛。' },
@@ -433,8 +433,166 @@ export const TRIO_SCENES_DATA = {
         ]
       }
     ]
+  },
+
+  'shen_mo__gu_qingcheng': {
+    locationId: 'studio',
+    title: '【三人同場】競圖草稿失蹤的下午（沈墨 ＆ 顧傾城）',
+    ambience: '繪圖板敲擊聲、遠處的雷聲與一扇半掩的門',
+    nodes: [
+      { speaker: 'narrator', expression: 'anxious', text: '競圖截止前一天，顧傾城的事務所裡，第三版立面草稿不見了。沈墨剛好在隔壁房間架設監測設備，被她堵在門口。窗外烏雲壓得很低，兩個人都沒有提高音量，空氣卻像拉緊的弦。' },
+      {
+        speaker: 'char', expression: 'anxious',
+        text: '顧傾城：「整層樓只有三個人有門禁卡。我不是在指控誰，我只是想知道，為什麼你的設備剛好對著我的製圖室？」\n沈墨：「我也想問，為什麼最先發現草稿不見的人，是一個離開座位兩小時都沒人看到的人？」',
+        choices: [
+          { text: '提議先把門禁紀錄、監控與各自的行程一條條攤在桌上對照，誰的時間線有缺口，大家一起看。', nextExpression: 'neutral', reply: '兩人各自沉默了幾秒。顧傾城先拉開了椅子：「……紀錄在我電腦裡。」沈墨沒有道謝，只是把耳機摘下放在桌上。', psychNote: '【三人互動解析】以可驗證的事實取代互相猜疑，同時不貶低任何一方的自尊。', stats: { affection: 6, security: 7, boundary: 5 } },
+          { text: '告訴她們草稿很可能只是被誰順手收進了某個資料夾，先別把事情想得太嚴重。', nextExpression: 'neutral', reply: '顧傾城皺起眉：「這不是『順手』能解釋的事。」沈墨冷冷補了一句：「輕描淡寫，往往是最方便的說法。」', psychNote: '【三人互動解析】過快淡化事件，會讓兩人都覺得自己的警覺被否定。', stats: { affection: -2, security: -3, boundary: 1 } },
+          { text: '私下對顧傾城說你相信她，再轉頭私下對沈墨說你也相信他。', nextExpression: 'anxious', reply: '兩人當晚各自收到你的訊息，隔天不約而同地問你：「所以你到底站哪一邊？」', psychNote: '【三人互動解析】兩面討好會在高度敏感的人身上累積更深的不信任。', stats: { affection: 2, security: -5, boundary: -4 } },
+          { text: '直接說出你的直覺：這件事比較像是有人刻意製造的誤會，建議兩人先暫停互相質問。', nextExpression: 'neutral', reply: '顧傾城抿著唇不置可否，沈墨則低聲說：「……你的直覺有證據嗎？」', psychNote: '【三人互動解析】提出方向但缺乏證據，容易被當作另一種說服。', stats: { affection: 2, security: 1, boundary: 2 } },
+          { text: '主動說這件事由你負責居中處理，兩人都不必再為此勞神。', nextExpression: 'anxious', reply: '兩人同時看向你，語氣出奇一致：「我們不需要被保護。」', psychNote: '【三人互動解析】過度攬下責任，會侵犯雙方都極為在意的自主與尊嚴。', stats: { affection: -3, security: -4, boundary: -5 } }
+        ]
+      }
+    ]
+  },
+
+  'lin_jianwei__su_fei': {
+    locationId: 'lounge',
+    title: '【三人同場】暴雨前的一張合奏邀請（林見微 ＆ 蘇緋）',
+    ambience: '大提琴低音、窗外將落未落的雨與壁鐘的規律聲',
+    nodes: [
+      { speaker: 'narrator', expression: 'anxious', text: '交誼廳的鋼琴旁，蘇緋抱著大提琴，臉上帶著過於明亮的笑。林見微坐在窗邊，筆記本攤開，正在記錄氣壓。蘇緋剛剛邀請她今晚合奏，而窗外的雲正在聚攏。' },
+      {
+        speaker: 'char', expression: 'anxious',
+        text: '蘇緋：「就一首而已！我拉主旋律，妳隨便敲幾個音也行。妳不來的話……我會覺得是不是我又說錯了什麼。」\n林見微（沒有抬頭）：「我並不介意妳說了什麼。只是今晚的氣壓會在九點下降，我預計那時候會想一個人待著。」',
+        choices: [
+          { text: '建議她們先合奏一首很短的曲子，在九點之前結束，結束後林見微可以隨時離開。', nextExpression: 'neutral', reply: '蘇緋的肩膀鬆了一些：「那……八點五十收尾？」林見微合上筆記本：「可以。」', psychNote: '【三人互動解析】給予明確的時間界線，讓孤僻者不覺得被侵入，也讓依附焦慮者得到可預期的陪伴。', stats: { affection: 6, security: 7, boundary: 6 } },
+          { text: '向蘇緋說明林見微並不是在拒絕她，只是習慣安靜，並替她轉達了心意。', nextExpression: 'neutral', reply: '林見微抬起眼：「我可以自己說明。」蘇緋則小聲「喔」了一聲，笑容淡了一些。', psychNote: '【三人互動解析】替人傳話有時會讓雙方都覺得被代言。', stats: { affection: 1, security: -1, boundary: 0 } },
+          { text: '勸林見微給蘇緋一點面子，今晚就答應吧，反正只是一首曲子。', nextExpression: 'anxious', reply: '林見微沉默片刻，說：「若是義務，我會彈得很糟。」蘇緋聽見這句話，指尖停在琴弦上。', psychNote: '【三人互動解析】以人情壓力換取同意，對兩方都有代價。', stats: { affection: -3, security: -4, boundary: -4 } },
+          { text: '改成陪蘇緋單獨練琴，讓林見微安靜地觀測，兩個人各做各的事但待在同一個空間。', nextExpression: 'smile', reply: '蘇緋小聲說：「這樣也很好……至少有人在。」林見微翻過一頁：「我不會打擾妳，你們繼續。」', psychNote: '【三人互動解析】平行陪伴是對孤僻型最友善的靠近方式。', stats: { affection: 5, security: 5, boundary: 5 } },
+          { text: '輕鬆地開個玩笑化解氣氛，說兩個人加起來一定能拉出一場世紀合奏。', nextExpression: 'neutral', reply: '蘇緋笑得有些勉強，林見微則平靜地補了一句：「世紀合奏需要至少三個月的排練。」', psychNote: '【三人互動解析】幽默有緩衝作用，但無法取代對真實需求的回應。', stats: { affection: 1, security: 0, boundary: 1 } }
+        ]
+      }
+    ]
+  },
+
+  'ruri__shen_mo': {
+    locationId: 'rooftop',
+    title: '【三人同場】凌晨的天台與水晶陣（星野琉璃 ＆ 沈墨）',
+    ambience: '風聲、水晶輕敲聲與偵測器偶爾的嗶響',
+    nodes: [
+      { speaker: 'narrator', expression: 'anxious', text: '凌晨一點，天台地面上被星野琉璃用鹽與水晶擺成了一個圈。沈墨提著偵測器上來巡視，剛好踩在圈的邊緣。他的腳尖停住了，琉璃抬起頭，眼睛在夜色裡亮得不太尋常。' },
+      {
+        speaker: 'char', expression: 'anxious',
+        text: '星野琉璃：「你踩到了結界……現在它會記住你的氣息。我不是怪你，只是，它會告訴我你是不是朋友。」\n沈墨：「結界、氣息、記住——這和你說的『監聽』有什麼不同？我只是在確認這個圈裡有沒有裝任何設備。」',
+        choices: [
+          { text: '請沈墨先把偵測器放在圈外，讓琉璃自己當面把圈裡的每一樣東西拿給他看。', nextExpression: 'neutral', reply: '琉璃一件一件地舉起水晶，沈墨一件一件地確認。結束時他說：「……都是石頭。」她輕聲回：「是的，它們只是石頭，也是我的守護。」', psychNote: '【三人互動解析】讓偵測的需求與象徵的需求各自被承認，而不需要誰去說服誰。', stats: { affection: 6, security: 7, boundary: 5 } },
+          { text: '告訴琉璃，結界不會因為一個人踩到就失效，不必擔心。', nextExpression: 'neutral', reply: '琉璃睜大眼睛：「你怎麼知道？」她的語氣更慌了，而沈墨低聲說：「你剛剛是在附和她。」', psychNote: '【三人互動解析】對象徵性信念表態「它是真的」或「它不重要」，都容易落入兩邊的陷阱。', stats: { affection: 0, security: -2, boundary: 0 } },
+          { text: '勸沈墨別在這裡亂踩亂查，這是琉璃的私人角落。', nextExpression: 'anxious', reply: '沈墨眼神一冷：「所以有人可以決定哪裡是『我不該查的地方』？」', psychNote: '【三人互動解析】劃出禁區會激起妄想傾向者對隱瞞的警覺。', stats: { affection: -3, security: -4, boundary: 0 } },
+          { text: '陪琉璃重新擺好那一小段被踩亂的鹽線，並對沈墨說你會在這裡待到天亮。', nextExpression: 'smile', reply: '琉璃輕輕點頭，沈墨看了一眼你們，沉默地在圈外坐下：「……我也待到天亮。」', psychNote: '【三人互動解析】以在場取代說服，讓兩個高警覺的人都感受到可預期的穩定。', stats: { affection: 5, security: 6, boundary: 4 } },
+          { text: '提議三個人一起下樓，到交誼廳喝點熱的，等天亮再回來。', nextExpression: 'neutral', reply: '沈墨先回答：「我留在這裡。」琉璃抱緊水晶：「那我也不走。」兩人對視了一眼，彼此都有些意外。', psychNote: '【三人互動解析】移動場域會讓兩個人同時失去熟悉的控制感。', stats: { affection: 0, security: -1, boundary: 2 } }
+        ]
+      }
+    ]
+  },
+
+  'han_xiao__bai_xiaolu': {
+    locationId: 'lounge',
+    title: '【三人同場】深夜酒吧裡的點單難題（韓梟 ＆ 白小鹿）',
+    ambience: '低音鼓點、玻璃杯碰撞聲與昏暗燈光',
+    nodes: [
+      { speaker: 'narrator', expression: 'anxious', text: '白小鹿第一次被帶到「失重」酒吧，抱著菜單不知所措。韓梟靠在吧台邊，手裡拋著一枚硬幣，對她露出似笑非笑的神情。她回頭找你，眼神像一隻迷路的小動物。' },
+      {
+        speaker: 'char', expression: 'anxious',
+        text: '白小鹿：「我、我不知道要點什麼……你們點什麼我都可以。」\n韓梟：「別人幫妳選，妳永遠都學不會。來，擲硬幣——正面妳喝酒，反面妳喝我挑的。選項都是我給的，很公平吧？」',
+        choices: [
+          { text: '替小鹿向韓梟要一份無酒精的特調酒單，並告訴她可以慢慢挑，選哪一種都沒關係。', nextExpression: 'smile', reply: '小鹿小心地指著其中一杯：「這個……名字看起來很溫柔。」韓梟挑了挑眉：「有品味。」', psychNote: '【三人互動解析】保留選擇權給依賴者，同時不挑戰衝動者的掌控遊戲。', stats: { affection: 5, security: 6, boundary: 6 } },
+          { text: '笑著接過硬幣，說今天由你來擲，所有後果都算在你頭上。', nextExpression: 'neutral', reply: '韓梟輕笑：「喔？有點意思。」小鹿鬆了口氣，卻也低聲說：「謝謝……我又沒有自己決定了。」', psychNote: '【三人互動解析】替依賴者承擔決定，短期有效但不利於自主。', stats: { affection: 2, security: 1, boundary: -4 } },
+          { text: '對韓梟說這樣逼人選擇不好玩，請他別再用硬幣捉弄小鹿。', nextExpression: 'anxious', reply: '韓梟的笑意收斂：「我是在教她。」他的語氣沒有惡意，卻有種被潑冷水的冷淡。', psychNote: '【三人互動解析】直接糾正衝動者，容易讓他覺得被管束。', stats: { affection: -2, security: -3, boundary: 2 } },
+          { text: '勸小鹿試試看，這家的調酒其實不烈，喝一點也無妨。', nextExpression: 'anxious', reply: '小鹿點了點頭，端起杯子的手微微發抖：「……你說可以，那就可以。」', psychNote: '【三人互動解析】鼓勵看似溫和，但依賴者會把你的意見當作命令。', stats: { affection: 2, security: -3, boundary: -5 } },
+          { text: '陪小鹿到吧台另一端，兩個人悄悄討論想喝什麼，讓韓梟在原位繼續他的遊戲。', nextExpression: 'neutral', reply: '韓梟並沒有追上來，只是在遠處舉杯向你們點了點頭。小鹿鼓起勇氣：「那……我要這個。」', psychNote: '【三人互動解析】為依賴者創造不被衝動者主導的決策空間。', stats: { affection: 4, security: 5, boundary: 5 } }
+        ]
+      }
+    ]
+  },
+
+  'xia_le__wen_yan': {
+    locationId: 'archive',
+    title: '【三人同場】新書發表會前的朗讀請求（夏樂 ＆ 溫言）',
+    ambience: '麥克風測音聲、翻動書頁與遠處排練的掌聲',
+    nodes: [
+      { speaker: 'narrator', expression: 'anxious', text: '社區書店的小型發表會即將開始，夏樂被請來當開場嘉賓，溫言則是被拉來朗讀自己的譯詩。休息室裡，夏樂正對著鏡子調整笑容，溫言縮在最角落的沙發邊緣。' },
+      {
+        speaker: 'char', expression: 'anxious',
+        text: '夏樂：「溫老師！你不要這麼緊張嘛，台下看你的人那麼多，你只要想像他們都很喜歡你就好啦！」\n溫言（聲音很輕）：「……他們要是不喜歡呢？我寧可不上台，這樣至少不會有人失望。」',
+        choices: [
+          { text: '請夏樂別再替溫言打氣，改成問溫言：「如果只朗讀一首，你最想念哪一首？」', nextExpression: 'neutral', reply: '溫言想了很久，說：「……第三首，那首很短。」夏樂眨眨眼：「那我幫你把前後的串場詞縮短好了！」', psychNote: '【三人互動解析】把焦點從「表現」拉回「選擇」，同時讓外向者找到可以幫上忙的位置。', stats: { affection: 5, security: 6, boundary: 5 } },
+          { text: '建議溫言深呼吸，說這種場面誰都會緊張，上台之後就會好一點。', nextExpression: 'neutral', reply: '溫言點頭，手指卻在膝蓋上收得更緊：「嗯，大概吧。」夏樂則笑著說：「對啊對啊！」', psychNote: '【三人互動解析】標準安慰在這種情境下太輕，無法接住真正的恐懼。', stats: { affection: 0, security: -1, boundary: 1 } },
+          { text: '說如果溫言真的不想上台，你可以請書店臨時改成放錄音。', nextExpression: 'neutral', reply: '溫言眼底閃過一絲鬆動，卻又低聲說：「……那樣大家會覺得我很沒用。」', psychNote: '【三人互動解析】給出逃生口是好意，但也要小心迴避強化。', stats: { affection: 1, security: 0, boundary: -2 } },
+          { text: '提議夏樂先上台，溫言可以在側幕看他表演，等覺得準備好再上。', nextExpression: 'smile', reply: '夏樂眼睛一亮：「好呀好呀，我先熱場！」溫言輕輕點頭：「……我在旁邊看就好。」', psychNote: '【三人互動解析】利用外向者的舞台能量，替畏避者創造暖身緩衝。', stats: { affection: 5, security: 5, boundary: 4 } },
+          { text: '對溫言說：「你是今天的主角，大家都是衝著你來的，你一定要上。」', nextExpression: 'anxious', reply: '溫言的臉色一下子白了：「……所以更不能搞砸了。」夏樂在一旁小聲說：「欸，不要給他壓力啦。」', psychNote: '【三人互動解析】強調期待會放大畏避者的預期性焦慮。', stats: { affection: -3, security: -5, boundary: 0 } }
+        ]
+      }
+    ]
+  },
+
+  'bai_xiaolu__you_ziqian': {
+    locationId: 'cafe',
+    title: '【三人同場】打烊前的一杯「隨便」（白小鹿 ＆ 游子謙）',
+    ambience: '咖啡機蒸氣聲、晚間爵士與關店前的清潔聲',
+    nodes: [
+      { speaker: 'narrator', expression: 'neutral', text: '咖啡廳快打烊了。白小鹿坐在吧台邊，游子謙笑盈盈地問她想喝什麼，她又說了一次「都可以」。他把杯子放下，笑容沒有變，但眼神微妙地冷了一點。' },
+      {
+        speaker: 'char', expression: 'neutral',
+        text: '游子謙：「小鹿每次都說『都可以』，我真的好羨慕這麼好說話的人呢～不像我，每次都要想很久才知道自己想要什麼。」\n白小鹿：「對、對不起，我是不是又讓你為難了？我不是故意要讓你一直問的……」',
+        choices: [
+          { text: '對小鹿說：「想一想，今天最想喝熱的還是冰的？只要告訴我們一個方向就夠了。」', nextExpression: 'smile', reply: '小鹿小聲說：「……熱的。」游子謙這次沒有笑，只是輕輕「嗯」了一聲，轉身去煮水。', psychNote: '【三人互動解析】縮小選項讓依賴者開口，同時避免與被動攻擊者的軟性挑釁正面糾纏。', stats: { affection: 5, security: 6, boundary: 5 } },
+          { text: '對游子謙說：「你這句話聽起來有點酸，是不是今天發生了什麼事？」', nextExpression: 'neutral', reply: '游子謙的笑容停頓了半秒：「怎麼會呢～只是隨口說說而已。」但他拿杯子的動作變得更用力。', psychNote: '【三人互動解析】點破隱性情緒需要時機，當著第三人面容易讓他退縮。', stats: { affection: 1, security: 0, boundary: 2 } },
+          { text: '替小鹿點一杯她平常最愛的熱可可，說這樣就不用煩惱了。', nextExpression: 'neutral', reply: '小鹿鬆了口氣：「謝謝……你都知道我喜歡什麼。」游子謙看了你們一眼，低頭默默擦拭杯子。', psychNote: '【三人互動解析】替依賴者決定能暫時解圍，但會讓被動攻擊者感到被排除在外。', stats: { affection: 2, security: -1, boundary: -4 } },
+          { text: '笑著打圓場：「游店長你別逗小鹿了，她比你想像的還要敏感。」', nextExpression: 'neutral', reply: '游子謙笑得很好看：「是嗎？那真是我失禮了呢～」那句話聽起來很禮貌，也很疏遠。', psychNote: '【三人互動解析】站在弱勢一方指責另一方，容易讓被動攻擊者進一步隱藏情緒。', stats: { affection: -2, security: -3, boundary: 1 } },
+          { text: '什麼都不說，只是安靜地陪小鹿等咖啡，也看著游子謙把那杯咖啡細心沖好。', nextExpression: 'smile', reply: '游子謙把杯子端到小鹿面前，這次輕聲說：「……小心燙。」那句話裡少了一點刺。', psychNote: '【三人互動解析】有時不介入也是一種尊重，讓雙方自行修復氣氛。', stats: { affection: 4, security: 5, boundary: 4 } }
+        ]
+      }
+    ]
+  },
+
+  'ji_yan__lu_qinglan': {
+    locationId: 'atelier',
+    title: '【三人同場】窯燒前夕的時刻表（紀嚴 ＆ 陸晴嵐）',
+    ambience: '窯爐預熱聲、計時器滴答與午後蟬鳴',
+    nodes: [
+      { speaker: 'narrator', expression: 'neutral', text: '陸晴嵐的窯要在下午三點入窯，紀嚴受邀來協助記錄燒製曲線。他帶來了三份表格與兩支溫度計，陸晴嵐則抱著一堆還沒修坯的杯子，一邊笑一邊哼歌。' },
+      {
+        speaker: 'char', expression: 'neutral',
+        text: '紀嚴：「升溫曲線必須在 14:55 前核對完畢，現在已經 14:41。陸小姐，請把坯體按編號擺好。」\n陸晴嵐：「哎呀紀醫師，燒窯又不是做解剖！偏一點點又不會怎樣——啊，我把三號杯放到九號的位置了，哈哈哈，還好有你在！」',
+        choices: [
+          { text: '幫晴嵐把坯體分成「必須按編號」與「可以隨意」兩堆，讓紀嚴只管前者的順序。', nextExpression: 'smile', reply: '紀嚴看著兩堆坯體，沉默後說：「……這個分類方式可以接受。」晴嵐則大笑：「我就知道有人能幫我們翻譯對方的語言！」', psychNote: '【三人互動解析】把「秩序需求」和「自由需求」切割成可共存的範圍。', stats: { affection: 6, security: 6, boundary: 6 } },
+          { text: '對紀嚴說放輕鬆，坯體放錯位置頂多就是燒出來有點不同，也沒什麼大不了。', nextExpression: 'neutral', reply: '紀嚴僵硬地回：「『頂多』這個詞，是失敗的前置條件。」晴嵐則笑出聲：「哈哈他說得好像也有道理！」', psychNote: '【三人互動解析】輕描淡寫會被強迫型當作對專業的忽視。', stats: { affection: -1, security: -2, boundary: 1 } },
+          { text: '勸晴嵐別再開玩笑，今天認真配合紀嚴把流程走完。', nextExpression: 'anxious', reply: '晴嵐笑容收了一半：「……好吧，我盡量。」她的語氣少了往常的輕快，紀嚴也沒有因此變得更放鬆。', psychNote: '【三人互動解析】要求一方壓抑，往往會讓兩邊都更緊繃。', stats: { affection: -2, security: -3, boundary: -2 } },
+          { text: '自告奮勇當記錄員，幫紀嚴抄寫數據，讓他專心核對，晴嵐專心擺坯。', nextExpression: 'smile', reply: '紀嚴把筆遞給你：「請使用藍色墨水。」晴嵐在一旁擺好杯子，還貼心地在每一個杯底寫了小小的數字。', psychNote: '【三人互動解析】分工讓各自在擅長的位置上不被干擾。', stats: { affection: 5, security: 5, boundary: 5 } },
+          { text: '提議把入窯時間延後一小時，讓大家都有餘裕。', nextExpression: 'neutral', reply: '紀嚴看向手錶：「延後會影響整體窯位預約。」晴嵐則小聲說：「但是延後也不錯呀……」兩個人同時看向你。', psychNote: '【三人互動解析】更動時程會觸動強迫型最在意的結構，需有替代方案。', stats: { affection: 0, security: -1, boundary: 2 } }
+        ]
+      }
+    ]
   }
 };
+
+// 為舊版僅兩個選項的三人同場補上更多模稜兩可的選項，並確保不包含任何第三者姓名
+const TRIO_EXTRA_CHOICES = [
+  { text: '先安靜地聽兩個人把話說完，再決定要不要開口。', nextExpression: 'neutral', reply: '兩人各自把想說的說完，場面反而沒有剛才那麼緊繃，但也沒有真正解決什麼。', psychNote: '【三人互動解析】傾聽能降溫，但並不等於處理需求。', stats: { affection: 3, security: 4, boundary: 3 } },
+  { text: '把話題輕輕轉到一件與當下無關的小事，讓氣氛先緩一緩。', nextExpression: 'neutral', reply: '空氣稍微鬆動了一點，不過兩個人似乎都意識到你在刻意轉移話題。', psychNote: '【三人互動解析】轉移話題可以暫時降溫，但可能讓人覺得被敷衍。', stats: { affection: 1, security: 0, boundary: 1 } },
+  { text: '表示你也有些不確定，希望兩個人都說說各自的感受。', nextExpression: 'smile', reply: '其中一人先沉默了幾秒，然後低聲說了一句坦率的話，另一人也跟著放慢了語氣。', psychNote: '【三人互動解析】示弱能讓防備的人先放下武裝，但需要對方願意回應。', stats: { affection: 4, security: 5, boundary: 3 } }
+];
+
+function padTrioChoices(scene) {
+  const nodes = scene.nodes.map((n) => {
+    if (n.choices && n.choices.length < 5) {
+      const need = 5 - n.choices.length;
+      return { ...n, choices: [...n.choices, ...TRIO_EXTRA_CHOICES.slice(0, need)] };
+    }
+    return n;
+  });
+  return { ...scene, nodes };
+}
 
 // ==================== 全域共同天災事件庫（深夜強震 E08 ＆ 強烈颱風 E10） ====================
 export const SHARED_DISASTER_REACTIONS = {
@@ -528,7 +686,20 @@ export function getCharacter15Events(charId, baseScenario) {
   const findTrioData = (pId) => {
     const k1 = `${charId}__${pId}`;
     const k2 = `${pId}__${charId}`;
-    return TRIO_SCENES_DATA[k1] || TRIO_SCENES_DATA[k2] || Object.values(TRIO_SCENES_DATA)[0];
+    const found = TRIO_SCENES_DATA[k1] || TRIO_SCENES_DATA[k2];
+    if (found) return padTrioChoices(found);
+    // 不再回退到其他角色的劇本，避免出現不在場的人名
+    return padTrioChoices({
+      locationId: locs[0],
+      title: '【三人同場】意外的同場時刻',
+      ambience: '公寓裡交錯的腳步與低語',
+      nodes: [
+        { speaker: 'narrator', expression: 'neutral', text: '兩位房客同時在場，彼此的沉默讓空氣有些微妙。你站在中間，不確定該先看向誰。', choices: [
+          { text: '先分別簡短地問候兩人，再看誰先開口。', nextExpression: 'neutral', reply: '兩人各自點頭，氣氛不尷不尬地維持住了。', psychNote: '【三人互動解析】均衡的問候能避免任何一方感到被冷落。', stats: { affection: 4, security: 5, boundary: 4 } },
+          { text: '只對其中一位熱絡地說話，對另一位點頭致意。', nextExpression: 'anxious', reply: '被冷落的那一位把視線移開，不再說話。', psychNote: '【三人互動解析】明顯的親疏差別容易引發不安。', stats: { affection: -2, security: -4, boundary: 0 } }
+        ] }
+      ]
+    });
   };
 
   const trio1 = findTrioData(lore.trioPartner1);
@@ -945,6 +1116,38 @@ export function getCharacter15Events(charId, baseScenario) {
   ];
 
   // 若為沈墨等有細緻客製藍圖者，也可保留上述完整的 15 事件結構並替換細節文字
+  // 全域後處理：每個決策節點至少提供 5 個選項，不足者補上模稜兩可的通用選項
+  const n = char.name;
+  const genericExtras = [
+    { text: `先不急著回應，安靜地陪在${n}身邊，看${char.pronoun}接下來怎麼做。`, nextExpression: 'neutral', reply: `${n}沒有立刻說話，只是微微側過頭，像是在確認你是否真的留下來。`, psychNote: '【觀察】沉默的陪伴不會推進關係，也不會傷害關係。', stats: { affection: 3, security: 4, boundary: 3 } },
+    { text: `把話題輕輕轉開，聊一件和眼前無關的小事。`, nextExpression: 'neutral', reply: `${n}順著話題應了幾句，語氣比剛才輕了一點，但眼神仍留在原處。`, psychNote: '【觀察】轉移話題能降溫，但可能讓對方覺得真正的感受沒被接住。', stats: { affection: 1, security: 0, boundary: 1 } },
+    { text: `坦白說你也不太確定該怎麼回應，但想聽聽${char.pronoun}的想法。`, nextExpression: 'smile', reply: `${n}看了你一會兒，像是在衡量這份坦白的重量，然後低聲說了一句比平常更真的話。`, psychNote: '【觀察】示弱能邀請對方開口，但需要對方願意信任。', stats: { affection: 4, security: 5, boundary: 3 } },
+    { text: `用輕鬆的口氣替情況打個圓場，希望氣氛不要太沉重。`, nextExpression: 'neutral', reply: `${n}勉強笑了一下，笑意沒有到達眼底。`, psychNote: '【觀察】玩笑是緩衝，不是回答。', stats: { affection: 0, security: -1, boundary: 1 } },
+    { text: `提出一個具體的小建議，讓事情先往前走一步。`, nextExpression: 'neutral', reply: `${n}想了想，沒有拒絕，也沒有完全接受：「……先這樣試試看吧。」`, psychNote: '【觀察】務實的建議有幫助，但可能略過情緒本身。', stats: { affection: 2, security: 2, boundary: 3 } }
+  ];
+  // E02 / E03 / E06 直接採用劇本中已改寫為 5 選項的日常對話
+  [[2, 0], [3, 1], [6, 2]].forEach(([num, idx]) => {
+    const ev = events.find((e) => e.eventNumber === num);
+    const tk = talks[idx];
+    if (!ev || !tk || !Array.isArray(tk.choices) || !tk.choices.length) return;
+    const last = ev.nodes[ev.nodes.length - 1];
+    const crit = last.choices?.[0]?.unlockCriterion || null;
+    last.choices = tk.choices.map((c) => ({
+      ...c,
+      nextExpression: c.nextExpression || ((c.stats?.security || 0) > 0 ? 'smile' : 'neutral'),
+      unlockCriterion: crit
+    }));
+  });
+  events.forEach((ev) => {
+    (ev.nodes || []).forEach((node) => {
+      if (node.choices && node.choices.length < 5) {
+        const have = node.choices.length;
+        const crit = node.choices.find((c) => c.unlockCriterion)?.unlockCriterion || null;
+        node.choices = [...node.choices, ...genericExtras.slice(0, 5 - have).map((c) => ({ ...c, unlockCriterion: crit && have ? null : null }))];
+      }
+    });
+  });
+
   return events;
 }
 

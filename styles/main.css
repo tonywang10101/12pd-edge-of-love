@@ -2947,3 +2947,11 @@ button, input, select, textarea {
 }
 
 
+
+/* 小說式推進卡片與未邂逅的門 */
+.novel-advance-card { display:flex; align-items:center; justify-content:space-between; gap:20px; margin:16px 0; padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(244,114,182,0.22), rgba(167,139,250,0.2)); border:1px solid rgba(253,230,138,0.35); }
+.novel-advance-card p { margin:6px 0 0; color:#f5d0fe; font-size:0.92rem; }
+.novel-advance-card .btn-primary-large { flex-shrink:0; width:auto; padding:12px 22px; }
+.locked-door-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:180px; padding:20px; border-radius:16px; border:1px dashed rgba(253,230,138,0.35); background:rgba(26,12,38,0.55); color:#f5d0fe; text-align:center; }
+.locked-door-icon { font-size:2.4rem; opacity:0.8; }
+@media (max-width:720px){ .novel-advance-card { flex-direction:column; align-items:stretch; } }

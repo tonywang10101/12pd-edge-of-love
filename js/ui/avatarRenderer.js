@@ -1,6 +1,6 @@
 // 《愛的邊緣》戀與製作人風格（SSR / SR 拱門金框）角色立繪與情緒特效渲染器
 
-import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=9';
+import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=10';
 
 export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrait') {
   const promptData = CHARACTER_PROMPTS[char.id];
