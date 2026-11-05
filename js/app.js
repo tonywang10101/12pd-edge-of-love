@@ -1,6 +1,7 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、共同天災（強震／颱風）、角色雙層背景與心靈成就控制器
 
 import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=10';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=10';
 import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=10';
 import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=10';
 import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=10';
@@ -79,6 +80,8 @@ class EdgeOfLoveGame {
       },
       roamCycle: 0,
       metCharacters: [],
+      currentStoryChar: null,
+      storyStack: [],
       characters: charState
     };
   }
@@ -121,6 +124,8 @@ class EdgeOfLoveGame {
   migrateState(loadedState) {
     const def = this.getDefaultState();
     if (typeof loadedState.roamCycle !== 'number') loadedState.roamCycle = 0;
+    if (!Array.isArray(loadedState.storyStack)) loadedState.storyStack = [];
+    if (typeof loadedState.currentStoryChar === 'undefined') loadedState.currentStoryChar = null;
     if (!Array.isArray(loadedState.metCharacters)) loadedState.metCharacters = CHARACTERS.map((c) => c.id);
 
     CHARACTERS.forEach((c) => {
@@ -343,32 +348,77 @@ class EdgeOfLoveGame {
     return sc.choiceOrder.order;
   }
 
-  // 小說式推進：隨機邂逅新房客，或讓已認識的房客推進下一段故事
-  advanceNovelStory() {
-    const unmet = CHARACTERS.filter((c) => !this.isMet(c.id));
-    const metIds = CHARACTERS.filter((c) => this.isMet(c.id)).map((c) => c.id);
-    const playable = metIds.filter((id) => {
-      const cs = this.state.characters[id];
-      if ((cs.eventCompleted || 0) >= 14) return false;
-      return !this.checkGateStatus(id, Math.min((cs.eventCompleted || 0) + 1, 15)).blocked;
-    });
-    const introduce = unmet.length > 0 && (playable.length === 0 || Math.random() < 0.4);
-    if (introduce) {
-      const c = unmet[Math.floor(Math.random() * unmet.length)];
-      this.meetCharacter(c.id);
-      this.showToast('🚪 走廊盡頭的門開了——一位新的房客出現在你的生活裡。');
-      this.startEvent(c.id, 1);
+  isStoryFinished(charId) {
+    return (this.state.characters[charId]?.eventCompleted || 0) >= 14;
+  }
+
+  // DFS 故事走訪：一個人的故事走到底；遇到需要他人在場的多人事件，才暫時跳去走對方的故事
+  resolveStoryStep() {
+    const st = this.state;
+    if (!Array.isArray(st.storyStack)) st.storyStack = [];
+    // 1. 若有等待中的條件已滿足，回到被擱置的角色
+    while (st.storyStack.length) {
+      const top = st.storyStack[st.storyStack.length - 1];
+      const ok = this.isStoryFinished(top.waitFor) || (st.characters[top.waitFor].eventCompleted || 0) >= top.need;
+      if (!ok) break;
+      st.storyStack.pop();
+      st.currentStoryChar = top.ret;
+    }
+    // 2. 目前角色已走完 → 回溯；沒有可回溯的就開新的一棵樹
+    if (!st.currentStoryChar || this.isStoryFinished(st.currentStoryChar)) {
+      const unfinishedMet = CHARACTERS.filter((c) => this.isMet(c.id) && !this.isStoryFinished(c.id));
+      if (unfinishedMet.length) {
+        st.currentStoryChar = unfinishedMet[0].id;
+      } else {
+        const unmet = CHARACTERS.filter((c) => !this.isMet(c.id));
+        if (!unmet.length) {
+          st.currentStoryChar = null;
+          return null;
+        }
+        st.currentStoryChar = unmet[Math.floor(Math.random() * unmet.length)].id;
+      }
+    }
+    // 3. 往下展開：多人事件需要夥伴先走到一定進度，否則先去走夥伴
+    for (let guard = 0; guard < 6; guard++) {
+      const cur = st.currentStoryChar;
+      const cs = st.characters[cur];
+      const events = this.getEventsForChar(cur);
+      const ev = events.find((e) => e.eventNumber === Math.min((cs.eventCompleted || 0) + 1, 15));
+      if (ev && ev.type === 'trio' && ev.partnerId) {
+        const need = ev.eventNumber <= 4 ? 3 : 7;
+        const partner = ev.partnerId;
+        if (!this.isStoryFinished(partner) && (st.characters[partner].eventCompleted || 0) < need) {
+          st.storyStack.push({ ret: cur, waitFor: partner, need });
+          st.currentStoryChar = partner;
+          continue;
+        }
+      }
+      break;
+    }
+    return st.currentStoryChar;
+  }
+
+  getStoryStatus() {
+    const cur = this.resolveStoryStep();
+    if (!cur) return null;
+    const char = CHARACTERS.find((c) => c.id === cur);
+    const cs = this.state.characters[cur];
+    const nextEv = this.getNextEventForChar(cur);
+    const gate = this.checkGateStatus(cur, nextEv.eventNumber);
+    const top = this.state.storyStack[this.state.storyStack.length - 1];
+    const retChar = top ? CHARACTERS.find((c) => c.id === top.ret) : null;
+    return { char, cs, nextEv, gate, retChar };
+  }
+
+  continueStory() {
+    const cur = this.resolveStoryStep();
+    if (!cur) {
+      this.showToast('🌙 十二個故事都走到了盡頭。');
+      this.render();
       return;
     }
-    if (playable.length) {
-      const id = playable[Math.floor(Math.random() * playable.length)];
-      this.startEvent(id);
-      return;
-    }
-    this.state.roamCycle = (this.state.roamCycle || 0) + 1;
-    this.autoSave();
-    this.render();
-    this.showToast('🌙 今天公寓很安靜。也許，需要先讓彼此多一點信任。');
+    this.activeLocationId = 'apartment';
+    this.startEvent(cur);
   }
 
   getCharactersAtLocation(locationId) {
@@ -422,6 +472,7 @@ class EdgeOfLoveGame {
     // 小說式開場：隨機一位房客先出現，其餘人之後慢慢認識
     const firstChar = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
     fresh.metCharacters = [firstChar.id];
+    fresh.currentStoryChar = firstChar.id;
 
     this.state = fresh;
     this.activeScene = null;
@@ -979,7 +1030,11 @@ class EdgeOfLoveGame {
           this.render();
           break;
         case 'advance-novel-story':
-          this.advanceNovelStory();
+        case 'continue-story':
+          this.continueStory();
+          break;
+        case 'story-daily':
+          this.startDailyTalk(target.dataset.charId);
           break;
         case 'daily-choice':
           this.handleDailyChoice(Number(target.dataset.choiceIndex));
@@ -1008,10 +1063,20 @@ class EdgeOfLoveGame {
         case 'start-event':
         case 'start-chapter':
           this.closeModals();
-          this.startEvent(
-            target.dataset.charId,
-            target.dataset.eventNum ? Number(target.dataset.eventNum) : null
-          );
+          {
+            const cid = target.dataset.charId;
+            const evNum = target.dataset.eventNum ? Number(target.dataset.eventNum) : null;
+            const doneUpTo = this.state.characters[cid]?.eventCompleted || 0;
+            if (evNum !== null && evNum <= doneUpTo) {
+              this.startEvent(cid, evNum); // 重溫已走過的事件
+            } else if (cid === this.state.currentStoryChar) {
+              this.continueStory();
+            } else {
+              this.showToast('📖 故事依序前進——先走完眼前這個人的故事，再輪到其他人。');
+              this.activeMainTab = 'locations';
+              this.render();
+            }
+          }
           break;
         case 'start-daily':
           this.startDailyTalk(target.dataset.charId);
@@ -1071,6 +1136,18 @@ class EdgeOfLoveGame {
           this.dsmWidgetTab = 'criteria';
           audio.playChime(520, 0.05);
           this.render();
+          break;
+        case 'open-dsm-ref': {
+          const code = target.dataset.code;
+          this.dsmWidgetTab = 'ref';
+          this.dsmWidgetOpen = true;
+          audio.playChime(540, 0.05);
+          this.render();
+          this.scrollToDsmRef(code);
+          break;
+        }
+        case 'jump-dsm-ref':
+          this.scrollToDsmRef(target.dataset.code);
           break;
         case 'switch-dsm-widget-tab':
           this.dsmWidgetTab = target.dataset.tab || 'criteria';
@@ -1231,7 +1308,7 @@ class EdgeOfLoveGame {
             data-action="switch-main-tab"
             data-tab="locations"
           >
-            📍 現在去哪・跟誰講話
+            📖 故事
           </button>
           <button
             class="hub-tab-btn ${this.activeMainTab === 'relationships' ? 'active' : ''}"
@@ -1349,188 +1426,71 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 頁籤 1：現在要去哪跟誰講話（動態跨地點出沒 ＋ 共同天災事件 ＋ 三人同場） ====================
+  // ==================== 頁籤 1：故事（以 DFS 一個人走到底） ====================
   renderLocationExplorer() {
-    const isApartmentOverview = !this.activeLocationId || this.activeLocationId === 'apartment';
-    const activeLoc = LOCATIONS.find((l) => l.id === this.activeLocationId) || null;
-    const charsHere = activeLoc ? this.getCharactersAtLocation(activeLoc.id) : [];
+    const status = this.getStoryStatus();
+    const metCount = (this.state.metCharacters || []).length;
+    const doneCount = CHARACTERS.filter((c) => this.isStoryFinished(c.id)).length;
+
+    if (!status) {
+      return `
+        <section class="location-panel story-panel">
+          <div class="panel-header"><div><h2>📖 故事</h2><p>十二位房客的故事都已走到盡頭。到「人物關係圖」回顧每個人的相處日記與成就吧。</p></div></div>
+        </section>`;
+    }
+    const { char, cs, nextEv, gate, retChar } = status;
+    const progressPct = Math.round(((cs.eventCompleted || 0) / 14) * 100);
+    const trail = this.state.storyStack
+      .map((e) => CHARACTERS.find((c) => c.id === e.ret)?.name)
+      .filter(Boolean);
 
     return `
-      <section class="location-panel">
+      <section class="location-panel story-panel">
         <div class="panel-header">
           <div>
-            <h2>📍 現在要去哪・跟誰講話</h2>
-            <p>角色不會只停留在單一場所，而會隨 15 個劇情事件進度與日常漫步在 6 大地點間移動，並可能觸發「三人同處一室」或「章節阻擋」。</p>
-          </div>
-          <div class="loc-header-actions">
-            <button class="nav-btn btn-gold" data-action="roam-shuffle">
-              🔄 漫步切換街區偶遇位置
-            </button>
-            <button class="nav-btn btn-accent" data-action="open-shared-disaster" data-disaster="quake">
-              🌍 共同事件 I：深夜強震
-            </button>
-            <button class="nav-btn btn-accent" data-action="open-shared-disaster" data-disaster="typhoon">
-              🌊 共同事件 II：強烈颱風
-            </button>
+            <h2>📖 故事</h2>
+            <p>一次只走一個人的故事，走到底。只有遇到需要兩人或多人同場的情節，才會暫時去認識另一位房客。</p>
           </div>
         </div>
 
-        ${this.renderNovelAdvanceCard()}
+        <article class="story-current-card" style="--char-color: ${char.themeColor}">
+          <img class="story-current-avatar" src="./assets/characters/${char.id}.png" alt="${char.name}" />
+          <div class="story-current-body">
+            <span class="story-current-tag">${trail.length ? '🔀 為了一段多人情節，先走這條支線' : '🧭 現在的故事'}</span>
+            <h3>${char.name}</h3>
+            <p>${char.tagline || ''}</p>
+            <div class="story-progress"><div class="story-progress-bar" style="width:${progressPct}%"></div></div>
+            <small>已走過 ${cs.eventCompleted || 0} / 14 段${trail.length ? `｜支線結束後回到「${trail[trail.length - 1]}」的故事` : ''}</small>
+            ${
+              nextEv.type === 'trio'
+                ? `<p class="story-hint">🚪 接下來的情節，有另一個人也在場。</p>`
+                : ''
+            }
+            ${
+              gate.blocked
+                ? `<div class="story-block"><strong>${gate.gateTitle}</strong><p>${gate.reason}</p>
+                    <button class="btn-primary-large" data-action="story-daily" data-char-id="${char.id}">🌸 先多花點時間陪${char.name}</button></div>`
+                : `<button class="btn-primary-large" data-action="continue-story">📖 繼續${char.name}的故事</button>
+                   <button class="nav-btn" data-action="story-daily" data-char-id="${char.id}">🌸 日常相處</button>`
+            }
+          </div>
+        </article>
 
-        <div class="location-tabs">
-          <button
-            class="loc-tab ${isApartmentOverview ? 'active' : ''}"
-            data-action="select-location"
-            data-location-id="apartment"
-          >
-            <span class="loc-icon">🏰</span>
-            <div class="loc-tab-text">
-              <strong>棲遲公寓・外出總覽</strong>
-              <small>預設公寓背景・一覽 6 大去處</small>
-            </div>
-          </button>
-
-          ${LOCATIONS.map((loc) => {
-            const cList = this.getCharactersAtLocation(loc.id);
-            return `
-              <button
-                class="loc-tab ${loc.id === this.activeLocationId ? 'active' : ''}"
-                data-action="select-location"
-                data-location-id="${loc.id}"
-              >
-                <span class="loc-icon">${loc.icon}</span>
-                <div class="loc-tab-text">
-                  <strong>${loc.name}</strong>
-                  <small>目前有 ${cList.length} 位角色在場</small>
-                </div>
-              </button>
-            `;
-          }).join('')}
+        <div class="story-roster">
+          <h4>已認識 ${metCount} / ${CHARACTERS.length} 位・已走完 ${doneCount} 位</h4>
+          <div class="story-roster-chips">
+            ${CHARACTERS.map((c) => {
+              if (!this.isMet(c.id)) return `<span class="story-chip locked">🚪 ？？？</span>`;
+              const ccs = this.state.characters[c.id];
+              const cls = c.id === char.id ? 'current' : this.isStoryFinished(c.id) ? 'done' : '';
+              return `<span class="story-chip ${cls}">${c.name} ${ccs.eventCompleted || 0}/14</span>`;
+            }).join('')}
+          </div>
         </div>
-
-        ${
-          isApartmentOverview
-            ? `
-              <div class="apartment-locations-overview">
-                ${LOCATIONS.map((loc) => {
-                  const locBg = getSceneBackground(loc.id);
-                  const locChars = this.getCharactersAtLocation(loc.id);
-                  return `
-                    <div class="scene-overview-card">
-                      <div
-                        class="scene-overview-banner"
-                        style="background-image: url('${locBg.imagePath}')"
-                        data-action="select-location"
-                        data-location-id="${loc.id}"
-                      >
-                        <div class="scene-overview-Shade"></div>
-                        <span class="scene-enter-pill">✨ 點擊進入此場景</span>
-                        <div class="scene-overview-title">
-                          <h3>${loc.icon} ${loc.name}</h3>
-                          <p>${loc.desc}</p>
-                        </div>
-                      </div>
-
-                      <div class="scene-overview-chars">
-                        <div class="scene-who-label">
-                          💬 目前在這裡可以跟誰講話（${locChars.length >= 2 ? '✨ 多人同場空間' : '單人獨處'}）：
-                        </div>
-                        ${locChars
-                          .map((char) => {
-                            const cs = this.state.characters[char.id];
-                            const nextEv = this.getNextEventForChar(char.id);
-                            const gate = this.checkGateStatus(char.id, nextEv.eventNumber);
-                            return `
-                              <div class="scene-mini-char-row" style="--char-color: ${char.themeColor}">
-                                <img src="./assets/characters/${char.id}.png" alt="${char.name}" class="scene-mini-Face" />
-                                <div class="scene-mini-info">
-                                  <div class="scene-mini-name">
-                                    <strong>#${char.number} ${char.name}</strong>
-                                    <span class="dsm-tag ${gate.blocked ? 'diag-locked' : 'diag-unlocked'}">
-                                      ${gate.blocked ? gate.gateTitle : `進度 E${String(nextEv.eventNumber).padStart(2, '0')}/15`}
-                                    </span>
-                                  </div>
-                                  <small>${nextEv.title}</small>
-                                </div>
-                                <div class="scene-mini-btns">
-                                  <button class="btn-action-primary" data-action="start-event" data-char-id="${char.id}">
-                                    ${gate.blocked ? '🔒 突破阻擋' : `💖 觸發 ${nextEv.code}`}
-                                  </button>
-                                  <button class="btn-action-secondary" data-action="start-daily" data-char-id="${char.id}">
-                                    🌸 閒聊
-                                  </button>
-                                </div>
-                              </div>
-                            `;
-                          })
-                          .join('')}
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            `
-            : `
-              <div class="active-location-stage">
-                <div class="loc-stage-info">
-                  <div>
-                    <h3>${activeLoc.icon} ${activeLoc.name}</h3>
-                    <p>${activeLoc.desc}</p>
-                  </div>
-                  <button class="nav-btn" data-action="select-location" data-location-id="apartment">
-                    🏰 返回棲遲公寓總覽（預設公寓背景）
-                  </button>
-                </div>
-                <div class="loc-char-cards">
-                  ${charsHere
-                    .map((char) => {
-                      const cs = this.state.characters[char.id];
-                      const lore = CHARACTER_EXTENDED_LORE[char.id];
-                      const nextEv = this.getNextEventForChar(char.id);
-                      const gate = this.checkGateStatus(char.id, nextEv.eventNumber);
-                      const achs = getCharacterAchievements(char, cs, this.isDiagnosed(char.id));
-                      return `
-                        <div class="loc-char-spot" style="--char-color: ${char.themeColor}">
-                          <div class="loc-char-avatar">
-                            ${renderCharacterSVG(char, 'neutral', 'mini')}
-                          </div>
-                          <div class="loc-char-detail">
-                            <div class="loc-char-top">
-                              <span class="char-num">#${char.number}</span>
-                              <strong>${char.name}</strong>
-                              <span class="dsm-tag">事件進度：${cs.eventCompleted} / 15</span>
-                            </div>
-                            <p class="char-quote">${char.tagline}</p>
-                            <p class="loc-current-bg-text"><strong>🟢 現在背景：</strong>${lore.currentBackground}</p>
-                            <div class="loc-next-event-box ${gate.blocked ? 'is-gated' : ''}">
-                              <strong>${gate.blocked ? gate.gateTitle : `🎬 下一事件：${nextEv.title}`}</strong>
-                              <small>${gate.blocked ? gate.reason : `類型：${nextEv.type === 'trio' ? '👥 三人同場事件' : nextEv.type.startsWith('shared') ? '🌍 共同天災事件' : '💖 個人劇情事件'}`}</small>
-                            </div>
-                            <div class="loc-char-buttons">
-                              <button class="btn-action-primary" data-action="start-event" data-char-id="${char.id}">
-                                ${gate.blocked ? '🔒 查看阻擋條件' : `💖 進行 ${nextEv.code} 劇情`}
-                              </button>
-                              <button class="btn-action-secondary" data-action="start-daily" data-char-id="${char.id}">
-                                🌸 日常對話 (+安全感)
-                              </button>
-                              <button class="btn-action-secondary" data-action="open-event-tree-modal" data-char-id="${char.id}">
-                                🌳 15 事件決策樹 (${achs.filter((a) => a.unlocked).length}/4 成就)
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      `;
-                    })
-                    .join('')}
-                </div>
-              </div>
-            `
-        }
       </section>
     `;
   }
 
-  // ==================== 頁籤 2：人物關係圖（互動關係星圖 ＋ 12 房客雙層背景 ＋ 角色心靈成就 ＋ 15 事件樹） ====================
   renderRelationshipGraphTab() {
     const achSummary = this.getTotalAchievementsCount();
     const diagnosedCount = CHARACTERS.filter((c) => this.isDiagnosed(c.id)).length;
@@ -2375,6 +2335,53 @@ class EdgeOfLoveGame {
   }
 
   // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格疾患診斷準則手冊 ====================
+  scrollToDsmRef(code) {
+    if (!code) return;
+    setTimeout(() => {
+      const el = document.getElementById(`dsm-ref-${code}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('dsm-ref-highlight');
+        setTimeout(() => el.classList.remove('dsm-ref-highlight'), 1800);
+      }
+    }, 60);
+  }
+
+  renderDsmReferenceTab() {
+    const list = CHARACTERS.map((c) => ({ code: c.dsmCode, title: c.dsmTitle, en: c.dsmTitleEn, cluster: c.cluster }));
+    const seen = new Set();
+    const uniq = list.filter((d) => (seen.has(d.code) ? false : seen.add(d.code)));
+    return `
+      <div class="dsm-ref-index">
+        <div class="dsm-criteria-section-title"><span>📚 點選診斷，直接跳到準則列點</span></div>
+        <div class="dsm-ref-chips">
+          ${uniq
+            .map(
+              (d) => `<button class="dsm-ref-chip" data-action="jump-dsm-ref" data-code="${d.code}"><strong>${d.code}</strong><span>${d.title}</span></button>`
+            )
+            .join('')}
+        </div>
+      </div>
+      ${uniq
+        .map((d) => {
+          const ref = DSM_REFERENCE[d.code];
+          if (!ref) return '';
+          return `
+            <div class="dsm-ref-block" id="dsm-ref-${d.code}">
+              <h4>${d.title} <small>${d.code}</small></h4>
+              <p class="dsm-ref-en">${d.en}</p>
+              <p>${ref.intro}</p>
+              <p class="dsm-ref-lead"><strong>${ref.lead}</strong></p>
+              <ul class="dsm-ref-list">${ref.criteria.map((c) => `<li>${c}</li>`).join('')}</ul>
+              ${ref.note ? `<p class="dsm-ref-note">📝 ${ref.note}</p>` : ''}
+              <button class="dsm-ref-top" data-action="jump-dsm-ref" data-code="${uniq[0].code}">↑ 回到第一項</button>
+            </div>`;
+        })
+        .join('')}
+      <p class="dsm-ref-disclaimer">※ 以上為 DSM-5-TR 準則的中文意譯整理，僅供遊戲內學習參考，不能用於真實診斷。</p>
+    `;
+  }
+
   renderSideDsmCriteriaWidget() {
     const selectedCharId = this.dsmWidgetCharId || this.activeScene?.charId || 'shen_mo';
     const char = CHARACTERS.find((c) => c.id === selectedCharId) || CHARACTERS[0];
@@ -2419,6 +2426,13 @@ class EdgeOfLoveGame {
               📋 12 角色與診斷準則 (${totalUnlockedClues}/${totalClues})
             </button>
             <button
+              class="dsm-tab-btn ${this.dsmWidgetTab === 'ref' ? 'active' : ''}"
+              data-action="switch-dsm-widget-tab"
+              data-tab="ref"
+            >
+              📚 診斷準則列點
+            </button>
+            <button
               class="dsm-tab-btn ${this.dsmWidgetTab === 'general' ? 'active' : ''}"
               data-action="switch-dsm-widget-tab"
               data-tab="general"
@@ -2429,7 +2443,9 @@ class EdgeOfLoveGame {
 
           <div class="dsm-drawer-body">
             ${
-              this.dsmWidgetTab === 'general'
+              this.dsmWidgetTab === 'ref'
+                ? this.renderDsmReferenceTab()
+                : this.dsmWidgetTab === 'general'
                 ? `
                   <div class="dsm-general-guide">
                     <div class="dsm-guide-card">
@@ -2501,7 +2517,7 @@ class EdgeOfLoveGame {
                         <p class="dsm-disorder-name">
                           ${
                             diag.diagnosed
-                              ? `${char.dsmTitle} (${char.dsmTitleEn})`
+                              ? `<span role="button" tabindex="0" class="dsm-ref-link" data-action="open-dsm-ref" data-code="${char.dsmCode}">${char.dsmTitle} (${char.dsmTitleEn}) 🔗 查看準則</span>`
                               : '🔒 真實人格疾患名稱將於集滿下方準則並完成 E12 後揭曉'
                           }
                         </p>
