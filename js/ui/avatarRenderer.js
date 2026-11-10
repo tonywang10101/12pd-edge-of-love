@@ -1,10 +1,15 @@
 // 《愛的邊緣》戀與製作人風格（SSR / SR 拱門金框）角色立繪與情緒特效渲染器
 
-import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=10';
+import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=14';
 
 export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrait') {
   const promptData = CHARACTER_PROMPTS[char.id];
-  const imgSrc = promptData ? promptData.imagePath : `./assets/characters/${char.id}.png`;
+  const isIntenseEmotion =
+    expression === 'triggered' || expression === 'vulnerable' || expression === 'anxious';
+  const baseImg = promptData ? promptData.imagePath : `./assets/characters/${char.id}.png`;
+  const emotionalImg =
+    promptData?.emotionalImagePath || `./assets/characters/${char.id}_emotional.png`;
+  const imgSrc = isIntenseEmotion ? emotionalImg : baseImg;
   const rarity = promptData?.rarity || 'SSR';
   const isMini = mode === 'mini';
 

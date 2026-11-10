@@ -4,8 +4,8 @@
   --bg-romantic-1: #241734;
   --bg-romantic-2: #3b224c;
   --bg-romantic-3: #5c3260;
-  --bg-panel: rgba(43, 25, 62, 0.78);
-  --bg-card: rgba(58, 34, 79, 0.72);
+  --bg-panel: rgba(38, 20, 56, 0.64);
+  --bg-card: rgba(52, 28, 72, 0.68);
   --gold-primary: #f6d365;
   --gold-secondary: #fda085;
   --gold-border: rgba(253, 224, 165, 0.48);
@@ -24,18 +24,24 @@
   padding: 0;
 }
 
-body {
-  font-family: var(--font-sans);
+html {
   background:
     radial-gradient(circle at 15% 15%, rgba(253, 164, 175, 0.28) 0%, transparent 40%),
     radial-gradient(circle at 85% 22%, rgba(253, 224, 71, 0.18) 0%, transparent 38%),
     radial-gradient(circle at 50% 80%, rgba(192, 132, 252, 0.25) 0%, transparent 50%),
     linear-gradient(145deg, #1f132b 0%, #371f47 45%, #4d295a 80%, #2a183b 100%);
   background-attachment: fixed;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: transparent;
   color: var(--text-main);
   min-height: 100vh;
   line-height: 1.68;
   overflow-x: hidden;
+  position: relative;
 }
 
 button, input, select, textarea {
@@ -326,8 +332,8 @@ button, input, select, textarea {
   border: 1px solid var(--gold-border);
   border-radius: 22px;
   padding: 24px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 12px 40px rgba(17, 8, 28, 0.5);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 40px rgba(17, 8, 28, 0.45);
 }
 
 .panel-header h2 {
@@ -1266,13 +1272,133 @@ button, input, select, textarea {
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(236, 72, 153, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-vn-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(236, 72, 153, 0.58);
+}
+
+.vn-continue-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+/* ==================== 命定結局畫面 (Ending Scene) ==================== */
+.ending-card {
+  gap: 20px;
+}
+
+.ending-header {
+  border-left: 4px solid #ec4899;
+  padding-left: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(253, 224, 165, 0.28);
+}
+
+.ending-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  color: #fde68a;
+  margin-bottom: 4px;
+}
+
+.ending-sub {
+  font-size: 0.9rem;
+  color: #f9a8d4;
+}
+
+.ending-body {
+  background: rgba(22, 10, 36, 0.58);
+  border: 1px solid rgba(253, 224, 165, 0.22);
+  border-radius: 16px;
+  padding: 18px 20px;
+  font-size: 1.02rem;
+  line-height: 1.92;
+}
+
+.ending-clinical-box {
+  background: linear-gradient(155deg, rgba(28, 14, 46, 0.88), rgba(18, 22, 44, 0.9));
+  border: 1px solid rgba(253, 224, 165, 0.38);
+  border-left: 4px solid #fbbf24;
+  border-radius: 16px;
+  padding: 18px 20px;
+  font-size: 0.9rem;
+  line-height: 1.72;
+  color: #fff1f2;
+}
+
+.ending-clinical-box strong {
+  color: #fde68a;
+  font-size: 0.96rem;
+}
+
+.ending-switcher {
+  background: rgba(24, 12, 38, 0.76);
+  border: 1px solid rgba(253, 224, 165, 0.3);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ending-switcher > span {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.ending-switch-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-end-tab {
+  background: rgba(46, 24, 68, 0.88);
+  color: #fce7f3;
+  border: 1px solid rgba(253, 224, 165, 0.42);
+  padding: 9px 16px;
+  border-radius: 99px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(12, 5, 22, 0.45);
+}
+
+.btn-end-tab:hover {
+  background: rgba(236, 72, 153, 0.32);
+  border-color: #fde68a;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.35);
+}
+
+.btn-end-tab.active {
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  color: #ffffff;
+  border-color: #fef08a;
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+}
+
+.save-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* ==================== 彈窗：Prompt 工坊、圖鑑與存檔 ==================== */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 180;
   background: rgba(16, 8, 26, 0.82);
   backdrop-filter: blur(10px);
   display: flex;
@@ -1320,13 +1446,25 @@ button, input, select, textarea {
 }
 
 .btn-close {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--gold-border);
   color: var(--text-main);
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
   border-radius: 50%;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background: rgba(244, 114, 182, 0.35);
+  border-color: #fde68a;
+  transform: scale(1.06);
 }
 
 .modal-body {
@@ -1519,23 +1657,41 @@ button, input, select, textarea {
 .page-scene-bg-layer {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
+  pointer-events: none;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;
+  filter: saturate(1.12) contrast(1.05) brightness(1.06);
   transition: background-image 0.55s ease-in-out;
+}
+
+#app-root > :not(.page-scene-bg-layer) {
+  position: relative;
+  z-index: 1;
+}
+
+#app-root > .top-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+#app-root > .dsm-side-widget-container {
+  position: fixed;
+  z-index: 150;
 }
 
 .page-scene-bg-vignette {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 25%, rgba(28, 14, 42, 0.35) 0%, rgba(18, 9, 30, 0.76) 100%),
-    linear-gradient(180deg, rgba(20, 10, 34, 0.45) 0%, rgba(16, 8, 28, 0.82) 100%);
-  backdrop-filter: blur(1.5px);
+    radial-gradient(circle at 50% 25%, rgba(28, 14, 42, 0.05) 0%, rgba(18, 9, 30, 0.28) 100%),
+    linear-gradient(180deg, rgba(20, 10, 34, 0.08) 0%, rgba(16, 8, 28, 0.32) 100%);
+  backdrop-filter: none;
 }
 
-/* ==================== 主頁籤切換列 (現在去哪跟誰講話 vs 人物關係圖) ==================== */
+/* ==================== 主頁籤切換列 (故事推進 vs 人物關係圖) ==================== */
 .hub-main-tabs-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1598,7 +1754,7 @@ button, input, select, textarea {
   border-color: #fda4af !important;
 }
 
-/* ==================== 棲遲公寓・6 大場所與對話對象總覽 ==================== */
+/* ==================== 雙層公寓・6 大場所與對話對象總覽 ==================== */
 .apartment-locations-overview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -2628,11 +2784,10 @@ button, input, select, textarea {
 }
 
 .dsm-drawer-tabs {
-  flex-wrap: wrap;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 10px 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 10px 14px;
   background: rgba(20, 12, 36, 0.72);
   border-bottom: 1px solid rgba(253, 224, 165, 0.22);
 }
@@ -2641,10 +2796,12 @@ button, input, select, textarea {
   background: rgba(30, 18, 52, 0.85);
   border: 1px solid rgba(253, 224, 165, 0.3);
   color: #fce7f3;
-  padding: 7px 10px;
+  padding: 8px 6px;
   border-radius: 10px;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
 }

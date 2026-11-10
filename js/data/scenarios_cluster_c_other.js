@@ -351,7 +351,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 1,
         title: '第一章：連草莓或藍莓都不敢選的女孩',
-        location: '「邊界」甜點屋・烘焙廚房',
+        location: '甜點店・烘焙廚房',
         ambience: '剛出爐的香草戚風蛋糕香氣與打蛋器的清脆聲',
         nodes: [
           {
@@ -418,7 +418,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 2,
         title: '第二章：不敢說出口的「我不喜歡」',
-        location: '棲遲公寓・一樓中庭儲物間',
+        location: '公寓・一樓中庭儲物間',
         ambience: '悶熱的午後，沉重的紙箱堆疊聲',
         nodes: [
           {
@@ -484,7 +484,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 3,
         title: '第三章：故意烤焦的最後一盤蛋糕',
-        location: '「邊界」甜點屋・主廚考核前夕',
+        location: '甜點店・主廚考核前夕',
         ambience: '烤箱計時器的叮咚聲與微焦的焦糖氣息',
         nodes: [
           {
@@ -1036,7 +1036,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 1,
         title: '第一章：金繼陶碗與額角的疤痕',
-        location: '微光藝術工坊・陶藝窯房',
+        location: '手作工坊・陶藝窯房',
         ambience: '拉坏機轉動的嗡鳴聲與窯火的暖意',
         nodes: [
           {
@@ -1169,13 +1169,13 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 3,
         title: '第三章：名為《新生》的金繼雙杯',
-        location: '微光藝廊・社區陶藝特展',
+        location: '藝廊・社區陶藝特展',
         ambience: '溫暖的聚光燈照在裂紋閃耀著金光的對杯上',
         nodes: [
           {
             speaker: 'narrator',
             expression: 'smile',
-            text: '入秋的社區陶藝特展當天，陽光灑滿了微光藝廊。陸晴嵐在展場中央展出了她的代表作《新生》——那是一對曾經在窯燒中裂開、卻被她用純金漆與朱漆修補出璀璨星河紋路的陶杯。'
+            text: '入秋的社區陶藝特展當天，陽光灑滿了藝廊。陸晴嵐在展場中央展出了她的代表作《新生》——那是一對曾經在窯燒中裂開、卻被她用純金漆與朱漆修補出璀璨星河紋路的陶杯。'
           },
           {
             speaker: 'narrator',
@@ -1378,7 +1378,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 1,
         title: '第一章：微笑著淋濕的企劃書',
-        location: '「邊界」手沖咖啡廳吧台',
+        location: '咖啡廳吧台',
         ambience: '輕柔的 Bossa Nova 音樂與手沖壺穩定繞圈的水流聲',
         nodes: [
           {
@@ -1445,7 +1445,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 2,
         title: '第二章：加了鹽巴的特調咖啡',
-        location: '「邊界」咖啡廳・打烊後的吧台',
+        location: '咖啡廳・打烊後的吧台',
         ambience: '磨豆機餘音散去，窗外街燈昏黃',
         nodes: [
           {
@@ -1511,7 +1511,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       {
         id: 3,
         title: '第三章：第一次摔碎杯子的真心話',
-        location: '「邊界」咖啡廳・深夜儲藏室',
+        location: '咖啡廳・深夜儲藏室',
         ambience: '清脆的瓷杯破裂聲後，前所未有的安靜',
         nodes: [
           {
@@ -1688,7 +1688,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       trueEnd: {
         title: '【True End】卸下微笑面具的回甘手沖',
         subtitle: '健康共生・敢於生氣也敢於深愛的真實',
-        romanticText: '游子謙正面回絕了母親的接班要求，把「邊界」咖啡廳經營得有聲有色。現在的他，在你面前再也不會說「隨便、沒關係、都聽你的」——不高興時他會直接皺眉捏你的臉頰抗議，開心時則會眼角彎彎地為你沖一杯真正加了蜂蜜的特調。你們偶爾會拌嘴吵架，但每一次坦率的爭執過後，擁抱都比以前那副假笑更加滾燙真實。',
+        romanticText: '游子謙正面回絕了母親的接班要求，把咖啡廳經營得有聲有色。現在的他，在你面前再也不會說「隨便、沒關係、都聽你的」——不高興時他會直接皺眉捏你的臉頰抗議，開心時則會眼角彎彎地為你沖一杯真正加了蜂蜜的特調。你們偶爾會拌嘴吵架，但每一次坦率的爭執過後，擁抱都比以前那副假笑更加滾燙真實。',
         soulmateText: '你成了游子謙這輩子唯一不必戴上「溫柔店長面具」的靈魂伴侶。在咖啡香氣中，你們學會了最誠實、最不委屈彼此的相處之道。'
       },
       codependentEnd: {
@@ -1706,7 +1706,7 @@ export const SCENARIOS_CLUSTER_C_OTHER = {
       normalEnd: {
         title: '【Normal End】集點卡上的微笑印章',
         subtitle: '平行線結局・最親切的咖啡廳店長',
-        romanticText: '你依然每天早上到「邊界」咖啡廳買一杯美式。游子謙依然是那個對每個人都笑臉迎人的溫柔店長，會在你的集點卡上多蓋一個章，禮貌周到得無懈可擊。',
+        romanticText: '你依然每天早上到咖啡廳買一杯美式。游子謙依然是那個對每個人都笑臉迎人的溫柔店長，會在你的集點卡上多蓋一個章，禮貌周到得無懈可擊。',
         soulmateText: '你們維持著愉快而客氣的店長與熟客關係。'
       }
     }

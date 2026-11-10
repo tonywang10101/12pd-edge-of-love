@@ -426,56 +426,56 @@ export function buildCharacterActionPrompt(charId, emotion = 'neutral', chapterN
   return `${MASTER_STYLE_PROMPT} Character: ${entry.appearanceAnchor}. Scene & Action: ${scenePart}. Emotion: ${emo.prompt}.`;
 }
 
-// 棲遲公寓與 6 大約會場景背景圖設定與生成 Prompt
+// 公寓與 6 大日常場景背景圖設定與生成 Prompt
 export const SCENE_BACKGROUNDS = {
   apartment: {
     id: 'apartment',
-    name: '棲遲公寓（The Liminal House・預設背景）',
+    name: '公寓',
     imagePath: './assets/backgrounds/apartment.jpg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), exterior and courtyard view of 'The Liminal House' (棲遲公寓), an elegant European-modern boutique apartment building at magic hour twilight, warm glowing arched windows, wrought-iron balconies with blooming climbing roses, string lights in the courtyard, soft pink and violet sunset clouds, floating golden bokeh particles, dreamy romantic atmosphere, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), exterior and courtyard view of an apartment building at magic hour twilight, warm glowing arched windows, wrought-iron balconies with blooming climbing roses, string lights in the courtyard, soft pink and violet sunset clouds, floating golden bokeh particles, dreamy romantic atmosphere, no humans, 16:9 wide shot."
   },
   rooftop: {
     id: 'rooftop',
-    name: '棲遲公寓・天台觀星閣',
-    imagePath: './assets/backgrounds/rooftop.svg',
+    name: '公寓天台',
+    imagePath: './assets/backgrounds/rooftop.jpg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), 'Rooftop Stargazing Pavilion' (棲遲公寓・天台觀星閣) at starry twilight, a cozy glass conservatory and open rooftop terrace overlooking a dazzling city skyline at night, a brass astronomical telescope, warm fairy string lights, glowing monitors inside a glass booth, deep indigo and rose-purple sky filled with stars and nebula glow, romantic cinematic lighting, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), apartment rooftop terrace at starry twilight overlooking a dazzling city skyline at night, a brass astronomical telescope, warm fairy string lights, deep indigo and rose-purple sky filled with stars, romantic cinematic lighting, no humans, 16:9 wide shot."
   },
   atelier: {
     id: 'atelier',
-    name: '微光藝術工坊＆古著店',
-    imagePath: './assets/backgrounds/atelier.svg',
+    name: '畫室與手作工坊',
+    imagePath: './assets/backgrounds/atelier.jpg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), 'Glimmer Art Atelier & Vintage Shop' (微光藝術工坊＆古著店), a bohemian romantic studio with arched stained-glass windows, tarot star tapestries, a wooden cello resting by a velvet sofa, oil painting easels, pottery wheel, warm amber chandeliers and floating dust motes in twilight beams, dreamy artistic atmosphere, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), art studio and pottery workshop with arched windows, oil painting easels, pottery wheel, warm amber lighting and floating dust motes in twilight beams, dreamy artistic atmosphere, no humans, 16:9 wide shot."
   },
   cafe: {
     id: 'cafe',
-    name: '「邊界」手沖咖啡＆甜點屋',
-    imagePath: './assets/backgrounds/cafe.svg',
+    name: '咖啡廳',
+    imagePath: './assets/backgrounds/cafe.jpg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), 'Boundary Pour-Over Cafe & Patisserie' (邊界手沖咖啡＆甜點屋), a sunlit glasshouse cafe during golden hour sunset, warm oak counter with brass pour-over coffee kettles, glass cake display filled with strawberry tarts, hanging dried flowers and greenery, soft pink-gold sunbeams and bokeh, romantic cozy atmosphere, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), sunlit neighborhood pour-over cafe and patisserie during golden hour sunset, warm oak counter with brass pour-over coffee kettles, glass cake display filled with strawberry tarts, soft pink-gold sunbeams and bokeh, romantic cozy atmosphere, no humans, 16:9 wide shot."
   },
   archive: {
     id: 'archive',
-    name: '大學古籍修復室＆法醫中心',
+    name: '圖書修復室與研究室',
     imagePath: './assets/backgrounds/archive.jpg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), 'University Rare Book Restoration Room & Research Archive' (大學古籍修復室＆臨床研究中心), a grand two-story classic wood library and restoration studio with tall arched windows letting in warm rose-gold sunset light, antique parchment manuscripts on a wooden worktable, green banker's lamp, grand piano in the corner, floating golden dust motes, quiet romantic atmosphere, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), two-story classic wood library and restoration studio with tall arched windows letting in warm rose-gold sunset light, antique manuscripts on a wooden worktable, green banker's lamp, grand piano in the corner, floating golden dust motes, quiet romantic atmosphere, no humans, 16:9 wide shot."
   },
   lounge: {
     id: 'lounge',
-    name: '「失重」地下酒吧＆小劇場',
+    name: '地下酒吧與小劇場',
     imagePath: './assets/backgrounds/lounge.svg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), 'Zero Gravity Underground Lounge & Cabaret Stage' (失重地下酒吧＆小劇場), a luxurious romantic speakeasy bar and velvet stage, glowing crystal bottles behind a marble bar counter, crimson velvet curtains with warm golden stage spotlights, neon rose-gold accents, bokeh reflections on polished floors, seductive dreamy atmosphere, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), underground bar and small theater stage, glowing crystal bottles behind a bar counter, crimson velvet curtains with warm golden stage spotlights, seductive dreamy atmosphere, no humans, 16:9 wide shot."
   },
   studio: {
     id: 'studio',
-    name: '雲端建築事務所＆落地窗露台',
+    name: '建築事務所',
     imagePath: './assets/backgrounds/studio.svg',
     prompt:
-      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), 'Cloud Architecture Studio & Penthouse Terrace' (雲端建築事務所＆落地窗露台), a breathtaking high-rise penthouse architectural studio with floor-to-ceiling arched glass windows overlooking a glittering city skyline at twilight, illuminated white architectural scale models, champagne-gold pendant lights, twilight purple and rose sky, luxurious romantic atmosphere, no humans, 16:9 wide shot."
+      "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), high-rise architectural studio with floor-to-ceiling glass windows overlooking a glittering city skyline at twilight, illuminated white architectural scale models, champagne-gold pendant lights, luxurious romantic atmosphere, no humans, 16:9 wide shot."
   }
 };
 
