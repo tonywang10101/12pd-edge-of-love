@@ -1,4 +1,4 @@
-// 《愛的邊緣》戀與製作人風格（SSR / SR 拱門金框）角色立繪與情緒特效渲染器
+// 《愛的邊緣》角色立繪與情緒特效渲染器
 
 import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=14';
 
@@ -27,7 +27,7 @@ export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrai
 
   return `
     <div class="otome-portrait-card ${exprClass}">
-      <!-- 戀與製作人風格外層拱門金框與珠光暈染 -->
+      <!-- 拱門金框與珠光暈染 -->
       <div class="otome-arch-frame">
         <img src="${imgSrc}" alt="${char.name}" class="otome-char-img-full" />
         <div class="otome-lighting-layer"></div>

@@ -437,14 +437,14 @@ export const SCENE_BACKGROUNDS = {
   },
   rooftop: {
     id: 'rooftop',
-    name: '公寓天台',
+    name: '公寓交誼廳',
     imagePath: './assets/backgrounds/rooftop.jpg',
     prompt:
       "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), apartment rooftop terrace at starry twilight overlooking a dazzling city skyline at night, a brass astronomical telescope, warm fairy string lights, deep indigo and rose-purple sky filled with stars, romantic cinematic lighting, no humans, 16:9 wide shot."
   },
   atelier: {
     id: 'atelier',
-    name: '畫室與手作工坊',
+    name: '畫室',
     imagePath: './assets/backgrounds/atelier.jpg',
     prompt:
       "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), art studio and pottery workshop with arched windows, oil painting easels, pottery wheel, warm amber lighting and floating dust motes in twilight beams, dreamy artistic atmosphere, no humans, 16:9 wide shot."
@@ -458,14 +458,14 @@ export const SCENE_BACKGROUNDS = {
   },
   archive: {
     id: 'archive',
-    name: '圖書修復室與研究室',
+    name: '圖書修復研究室',
     imagePath: './assets/backgrounds/archive.jpg',
     prompt:
       "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), two-story classic wood library and restoration studio with tall arched windows letting in warm rose-gold sunset light, antique manuscripts on a wooden worktable, green banker's lamp, grand piano in the corner, floating golden dust motes, quiet romantic atmosphere, no humans, 16:9 wide shot."
   },
   lounge: {
     id: 'lounge',
-    name: '地下酒吧與小劇場',
+    name: '地下酒吧',
     imagePath: './assets/backgrounds/lounge.svg',
     prompt:
       "Masterpiece anime visual novel background art in the style of Love and Producer (戀與製作人), underground bar and small theater stage, glowing crystal bottles behind a bar counter, crimson velvet curtains with warm golden stage spotlights, seductive dreamy atmosphere, no humans, 16:9 wide shot."

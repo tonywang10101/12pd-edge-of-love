@@ -43,7 +43,7 @@ export const CHARACTER_EXTENDED_LORE = {
       { code: 'E05', phase: 2, loc: 'lounge', type: 'base_chap', chapIdx: 1, title: '地下酒吧的線人與五分鐘空白', critIdx: 3 },
       {
         code: 'E06', phase: 2, loc: 'rooftop', type: 'custom', title: '無心的讚美：風衣領口的暗號？', critIdx: 2,
-        prompt: '傍晚在公寓天台偶遇沈墨，你隨口誇獎他今天穿的深灰風衣很襯他的氣質。',
+        prompt: '傍晚在公寓交誼廳偶遇沈墨，你隨口誇獎他今天穿的深灰風衣很襯他的氣質。',
         charLine: '他瞬間按住領口往後退了一步，眼神銳利：「你怎麼知道我今天剛換了這件外套？是誰讓你來試探我的行程？」',
         choices: [
           { text: '「只是單純覺得這個顏色很適合你而已。如果談論穿搭讓你覺得被窺探，我以後只聊我們當下的事。」', reply: '他沉默數秒，耳根微紅地別過臉：「……是我反應過度了。你說好看，我會記住。」', stats: { affection: 10, security: 12, boundary: 8 }, psychNote: '穩定而不慌亂的回應，能幫他從「過度解讀威脅」中回到現實。' },
@@ -177,7 +177,7 @@ export const CHARACTER_EXTENDED_LORE = {
     trioPartner1: 'ruri',
     trioPartner2: 'ji_yan',
     currentBackground:
-      '29 歲，畫室與手作工坊的陶藝家（專修金繼 Kintsugi 工藝），曾是前途無量的腦神經外科主治醫師。她性格直率熱情、想到什麼就立刻去做，常開一些不合時宜卻毫無惡意的直白玩笑，情緒來得快去得也快，右側額角髮際線下有一道淡淡的手術疤痕，用一片金箔髮夾遮住。',
+      '29 歲，畫室的陶藝家（專修金繼 Kintsugi 工藝），曾是前途無量的腦神經外科主治醫師。她性格直率熱情、想到什麼就立刻去做，常開一些不合時宜卻毫無惡意的直白玩笑，情緒來得快去得也快，右側額角髮際線下有一道淡淡的手術疤痕，用一片金箔髮夾遮住。',
     growthBackstory: {
       title: '《手術檯上的天才醫師與車禍額葉受損後的「陌生人」》',
       story:
@@ -209,7 +209,7 @@ export const TRIO_SCENES_DATA = {
       {
         speaker: 'narrator',
         expression: 'anxious',
-        text: '深夜走上公寓天台，你赫然發現氣氛緊繃——沈墨手裡握著高頻訊號偵測器，正冷冷指著林見微剛架設好的大型折反射式天文望遠鏡。'
+        text: '深夜走上公寓交誼廳，你赫然發現氣氛緊繃——沈墨手裡握著高頻訊號偵測器，正冷冷指著林見微剛架設好的大型折反射式天文望遠鏡。'
       },
       {
         speaker: 'char',
@@ -305,7 +305,7 @@ export const TRIO_SCENES_DATA = {
       {
         speaker: 'narrator',
         expression: 'triggered',
-        text: '你在畫室與手作工坊陪蘇緋排練大提琴，白小鹿捧著剛烤好的草莓塔推門進來想給你們驚喜。沒想到蘇緋看到小鹿袖口沾著與你同款的香草葉，眼神瞬間從溫柔轉為刺骨的冰寒。'
+        text: '你在畫室陪蘇緋排練大提琴，白小鹿捧著剛烤好的草莓塔推門進來想給你們驚喜。沒想到蘇緋看到小鹿袖口沾著與你同款的香草葉，眼神瞬間從溫柔轉為刺骨的冰寒。'
       },
       {
         speaker: 'char',
@@ -449,7 +449,7 @@ export const TRIO_SCENES_DATA = {
       {
         speaker: 'narrator',
         expression: 'smile',
-        text: '在畫室與手作工坊裡，陸晴嵐正哼著歌用純金粉末修補一只摔成五瓣的青瓷碗，星野琉璃則捧著水晶球湊在旁邊目不轉睛地盯著裂痕看。'
+        text: '在畫室裡，陸晴嵐正哼著歌用純金粉末修補一只摔成五瓣的青瓷碗，星野琉璃則捧著水晶球湊在旁邊目不轉睛地盯著裂痕看。'
       },
       {
         speaker: 'char',
@@ -1119,7 +1119,7 @@ export const CHARACTER_BESPOKE_STORY_NODES = {
     },
     e14: {
       title: 'E14｜最終約會：不設密碼的雙人黎明',
-      prompt: '黎明時分的公寓天台，晨曦染紅了天際。沈墨親手拆掉了頂樓門口的第二道警報器，將一把溫熱的純銅實體鑰匙放進你掌心。',
+      prompt: '黎明時分的公寓交誼廳，晨曦染紅了天際。沈墨親手拆掉了頂樓門口的第二道警報器，將一把溫熱的純銅實體鑰匙放進你掌心。',
       charLine: '「我可能這輩子還是會習慣進餐廳先看逃生口、還是會比別人多心一點……但在你身邊，我願意練習把背交給你。{player}，你願意當我唯一的白帽共犯嗎？」',
       choices: [
         { text: '收下純銅鑰匙並與他十指緊扣：「我們不搞突然的驚喜，一輩子都坦率透明地向彼此預告愛意。」', reply: '沈墨眼底浮現前所未有的純粹笑意，在晨光中低頭輕吻你的指節：「一言為定，我的共犯。」', psychNote: '【終章共鳴】在尊重彼此性格特質與健康邊界的基礎上，締結真正的伴侶盟約。', stats: { affection: 15, security: 15, boundary: 12 } },
@@ -1177,7 +1177,7 @@ export const CHARACTER_BESPOKE_STORY_NODES = {
     },
     e14: {
       title: 'E14｜最終約會：刻在金錶背蓋上的永恆座標',
-      prompt: '在雙子座流星雨降臨的夜晚，你們並肩坐在公寓天台的躺椅上。林見微拿出一只她耗時三個月親手修復的鎏金古董懷錶，翻開背蓋遞給你。',
+      prompt: '在雙子座流星雨降臨的夜晚，你們並肩坐在公寓交誼廳的躺椅上。林見微拿出一只她耗時三個月親手修復的鎏金古董懷錶，翻開背蓋遞給你。',
       charLine: '「背蓋內側我用微雕刀刻了我們第一次在天台相遇時的赤經與赤緯座標。{player}，宇宙一直在膨脹，但只要你敲兩下桌面，我的引力就永遠為你停留。」',
       choices: [
         { text: '在桌面上輕輕敲了兩下「叩、叩」，微笑著握住她的手：「收到訊號了。未來的每場流星雨，我們都一起在同一個座標觀測。」', reply: '流星劃過夜空的瞬間，林見微主動傾身，在你唇角落下一個輕如星光的吻。', psychNote: '【終章共鳴】以專屬於兩人的秘密通訊協定，達成健康而詩意的共生結局。', stats: { affection: 15, security: 15, boundary: 12 } },
@@ -1641,7 +1641,7 @@ export const CHARACTER_BESPOKE_STORY_NODES = {
     },
     e14: {
       title: 'E14｜最終約會：刻意留白一整頁的雙人週末日程表',
-      prompt: '週六早晨的陽光灑在公寓天台，紀嚴穿著沒有打領帶的休閒白襯衫，袖口自然捲起。他將他的真皮萬年曆筆記本遞給你——向來以 15 分鐘為單位寫滿的週末頁面，今天竟然整整兩頁全是一片空白，只在正中央寫著你的名字。',
+      prompt: '週六早晨的陽光灑在公寓交誼廳，紀嚴穿著沒有打領帶的休閒白襯衫，袖口自然捲起。他將他的真皮萬年曆筆記本遞給你——向來以 15 分鐘為單位寫滿的週末頁面，今天竟然整整兩頁全是一片空白，只在正中央寫著你的名字。',
       charLine: '「我還是習慣把書按高度排好，還是喜歡準時起床。但從今天起，我每週都會在日程表上為{player}留出完全空白的兩天——不設鬧鐘、不列清單，走到哪裡算哪裡。你願意成為我生命裡最美好的『計畫外變數』嗎？」',
       choices: [
         { text: '合上他的筆記本，笑著牽起他的手：「那我們現在就出發，去過一個沒有時刻表、卻每一秒都屬於我們的週末！」', reply: '紀嚴鏡片後的雙眼漾起溫潤而寵溺的笑意，在晨光中低頭溫柔地吻住你：「遵命，我的最高優先級。」', psychNote: '【終章共鳴】保留強迫型可靠的秩序特質，同時在愛裡學會擁抱留白與未知的浪漫。', stats: { affection: 15, security: 15, boundary: 12 } },
@@ -1666,7 +1666,7 @@ export const CHARACTER_BESPOKE_STORY_NODES = {
     },
     e10: {
       title: 'E10｜雙人秘密：額角金箔髮夾下的手術疤痕（邊界分水嶺）',
-      prompt: '夜晚的畫室與手作工坊裡，只點著一盞溫暖的工作檯燈。陸晴嵐洗完臉走出來，罕見地摘下了平時用來遮掩右額角的那枚金箔髮夾——髮際線下露出一道長達七公分、蜿蜒深刻的開顱手術疤痕。她沒有開玩笑，只是安靜而脆弱地站在你面前。',
+      prompt: '夜晚的畫室裡，只點著一盞溫暖的工作檯燈。陸晴嵐洗完臉走出來，罕見地摘下了平時用來遮掩右額角的那枚金箔髮夾——髮際線下露出一道長達七公分、蜿蜒深刻的開顱手術疤痕。她沒有開玩笑，只是安靜而脆弱地站在你面前。',
       charLine: '「三年前車禍醒來第一次照鏡子時，我認不出裡面那個剃光頭髮、講話會突然爆哭或爆笑的女人是誰。以前的陸醫師優雅、冷靜、從不失態；現在的我卻連眼淚都剎不住車……{player}，看著這道疤，你真的不會覺得我是個壞掉的瑕疵品嗎？」',
       choices: [
         { text: '伸手極其溫柔地撫過她右額角的手術疤痕，就像撫摸瓷器上最美的金繼紋路：「晴嵐，這道疤不是瑕疵，是妳從死神手裡勇敢活下來的勳章。以前的陸醫師很優秀，但現在這個真實鮮活的陸晴嵐，才是我深愛的人。」', reply: '陸晴嵐閉上眼睛感受你指尖的溫度，滾燙的淚水順著臉頰滑落，卻露出了這三年來最平靜、最幸福的笑容：「……原來我自己的裂痕，也終於被你塗上金箔了。」', psychNote: '【分水嶺：通往 True End】將「金繼（Kintsugi）接納裂痕」的哲學延伸到她的腦傷疤痕與新性格上，完成最深層的自我整合與接納！', stats: { affection: 15, security: 18, boundary: 15 } },
@@ -1699,7 +1699,7 @@ export const CHARACTER_BESPOKE_STORY_NODES = {
     },
     e14: {
       title: 'E14｜最終約會：用純金連結彼此裂痕的對杯',
-      prompt: '夕陽西下的公寓天台，陸晴嵐笑盈盈地捧出兩只剛出窯的青瓷對杯——她特意將兩只杯子邊緣的一道自然窯裂紋對齊，用璀璨的 24K 純金描繪成一顆相連的心形。',
+      prompt: '夕陽西下的公寓交誼廳，陸晴嵐笑盈盈地捧出兩只剛出窯的青瓷對杯——她特意將兩只杯子邊緣的一道自然窯裂紋對齊，用璀璨的 24K 純金描繪成一顆相連的心形。',
       charLine: '「我這個人呢，以後可能還是會講話太直、還是會三秒鐘前掉眼淚三秒鐘後哈哈大笑！但我的心就像這道金繼線一樣，一旦跟你黏在一起，就比原本的瓷器還要堅固十倍！{player}，你要不要收下我這個吵吵鬧鬧的伴侶呀？」',
       choices: [
         { text: '舉起其中一只金繼杯與她的杯子輕輕相碰：「我最喜歡妳真實直率的樣子。未來的每一天，我們都一起大笑、一起把生活的裂痕補成黃金！」', reply: '清脆的碰杯聲中，陸晴嵐開心地撲進你懷裡，在夕陽下給了你一個熱情如火的吻！', psychNote: '【終章共鳴】擁抱生命的不完美與鮮活真性情，達成充滿生命力的金繼之愛。', stats: { affection: 15, security: 15, boundary: 12 } },
@@ -1810,7 +1810,7 @@ export const EXTRA_DAILY_TALKS = {
     },
     {
       title: '頂樓的流浪黑貓與罐頭',
-      prompt: '傍晚在公寓天台樓梯口，你看見林見微正蹲在地上，把一罐打開的無鹽鮪魚貓罐頭放在距離自己剛好一公尺遠的地面上，一隻流浪黑貓正安靜地低頭進食。',
+      prompt: '傍晚在公寓交誼廳樓梯口，你看見林見微正蹲在地上，把一罐打開的無鹽鮪魚貓罐頭放在距離自己剛好一公尺遠的地面上，一隻流浪黑貓正安靜地低頭進食。',
       response: '「牠每天傍晚六點十五分會經過這裡。我們有默契——我不摸牠，牠也不蹭我，吃完就各自離開。這是最理想的生物社交模式。」',
       choices: [
         { text: '也安靜地蹲在你與她距離一公尺的位置，陪她和黑貓一起看夕陽，不驚動牠們。', reply: '黑貓吃完罐頭甩甩尾巴走了，見微轉頭看了你一眼，唇角微不可察地彎了 1 毫米：「……你也懂得貓的禮貌。」', psychNote: '以同樣尊重距離的方式融入她的日常，讓她感到無比自在。', stats: { affection: 8, security: 9, boundary: 7 } },
@@ -1928,7 +1928,7 @@ export const EXTRA_DAILY_TALKS = {
   lu_qinglan: [
     {
       title: '拉坏機上的泥巴小意外',
-      prompt: '走進畫室與手作工坊時，陸晴嵐正踩著電動拉坏機做花瓶，結果因為轉速不小心調太快，一團濕軟的陶土「啪」地飛濺出來，正好糊在她自己的臉頰和圍裙上。',
+      prompt: '走進畫室時，陸晴嵐正踩著電動拉坏機做花瓶，結果因為轉速不小心調太快，一團濕軟的陶土「啪」地飛濺出來，正好糊在她自己的臉頰和圍裙上。',
       response: '她愣了兩秒鐘，隨即看著鏡子裡的自己拍著大腿哈哈大笑：「哈哈哈哈！{player}你快看！我本來想拉一個優雅的玉壺春瓶，結果現在我自己變成兵馬俑啦！哎喲笑死我了，不過這團土甩出去的弧度還挺有現代藝術感的對吧！」',
       choices: [
         { text: '被她爽朗的笑聲感染，拿濕毛巾笑著幫她擦掉臉頰上的泥巴：「兵馬俑大師辛苦啦！我們把轉速調慢一點，我陪妳一起把這個花瓶救回來。」', reply: '陸晴嵐任由你幫她擦臉，笑彎了的眼睛裡閃著溫柔的光：「還是{player}最好了，都不會嫌我粗魯笨手笨腳！來，我們一起拉坏！」', psychNote: '自然接納她的失誤與豁達幽默，不以過去完美醫師的標準苛責她，讓她感到無比放鬆。', stats: { affection: 8, security: 9, boundary: 6 } },
@@ -2084,7 +2084,7 @@ export function getCharacter15Events(charId, scenarioData) {
       nodes: trio1.nodes
     },
 
-    // ==================== PHASE II：試探與防衛初現 (E05 ~ E08) [Gate 1 後解鎖] ====================
+    // ==================== PHASE II：試探與防衛初現 (E05 ~ E08) ====================
     {
       eventNumber: 5,
       code: 'E05',
@@ -2092,7 +2092,6 @@ export function getCharacter15Events(charId, scenarioData) {
       phaseName: 'Phase II：試探與防衛初現',
       locationId: locs[0],
       type: 'story',
-      gate: { minSecurity: 25, desc: '需完成 Phase I (E01~E04) 且依戀安全感達 25 以上' },
       title: `E05｜深入試探：${chap2.title.replace(/^第.章：/, '')}`,
       ambience: chap2.ambience,
       criterionId: critList[1]?.id || critList[0]?.id,
@@ -2145,7 +2144,7 @@ export function getCharacter15Events(charId, scenarioData) {
       ]
     },
 
-    // ==================== PHASE III：風暴、修羅場與核心創傷 (E09 ~ E12) [Gate 2 後解鎖] ====================
+    // ==================== PHASE III：風暴、修羅場與核心創傷 (E09 ~ E12) ====================
     {
       eventNumber: 9,
       code: 'E09',
@@ -2154,7 +2153,6 @@ export function getCharacter15Events(charId, scenarioData) {
       locationId: trio2.locationId,
       type: 'trio',
       partnerId: lore.trioPartner2,
-      gate: { minAffection: 38, minSecurity: 32, desc: '需完成突發天災事件 (E08)，且親密度 ≥ 38、安全感 ≥ 32' },
       title: `E09｜${trio2.title}`,
       ambience: trio2.ambience,
       criterionId: critList[critList.length - 1]?.id,
@@ -2220,7 +2218,7 @@ export function getCharacter15Events(charId, scenarioData) {
       nodes: chap3.nodes
     },
 
-    // ==================== PHASE IV：養成故事揭曉與命定結局 (E13 ~ E15) [Gate 3 後解鎖] ====================
+    // ==================== PHASE IV：養成故事揭曉與命定結局 (E13 ~ E15) ====================
     {
       eventNumber: 13,
       code: 'E13',
@@ -2229,7 +2227,6 @@ export function getCharacter15Events(charId, scenarioData) {
       locationId: locs[0],
       type: 'backstory',
       unlockBackstoryOnComplete: true,
-      gate: { requireDiagnosed: true, desc: '需先完成 E12 並達成【🥇 靈魂真名（DSM-5-TR 診斷揭曉）】' },
       title: `${bespoke.e13.title}（👑 解鎖成長養成故事）`,
       ambience: '溫暖靜謐的暮光與舊日記憶的迴響',
       nodes: [

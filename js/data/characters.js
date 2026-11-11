@@ -3,14 +3,14 @@
 export const LOCATIONS = [
   {
     id: 'rooftop',
-    name: '公寓天台',
+    name: '公寓交誼廳',
     desc: '能俯瞰整座城市霓虹與夜空的角落，適合需要距離感與獨處的靈魂。',
     icon: '🌙',
     characters: ['shen_mo', 'lin_jianwei']
   },
   {
     id: 'atelier',
-    name: '畫室與手作工坊',
+    name: '畫室',
     desc: '空氣中飄著松節油、線香與陶土氣息，色彩與情緒在此劇烈碰撞。',
     icon: '🎨',
     characters: ['ruri', 'su_fei', 'lu_qinglan']
@@ -24,14 +24,14 @@ export const LOCATIONS = [
   },
   {
     id: 'archive',
-    name: '圖書修復室與研究室',
+    name: '圖書修復研究室',
     desc: '時間在這裡被精確切割成秒針與編號，安靜得能聽見紙頁翻動與心跳。',
     icon: '📚',
     characters: ['wen_yan', 'ji_yan']
   },
   {
     id: 'lounge',
-    name: '地下酒吧與小劇場',
+    name: '地下酒吧',
     desc: '夜晚才甦醒的聚光燈與搖晃酒杯，慾望、表演與危險的博弈場。',
     icon: '🍸',
     characters: ['han_xiao', 'xia_le']
