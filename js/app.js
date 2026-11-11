@@ -29,6 +29,35 @@ const ALL_SCENARIOS = {
 const STORAGE_KEY_AUTOSAVE = 'edge_of_love_browser_save_v4';
 const STORAGE_KEY_SESSION = 'edge_of_love_session_save_v4';
 
+function getDeviceType() {
+  const ua = navigator.userAgent || '';
+  if (/tablet|ipad|playbook|silk/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    return 'tablet';
+  }
+  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/i.test(ua)) {
+    return 'mobile';
+  }
+  return window.innerWidth <= 768 ? 'mobile' : 'desktop';
+}
+
+function trackGA(eventName, params = {}) {
+  try {
+    const payload = {
+      device_type: getDeviceType(),
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      ...params
+    };
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', eventName, payload);
+    }
+    if (Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({ event: eventName, ...payload });
+    }
+  } catch (_) {
+    // ignore tracking errors
+  }
+}
+
 class EdgeOfLoveGame {
   constructor() {
     this.state = this.getDefaultState();
@@ -42,6 +71,7 @@ class EdgeOfLoveGame {
     this.dsmWidgetCharId = null;
     this.dsmWidgetTab = 'criteria'; // 'criteria' (12角色與準則核對) | 'general' (DSM-5-TR 通則與四大類群)
     this.mobileNavOpen = false;
+    this.sessionStartTime = Date.now();
   }
 
   getEventsForChar(charId) {
@@ -117,10 +147,36 @@ class EdgeOfLoveGame {
       if (this.state.initialized) {
         this.autoSave();
       }
+      this.trackRetention('unload');
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        this.trackRetention('hidden');
+      }
+    });
+
+    trackGA('game_visit', {
+      has_save: Boolean(this.state.initialized)
     });
 
     this.bindGlobalEvents();
     this.render();
+  }
+
+  trackRetention(reason = 'check') {
+    const durationSec = Math.round((Date.now() - this.sessionStartTime) / 1000);
+    if (durationSec < 2) return;
+    const playedChars = CHARACTERS.filter((c) => (this.state.characters[c.id]?.eventCompleted || 0) > 0).map(
+      (c) => c.name
+    );
+    trackGA('game_retention', {
+      duration_seconds: durationSec,
+      duration_minutes: Number((durationSec / 60).toFixed(1)),
+      played_characters: playedChars.join(',') || 'none',
+      played_characters_count: playedChars.length,
+      reason
+    });
   }
 
   sanitizeActiveScene(scene) {
@@ -490,6 +546,11 @@ class EdgeOfLoveGame {
     this.activeLocationId = 'apartment';
     this.autoSave();
     audio.playSelect();
+    trackGA('game_start', {
+      player_sex: fresh.player.sex,
+      first_character_id: firstChar.id,
+      first_character_name: firstChar.name
+    });
     this.render();
     this.startEvent(firstChar.id, 1);
   }
@@ -568,6 +629,13 @@ class EdgeOfLoveGame {
     if (evObj.partnerId) this.meetCharacter(evObj.partnerId);
 
     audio.playSelect();
+    trackGA('story_play', {
+      character_id: char.id,
+      character_name: char.name,
+      event_number: evObj.eventNumber,
+      event_code: evObj.code,
+      event_title: evObj.title
+    });
     this.activeScene = {
       mode: 'event',
       charId,
@@ -650,6 +718,13 @@ class EdgeOfLoveGame {
     this.activeLocationId = evObj.locationId || char.locationId;
     this.dsmWidgetCharId = charId;
     audio.playSelect();
+    trackGA('story_play', {
+      character_id: char.id,
+      character_name: char.name,
+      event_number: evObj.eventNumber,
+      event_code: evObj.code,
+      event_title: evObj.title
+    });
 
     this.activeScene = {
       mode: 'event',
@@ -683,6 +758,11 @@ class EdgeOfLoveGame {
 
     this.dsmWidgetCharId = charId;
     audio.playSelect();
+    trackGA('story_daily', {
+      character_id: char.id,
+      character_name: char.name,
+      talk_title: talk.title
+    });
 
     this.activeScene = {
       mode: 'daily',
@@ -762,6 +842,12 @@ class EdgeOfLoveGame {
 
     const isGood = endingKey === 'trueEnd' || endingKey === 'normalEnd';
     audio.playEndingChord(isGood);
+    trackGA('story_ending', {
+      character_id: char.id,
+      character_name: char.name,
+      ending_key: endingKey,
+      ending_title: scenario.endings[endingKey]?.title || endingKey
+    });
 
     this.activeScene = {
       mode: 'ending',
@@ -878,6 +964,13 @@ class EdgeOfLoveGame {
 
     // 推進街區動態漫步週期，讓角色移動到不同地點
     this.state.roamCycle = (this.state.roamCycle || 0) + 1;
+
+    trackGA('story_event_complete', {
+      character_id: char.id,
+      character_name: char.name,
+      event_number: eventNumber,
+      event_code: eventData.code
+    });
 
     if (eventNumber === 14) {
       this.showEndingForCharacter(charId);
