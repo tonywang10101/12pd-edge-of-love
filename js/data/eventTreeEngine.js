@@ -18,39 +18,45 @@ export const CHARACTER_EXTENDED_LORE = {
     eventBlueprint: [
       { code: 'E01', phase: 1, loc: 'rooftop', type: 'base_chap', chapIdx: 0, title: '頂樓的雙重門鎖與試探', critIdx: 0 },
       {
-        code: 'E02', phase: 1, loc: 'cafe', type: 'custom', title: '轉角監聽：密封瓶裝水的戒心', critIdx: 0,
+        code: 'E02', phase: 1, loc: 'cafe', type: 'custom', title: '轉角監聽：密封瓶裝水的戒心', critIdx: 1,
+        criterionTags: ['F60.0-A2'],
         prompt: '在咖啡廳角落，沈墨戴著單邊監聽耳機，面前放著一瓶未拆封的礦泉水，堅決不碰店員端來的手沖咖啡。',
-        charLine: '「開放式吧台的飲品有 17 種下藥途徑。你坐過來之前，有注意到門口那輛黑色轎車停了多久嗎？」',
+        charLine: '「開放式吧台的飲品有 17 種下藥途徑。你剛才跟蘇緋講了什麼？為什麼她的說法跟你在玄關跟我講的時間差了三分鐘？你坐過來之前，有注意到門口那輛黑色轎車停了多久嗎？」',
         choices: [
-          { text: '「我剛才有留意車牌，是附近花店的送貨車，送貨單還夾在雨刷上喔。」', reply: '他緊繃的肩膀微不可察地放鬆了一毫米：「……你觀察力比我想像中好。」', stats: { affection: 8, security: 10, boundary: 6 }, psychNote: '提供可查證的客觀事實，能有效降低高警覺者的防衛。' },
+          { text: '「我剛才有留意車牌，是附近花店的送貨車，三分鐘差距是我去二樓放傘的時間，時間線可以核對。」', reply: '他緊繃的肩膀微不可察地放鬆了一毫米：「……你連時間誤差都能提出客觀佐證。」', stats: { affection: 8, security: 10, boundary: 6 }, psychNote: '提供可查證的客觀事實，能有效降低高警覺者對「友誼或忠誠不可靠」的猜疑（F60.0-A2）。' },
           { text: '自己也點一瓶未拆封的氣泡水陪他喝，不勉強他喝吧台的咖啡。', reply: '他看了一眼你手中的密封瓶蓋，眼神柔和了幾分：「這樣最安全。」', stats: { affection: 7, security: 9, boundary: 6 }, psychNote: '尊重他的安全儀式而不加以嘲笑，能建立初步默契。' },
-          { text: '把自己的手沖咖啡推過去：「我幫你先喝一口試毒，這樣你總能放心喝了吧！」', reply: '他皺起眉頭把杯子推回來：「別拿你自己的身體開玩笑，這不好笑。」', stats: { affection: 3, security: 2, boundary: -6 }, psychNote: '過度戲劇化的犧牲反而讓他感到負擔與不安。' },
-          { text: '「你想太多了吧！子謙怎麼可能下藥啦！」', reply: '他冷冷拉下帽簷：「毫無防備的人，通常連自己怎麼被賣掉的都不知道。」', stats: { affection: -5, security: -10, boundary: 0 }, psychNote: '直接否定他的懷疑只會讓他把你也歸類為「盲目或同夥」。' }
-        ]
+          { text: '把自己的手沖咖啡推過去：「我幫你先喝一口試毒，這樣你總能放心喝了吧！」', reply: '他皺起眉頭把杯子推回來：「別拿你自己的身體演這套戲。過度熱心試探，反而更像有人叫你來套話。」', defenseMechanism: '懷疑性防衛投射（Suspicious Motive Attribution）', stats: { affection: 3, security: 2, boundary: -6 }, psychNote: '【病理展演】過度戲劇化的犧牲對妄想型而言反而像「操弄性試探」，誘發他對他人動機的二次懷疑。' },
+          { text: '「你想太多了吧！子謙怎麼可能下藥，我只是晚幾分鐘下來而已，你連這都要查！」', reply: '他冷冷拉下帽簷：「毫無防備又急著替別人開脫的人，通常不是盲目就是同夥。」', defenseMechanism: '投射性反擊與敵意歸因（Projective Counter-Hostility）', stats: { affection: -5, security: -10, boundary: 0 }, psychNote: '【病理展演】直接否定他的懷疑會立刻觸發妄想型的二分歸因，將你劃入「盲目或敵方同夥」。' }
+        ],
+        studySummary: '【DSM-5-TR 考點】準則 A2 展現個案「無根據地懷疑同事或朋友的忠誠與可信度」，連三分鐘動線差異都需反覆交叉比對。'
       },
       {
-        code: 'E03', phase: 1, loc: 'archive', type: 'custom', title: '加密硬碟：背後的盯視', critIdx: 1,
-        prompt: '在圖書修復室，沈墨委託修復一頁燒焦的紙本帳冊，卻全程站在桌後死死盯著每一個動作。',
-        charLine: '「別誤會，我不是針對你。只是這份名單關係到三條人命，我連自己的影子都不信。」',
+        code: 'E03', phase: 1, loc: 'archive', type: 'custom', title: '加密硬碟：背後的盯視與資訊隱瞞', critIdx: 2,
+        criterionTags: ['F60.0-A3'],
+        prompt: '在圖書修復室，沈墨委託修復一頁燒焦的紙本帳冊，卻把關鍵頁角用黑卡紙遮住，全程站在桌後死死盯著每一個動作。',
+        charLine: '「這不關你的事。少知道一點底細，對我們兩個都比較安全——我連自己的影子都不敢交出完整資訊。」',
         choices: [
-          { text: '「理解，那我把雙手都放在檯燈照射範圍內，每做一步都先跟你說明工序。」', reply: '他愣了一下，眼神閃過一絲動容：「……謝謝你沒有覺得我在羞辱你。」', stats: { affection: 10, security: 12, boundary: 8 }, psychNote: '尊重他的控制感需求並保持高透明度，建立了珍貴的初步信任。' },
+          { text: '「理解，那我把雙手都放在檯燈照射範圍內，遮住的部分我不看也不問，每做一步都先跟你說明工序。」', reply: '他愣了一下，眼神閃過一絲動容：「……謝謝你尊重資訊隔離，沒有逼我吐露細節。」', stats: { affection: 10, security: 12, boundary: 8 }, psychNote: '尊重其對自我揭露的恐懼與控制需求（F60.0-A3），保持高透明度才能建立初步信任。' },
           { text: '搬一張椅子放在旁邊特定視角：「站著盯兩個小時太累了，這個角度你可以看清我的手，也能坐著休息。」', reply: '他猶豫了兩秒，依言坐下：「……謝了，這個視角確實沒有死角。」', stats: { affection: 9, security: 10, boundary: 7 }, psychNote: '貼心照顧其生理疲勞同時保留其安全感控制權。' },
-          { text: '「既然你這麼不放心，那我把手機跟背包都押在你那裡當人質總行了吧！」', reply: '他看著你的背包，眉頭微蹙：「我不需要人質，我只需要確保證物安全。」', stats: { affection: 2, security: 2, boundary: -8 }, psychNote: '過度讓渡個人物品邊界並非建立健康信任的方式。' },
-          { text: '「你這樣盯著我看，我壓力很大耶，幫你忙還要被當成小偷！」', reply: '他立刻伸手抽回帳冊放進防彈公事包：「抱歉，是我不該麻煩外人。」', stats: { affection: -6, security: -8, boundary: 4 }, psychNote: '情緒化的抱怨會觸發他「果然不能依靠任何人」的信念。' }
-        ]
+          { text: '「既然你這麼不放心，那我把手機跟背包都押在你那裡當人質總行了吧！」', reply: '他看著你的背包，眉頭微蹙：「我不需要人質——而且你這麼急著交出隱私，是不是想藉此反過來套我的帳冊？」', defenseMechanism: '防衛性不信任擴散（Defensive Distrust Generalization）', stats: { affection: 2, security: 2, boundary: -8 }, psychNote: '【病理展演】過度讓渡邊界對妄想型毫無安撫作用，反而激發他「對等交換陰謀」的警覺。' },
+          { text: '「你這樣什麼都不肯講還盯著我看，幫忙還要被當成竊密間諜嗎！」', reply: '他立刻伸手抽回帳冊放進防彈公事包：「抱歉，從頭到尾不該讓任何人經手。」', defenseMechanism: '撤回保密孤島（Withdraw into Secrecy）', stats: { affection: -6, security: -8, boundary: 4 }, psychNote: '【病理展演】逼問或抱怨他不肯信任，會直接印證 F60.0-A3「資訊遲早被惡意利用」的核心恐懼。' }
+        ],
+        studySummary: '【DSM-5-TR 考點】準則 A3「不願向他人傾訴或公開任何個人與關鍵資訊」，源於深信資訊終將被拿來攻擊自己。'
       },
-      { code: 'E04', phase: 1, loc: 'rooftop', type: 'trio', partnerId: 'lin_jianwei', title: '三人交會：天台望遠鏡的監視疑雲', critIdx: 2 },
-      { code: 'E05', phase: 2, loc: 'lounge', type: 'base_chap', chapIdx: 1, title: '地下酒吧的線人與五分鐘空白', critIdx: 3 },
+      { code: 'E04', phase: 1, loc: 'rooftop', type: 'trio', partnerId: 'lin_jianwei', title: '三人交會：天台望遠鏡的監視疑雲', critIdx: 0 },
+      { code: 'E05', phase: 2, loc: 'lounge', type: 'base_chap', chapIdx: 1, title: '地下酒吧的線人與五分鐘空白', critIdx: 1 },
       {
-        code: 'E06', phase: 2, loc: 'rooftop', type: 'custom', title: '無心的讚美：風衣領口的暗號？', critIdx: 2,
-        prompt: '傍晚在公寓交誼廳偶遇沈墨，你隨口誇獎他今天穿的深灰風衣很襯他的氣質。',
-        charLine: '他瞬間按住領口往後退了一步，眼神銳利：「你怎麼知道我今天剛換了這件外套？是誰讓你來試探我的行程？」',
+        code: 'E06', phase: 2, loc: 'rooftop', type: 'custom', title: '無心的讚美：風衣領口的暗號？', critIdx: 3,
+        criterionTags: ['F60.0-A4'],
+        prompt: '傍晚在公寓交誼廳偶遇沈墨，你隨口誇獎他今天穿的深灰風衣很襯他的氣質，並提到剛在樓下信箱放了一把備用鑰匙。',
+        charLine: '他瞬間按住領口往後退了一步，眼神銳利：「你把備用鑰匙留給我，是為了等我出錯時有理由搜查我的房間嗎？連稱讚外套都是試探動線的暗號！」',
         choices: [
-          { text: '「只是單純覺得這個顏色很適合你而已。如果談論穿搭讓你覺得被窺探，我以後只聊我們當下的事。」', reply: '他沉默數秒，耳根微紅地別過臉：「……是我反應過度了。你說好看，我會記住。」', stats: { affection: 10, security: 12, boundary: 8 }, psychNote: '穩定而不慌亂的回應，能幫他從「過度解讀威脅」中回到現實。' },
-          { text: '溫和地指了指自己手上的洗衣籃：「因為我剛剛上來曬衣服，剛好看到你走上樓梯呀。」', reply: '他看了一眼洗衣籃，緊繃的肩膀鬆了下來：「……原來如此，動線吻合。」', stats: { affection: 9, security: 10, boundary: 7 }, psychNote: '給出清晰透明的來龍去脈，能迅速解除他的關係意念警報。' },
-          { text: '「對不起對不起！我以後見到你都低著頭不敢看你穿什麼了！」', reply: '他看著惶恐道歉的你，眼神有些複雜與不自在。', stats: { affection: 2, security: 0, boundary: -8 }, psychNote: '過度卑微的道歉反而讓互動變得更加緊繃。' },
-          { text: '「誇你帥也不行？你真的有被害妄想症耶！」', reply: '他眼神瞬間結冰：「既然覺得我有病，那就離我遠一點。」', stats: { affection: -12, security: -15, boundary: -5 }, psychNote: '貼標籤式的指責是高猜疑特質者的最大雷區。' }
-        ]
+          { text: '「只是單純覺得這個顏色很適合你，鑰匙也是房東請我交給各住戶的。如果讓你覺得被試探，鑰匙我先放回管理室。」', reply: '他沉默數秒，耳根微紅地別過臉：「……是我反應過度了，把無害的舉動解讀成陷阱。」', stats: { affection: 10, security: 12, boundary: 8 }, psychNote: '穩定而不慌亂地拆解關係過度解讀（F60.0-A4），能幫他從受迫害預設回到現實。' },
+          { text: '溫和地指了指自己手上的洗衣籃：「因為我剛剛上來曬衣服，剛好看到你走上樓梯，鑰匙袋上也有房東簽條喔。」', reply: '他看了一眼洗衣籃與簽條，緊繃的肩膀鬆了下來：「……原來如此，物證與動線吻合。」', stats: { affection: 9, security: 10, boundary: 7 }, psychNote: '給出清晰透明的來龍去脈，能迅速解除他的脅迫解讀警報。' },
+          { text: '「對不起對不起！我以後見到你都低著頭不講話、不給任何東西了！」', reply: '他眼神更緊繃：「突然一反常態過度低姿態道歉……你在掩飾什麼實情？」', defenseMechanism: '關係意念過度解讀（Benign-to-Threat Misinterpretation）', stats: { affection: 2, security: 0, boundary: -8 }, psychNote: '【病理展演】過度惶恐反而會被妄想型解讀為「心虛掩飾隱情」，進一步激活準則 A4。' },
+          { text: '「誇你帥、給鑰匙也不行？你真的有被害妄想症耶！」', reply: '他眼神瞬間結冰並冷笑：「用精神病理標籤封我的口？果然被我抓到你的企圖了。」', defenseMechanism: '反控標籤與防禦反擊（Counter-Labeling Defense）', stats: { affection: -12, security: -15, boundary: -5 }, psychNote: '【病理展演】對高猜疑人格貼診斷標籤，會立刻成為對方眼中「企圖使其喪失公信力」的證據。' }
+        ],
+        studySummary: '【DSM-5-TR 考點】準則 A4「從良性言詞或事件中解讀出隱藏的貶抑或威脅意味」；也是區分思覺失調症（固定怪異妄想）與妄想型人格（高估動機但不脫離現實邏輯）的關鍵。'
       }
     ]
   },
@@ -58,7 +64,7 @@ export const CHARACTER_EXTENDED_LORE = {
   lin_jianwei: {
     scheduleLocations: ['rooftop', 'archive', 'cafe', 'atelier'],
     trioPartner1: 'shen_mo',
-    trioPartner2: 'su_fei',
+    trioPartner2: 'wen_yan',
     currentBackground:
       '25 歲，市立天文館夜間觀測員兼古董機械鐘錶修復師。說話永遠簡短平直，臉上幾乎沒有表情起伏。不參加任何公寓聚餐，對戀愛八卦、時尚或別人的誇獎與批評都毫無反應，唯一能讓她眼神停留超過三秒的只有星圖與精密齒輪。',
     growthBackstory: {
@@ -136,7 +142,7 @@ export const CHARACTER_EXTENDED_LORE = {
   wen_yan: {
     scheduleLocations: ['archive', 'cafe', 'atelier', 'rooftop'],
     trioPartner1: 'gu_qingcheng',
-    trioPartner2: 'xia_le',
+    trioPartner2: 'lin_jianwei',
     currentBackground:
       '25 歲，圖書修復師兼獨立文學譯者。總是穿著寬鬆的米色針織衫、戴著細框眼鏡，說話聲音輕柔且常以「對不起、會不會太麻煩你」開頭。文筆極其細膩溫柔，卻因為深信自己「笨拙、無聊、不討喜」，連去咖啡廳點餐都要在門口深呼吸三次。',
     growthBackstory: {
@@ -205,6 +211,12 @@ export const TRIO_SCENES_DATA = {
     locationId: 'rooftop',
     title: '【三人同場】天台望遠鏡的監視疑雲（沈墨 ＆ 林見微）',
     ambience: '星夜微風、赤道儀馬達低鳴與電磁偵測器的嗶嗶聲',
+    criterionTags: ['F60.0-A1', 'F60.0-A4', 'F60.1-A1'],
+    differentialContrast: {
+      summary: '同處深夜天台「被觀察/共處」刺激下的病理動機對比：妄想型把中性行為過度解讀為敵意監控，孤僻型則單純沉浸於非人際客觀事物並無社交敵意。',
+      partnerA: { name: '沈墨', disorder: '妄想型 PPD', motive: '過度警戒他人意圖，將 14 度仰角解讀為定點光學監控。', mechanism: '猜疑與威脅歸因（Hypervigilant Attribution）' },
+      partnerB: { name: '林見微', disorder: '孤僻型 SzPD', motive: '對人際衝突毫無興趣，只關注木星觀測座標與不願被打擾。', mechanism: '情感冷漠與低社交動機（Affective Detachment）' }
+    },
     nodes: [
       {
         speaker: 'narrator',
@@ -233,26 +245,93 @@ export const TRIO_SCENES_DATA = {
           {
             text: '順著沈墨的話懷疑林見微：「對啊見微，妳每天半夜不睡覺在頂樓架機器，難怪沈墨會懷疑妳！」',
             nextExpression: 'triggered',
+            defenseMechanism: '連坐猜疑與冷淡退場（Suspicious Triangulation vs. Schizoid Exit）',
             reply: '林見微面無表情地收起腳架：「跟沒有天文常識的人解釋很浪費時間，我回房了。」沈墨反而狐疑地看了你一眼：「你這麼急著附和我，是在掩飾什麼？」',
-            psychNote: '【三人互動解析】盲目附和猜疑不僅逼退了孤僻型，也會讓妄想型懷疑你的討好動機。',
+            psychNote: '【病理展演】妄想型連附和者都會懷疑動機；孤僻型不解釋也不憤怒，直接中止無效社交。',
             stats: { affection: -6, security: -9, boundary: -5 }
           },
           {
             text: '當場嘲笑沈墨：「人家見微是天文館觀測員耶，誰有空監視你啊，你真的太神經質了！」',
             nextExpression: 'triggered',
-            reply: '沈墨臉色瞬間冷如寒冰，轉身走下樓梯並鎖死鐵門：「既然覺得我神經質，以後天台有事別找我。」',
-            psychNote: '【三人互動解析】當著第三人的面羞辱妄想型的警覺，會立刻觸發其敵意與封鎖。',
+            defenseMechanism: '敵意反擊與邊界封鎖（Paranoid Freezing & Lockout）',
+            reply: '沈墨臉色瞬間冷如寒冰，轉身走下樓梯並鎖死鐵門：「既然覺得我神經質，以後天台有事別找我——你跟她的立場倒挺一致。」',
+            psychNote: '【病理展演】羞辱妄想型的警覺會觸發防衛性敵意，將調解者歸為對立面。',
             stats: { affection: -8, security: -12, boundary: -4 }
           }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】同為 Cluster A 的社交疏離：妄想型「因恐懼惡意而退縮且高度警覺」；孤僻型「因缺乏連結獎賞感而自然抽離、對他人在想什麼漠然無感」。'
+  },
+
+  'lin_jianwei__wen_yan': {
+    locationId: 'rooftop',
+    title: '【三人同場】公寓頂樓慶功邀請：無慾疏離 vs 恐懼退縮（林見微 ＆ 溫言）',
+    ambience: '樓下交誼廳傳來的溫暖笑聲、咖啡香與微涼的夜風',
+    criterionTags: ['F60.1-A1', 'F60.1-A6', 'F60.1-SPEC1', 'F60.6-A1', 'F60.6-A4', 'F60.6-SPEC1'],
+    specifierTags: ['F60.1-SPEC1', 'F60.6-SPEC1'],
+    differentialContrast: {
+      summary: 'DSM-5-TR 最經典臨床考點：同在面對「熱鬧人群與社交邀請」都不參與，但林見微是「沒有需求也不在乎評價」，溫言是「深切渴望連結卻因羞恥與怕被拒絕而逃避」。',
+      partnerA: { name: '林見微', disorder: '孤僻型 SzPD', motive: '內心並無寂寞感，認為聚會只是低資訊密度的熱量消耗，獨自算星圖更自在。', mechanism: '社交無快感與評價無感（Social Anhedonia & Indifference）' },
+      partnerB: { name: '溫言', disorder: '畏避型 AvPD', motive: '其實很想下樓跟大家喝茶，卻因害怕講錯話被嘲笑而縮在樓梯轉角反覆自責。', mechanism: '羞恥預支與拒絕敏感退縮（Rejection-Fearful Avoidance）' }
+    },
+    nodes: [
+      {
+        speaker: 'narrator',
+        expression: 'anxious',
+        text: '樓下公寓交誼廳正舉辦慶祝住戶獲獎的小茶會，你上頂樓喊林見微與溫言一起下去。兩個人都站在露台陰影裡沒有進屋，可眼神裡的溫度卻截然不同。'
+      },
+      {
+        speaker: 'char',
+        expression: 'anxious',
+        text: '林見微（看了一眼星圖，語調毫無波瀾）：「樓下有十一位住戶，交談頻率重疊率高，我沒有參與社交的動機。我看得懂他在害怕被討厭；我只是單純覺得，安靜地各自存在比較省力。」\n溫言（雙手緊緊抓著剛烤好的小餅乾盒，指節泛白地往門後退）：「不、不是我不想去……我其實也很想跟大家坐在一起，但剛才在樓梯口聽到大家在笑，我好怕自己一進去冷場、害氣氛變尷尬，最後被所有人討厭……我還是在這裡待著就好。」',
+        choices: [
+          {
+            text: '尊重見微留在頂樓看星，同時拿一個溫熱的瓷盤陪溫言先到玄關外安靜處坐著，再慢慢進茶會只跟兩個熟人打招呼。',
+            nextExpression: 'smile',
+            reply: '林見微點頭致意後戴回耳機：「謝謝你節省我的無效溝通成本。」溫言則鬆了一大口氣，緊握著餅乾盒對你小聲道謝：「只有跟熟人先打招呼的話……我好像做得到了！」',
+            psychNote: '【臨床鑑別實作】對孤僻型採取「低侵入性尊重其獨處」；對畏避型則給予「漸進式暴露安全網（Graded Exposure）」。',
+            stats: { affection: 13, security: 14, boundary: 12 }
+          },
+          {
+            text: '幫兩人各自找合適的位置：請見微在十點後空無一人時下來領她的外帶烏龍茶，自己陪溫言從送餅乾的小任務開始加入大家。',
+            nextExpression: 'smile',
+            reply: '見微平靜表示接受；溫言捧著餅乾盒鼓起勇氣走下兩階樓梯：「幫、幫大家端餅乾的話，我就知道要說什麼話了……」',
+            psychNote: '【臨床鑑別實作】為畏避型設定「具體可預測的小角色」，能大幅降低其評價焦慮（F60.6-A1/A4）。',
+            stats: { affection: 11, security: 13, boundary: 11 }
+          },
+          {
+            text: '拉住林見微的手硬拖她下樓：「妳就是太冷血才沒朋友！別裝酷了，跟我下去跟十幾個人敬酒聊天！」',
+            nextExpression: 'triggered',
+            defenseMechanism: '過載關機與抽離（Sensory-Social Shutdown）',
+            reply: '林見微直接抽回手關上頂樓氣窗：「我的需求並不包含熱鬧。你的強迫干預只會讓我把對你的互動評級降為零。」溫言在一旁也被嚇得往後退了三步。',
+            psychNote: '【病理展演】把孤僻型誤當成畏避型去「鼓勵合群」，會引發其徹底疏離；且強勢衝突也會同時嚇壞旁邊的畏避型。',
+            stats: { affection: -9, security: -12, boundary: -10 }
+          },
+          {
+            text: '對溫言擺擺手：「既然你們兩個都不愛出門、性格都這麼孤僻，那以後聚會我也不約你們了，省得尷尬！」',
+            nextExpression: 'triggered',
+            defenseMechanism: '預言成真與羞恥逃避（Self-Fulfilling Shame Retreat）',
+            reply: '林見微面無表情地說「理解」便繼續寫筆記；溫言卻瞬間眼眶通紅、僵在原地：「……對、對不起，你果然覺得我很掃興，以後不用再找我了……」',
+            psychNote: '【病理展演】同一句拒絕——孤僻型毫髮無傷（F60.1-A6），畏避型卻體驗到如墜冰窟的拒絕痛楚（F60.6-A4）！',
+            stats: { affection: -10, security: -15, boundary: -6 }
+          }
+        ]
+      }
+    ],
+    studySummary: '【鑑別核心考題】Schizoid（F60.1）vs Avoidant（F60.6）：兩者表面都「社交退縮」，但見微屬於『無慾望、低痛苦、對評價無感（ego-syntonic）』；溫言屬於『有渴望、高焦慮、極度敏感於否定（ego-dystonic）』，臨床處遇方向完全相反。'
   },
 
   'ji_yan__you_ziqian': {
     locationId: 'cafe',
     title: '【三人同場】1.5 度歪斜的海報修羅場（紀嚴 ＆ 游子謙）',
     ambience: '義式咖啡機蒸氣聲、紀嚴的鋼尺敲擊聲與游子謙溫和的微笑',
+    criterionTags: ['F60.5-A1', 'F60.5-A8', 'F60.89-GB', 'F60.89-GC'],
+    differentialContrast: {
+      summary: '剛性控制與被動抗拒的權力角力：強迫型將字距失誤視為秩序崩壞威脅；被動攻擊型不敢正面拒絕高壓控制，遂以「手滑拖延與假笑自貶」完成無聲反抗。',
+      partnerA: { name: '紀嚴', disorder: '強迫型 OCPD', motive: '執著於規則細節與精準標準，深信失去秩序就會引發災難。', mechanism: '情感隔離與規則控制（Isolation of Affect & Controllingness）' },
+      partnerB: { name: '游子謙', disorder: '被動攻擊型 Passive-Aggressive', motive: '厭惡被當工具命令卻懼怕正面衝突，以「忘記／手滑」發洩憤怒並誘發對方罪惡感。', mechanism: '順從假面下的消極阻撓（Malicious Compliance & Procrastination）' }
+    },
     nodes: [
       {
         speaker: 'narrator',
@@ -281,26 +360,35 @@ export const TRIO_SCENES_DATA = {
           {
             text: '站在紀嚴那邊嚴厲批評游子謙：「子謙你別再找藉口拖延了，趕快照紀嚴的清單一模一樣改好！」',
             nextExpression: 'triggered',
+            defenseMechanism: '被動攻擊「意外當機」阻撓（Passive-Aggressive Sabotage）',
             reply: '游子謙笑得更燦爛了：「好喔～都聽你們的！」結果五分鐘後他的筆電「剛好」沒電自動關機，檔案還沒存檔。',
-            psychNote: '【三人互動解析】高壓命令會直接誘發被動攻擊型更強烈的「意外損壞與拖延」防衛。',
+            psychNote: '【病理展演】高壓命令直接觸發被動攻擊型的經典防衛——表面微笑順從（F60.89-GA），實際透過「意外遺失未存檔」完成報復。',
             stats: { affection: -6, security: -8, boundary: -5 }
           },
           {
             text: '站在游子謙那邊嘲笑紀嚴：「不過是一張社區海報，拿游標卡尺量字距也太吹毛求疵了吧！」',
             nextExpression: 'triggered',
+            defenseMechanism: '道德優越退場與僵化凍結（Rigid Withdrawal & Moral Rectitude）',
             reply: '紀嚴冷冷收起鋼尺與清單：「既然你們不在乎品質，這場活動的審查我不必參與了。」',
-            psychNote: '【三人互動解析】公開否定強迫型的標準會讓他感到強烈的失控焦慮與受辱。',
+            psychNote: '【病理展演】公開否定強迫型的標準（F60.5-A1/A8）會誘發強烈失控焦慮，使之以冷酷道德切割保護自己。',
             stats: { affection: -7, security: -10, boundary: -4 }
           }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】當極高控制的 OCPD（F60.5-A8）遇上高隱性反抗的被動攻擊型（F60.89-GB），會形成典型的「控制升級 ↔ 失誤拖延」惡性循環。'
   },
 
   'su_fei__bai_xiaolu': {
     locationId: 'atelier',
     title: '【三人同場】打翻的草莓塔與嫉妒風暴（蘇緋 ＆ 白小鹿）',
     ambience: '大提琴低音餘韻、瓷盤碎裂聲與急促的呼吸',
+    criterionTags: ['F60.3-A1', 'F60.3-A2', 'F60.7-A2', 'F60.7-A5'],
+    differentialContrast: {
+      summary: '兩者皆具高度「被拋棄恐懼」下的分化比較：邊緣型（BPD）在威脅下出現狂暴嫉妒與極端黑白分化；依賴型（DPD）則瞬間退回過度自責與討好順從以求不被丟下。',
+      partnerA: { name: '蘇緋', disorder: '邊緣型 BPD', motive: '將同伴視為競爭者並預見自己即將被取代，以推開與指控來防禦被拋棄恐慌。', mechanism: '分裂防衛與拋棄狂怒（Splitting & Abandonment Panic）' },
+      partnerB: { name: '白小鹿', disorder: '依賴型 DPD', motive: '不敢表達不滿或設定界線，立即把所有責任攬在自己身上以換取保護。', mechanism: '過度順從與自貶求和（Pathological Appeasement）' }
+    },
     nodes: [
       {
         speaker: 'narrator',
@@ -329,26 +417,35 @@ export const TRIO_SCENES_DATA = {
           {
             text: '為了哄蘇緋開心，轉頭對白小鹿兇道：「都是妳突然跑來害蘇緋心情不好，快點把地上擦乾淨出去！」',
             nextExpression: 'triggered',
+            defenseMechanism: '討好型自殘順從 × 邊緣型關係不信任擴散（Self-Harming Compliance vs. Splitting）',
             reply: '白小鹿哭著徒手撿碎瓷片，手指被割出血也不敢吭聲；蘇緋看著這一幕，眼神反而更加空洞不安：「……你連這麼聽話的她都能說趕走就趕走，哪天也會這樣對我吧。」',
-            psychNote: '【三人互動解析】透過踐踏依賴者來討好邊緣者，只會讓雙方都感受到關係的殘酷與不安全。',
+            psychNote: '【病理展演】依賴型為避免被棄（F60.7-A5）甚至甘願受傷忍受不合理對待；而邊緣型目睹冷酷對待他人反而觸發自身「遲早也被拋棄」的恐懼（F60.3-A1）。',
             stats: { affection: -8, security: -14, boundary: -10 }
           },
           {
             text: '只顧著心疼白小鹿，當場大罵蘇緋是不可理喻的瘋子並拉著小鹿離開。',
             nextExpression: 'triggered',
+            defenseMechanism: '拋棄感誘發破壞性爆發（Abandonment Rage Act-Out）',
             reply: '蘇緋獨自站在滿地碎瓷與草莓醬中，絕望地拉斷了大提琴弦；小鹿也一路哭著自責是自己害你們吵架。',
-            psychNote: '【三人互動解析】直接引爆邊緣型的被拋棄創傷，同時加重依賴型的罪惡感。',
+            psychNote: '【病理展演】當場被比較並被丟下，會直接點燃邊緣型的破壞性衝動與被棄危機（F60.3-A1/A8）。',
             stats: { affection: -10, security: -15, boundary: -6 }
           }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】BPD（F60.3）與 DPD（F60.7）皆害怕分離，但面臨被棄威脅時：BPD 呈現「激烈憤怒、指控、自傷/破壞或急速推拉」；DPD 呈現「卑微自貶、迎合要求與害怕觸怒照顧者」。'
   },
 
   'han_xiao__xia_le': {
     locationId: 'lounge',
     title: '【三人同場】聚光燈與危險賭局（韓梟 ＆ 夏樂）',
     ambience: '地下酒吧爵士樂、鎂光燈快門與冰塊撞擊威士忌杯的脆響',
+    criterionTags: ['F60.2-A5', 'F60.2-A2', 'F60.4-A1', 'F60.4-A4'],
+    differentialContrast: {
+      summary: '同為 Cluster B 高度戲劇化與高喚起需求：做作型搶焦點是為了「確認自己仍被喜愛、避免被遺忘」；反社會型撩撥規則與挑釁則是為了「追求刺激感與測試權力籌碼」。',
+      partnerA: { name: '夏樂', disorder: '做作型 HPD', motive: '失去全場目光即陷入空虛失溫，急於拉攏旁人確認自己仍是鎂光燈中心。', mechanism: '尋求關注與情感誇張化（Attention-Seeking Dramatization）' },
+      partnerB: { name: '韓梟', disorder: '反社會型 ASPD', motive: '無聊厭煩平靜，蓄意製造衝突與高風險遊戲來測試別人的反應與把柄。', mechanism: '工具性挑釁與冒險操弄（Instrumental Provocation）' }
+    },
     nodes: [
       {
         speaker: 'narrator',
@@ -377,26 +474,35 @@ export const TRIO_SCENES_DATA = {
           {
             text: '被韓梟帶著一起起鬨嘲笑夏樂：「對啊夏樂，你的舞台劇哪有火焰調酒好看，別在那邊刷存在感了！」',
             nextExpression: 'triggered',
+            defenseMechanism: '做作型羞恥崩潰 × 反社會型輕蔑支配（Attention Collapse vs. Predator Contempt）',
             reply: '夏樂臉上的笑容瞬間碎裂，捂著臉跑進後台化妝間；韓梟看著附和他的你，眼底卻掠過一絲看穿獵物般的輕蔑。',
-            psychNote: '【三人互動解析】隨波逐流羞辱他人，既傷了做作型的心，也讓反社會型看輕你的原則。',
+            psychNote: '【病理展演】隨波逐流羞辱人，會擊潰做作型的表演自尊（F60.4-A1），同時證實反社會型對「人人皆可被誘導作惡」的冷血價值觀。',
             stats: { affection: -8, security: -10, boundary: -10 }
           },
           {
             text: '為了討好夏樂，直接伸手把韓梟吧台上的酒杯掃落在地大罵他搶風頭。',
             nextExpression: 'triggered',
-            reply: '酒吧瞬間安靜，韓梟擦掉手背上的酒漬，眼神冷得令人發寒；夏樂也被這突如其來的暴力場面嚇得臉色發白。',
-            psychNote: '【三人互動解析】情緒失控的破壞行為只會讓場面徹底失衡。',
+            defenseMechanism: '冷血敵對反制與驚嚇退縮（Cold Intimidation vs. Theatrical Panic）',
+            reply: '酒吧瞬間安靜，韓梟擦掉手背上的酒漬，眼神冷得令人發寒：「你想試試看這間吧台的規矩？」夏樂也被這股真實暴戾氣息嚇得臉色發白。',
+            psychNote: '【病理展演】做作型渴望的是戲劇張力而非真實暴力；與反社會型正面硬碰硬的失控行為只會喚醒他無同理的叢林反擊。',
             stats: { affection: -9, security: -12, boundary: -8 }
           }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】HPD 與 ASPD 皆愛追求興奮與戲劇性場面：HPD 的動機是『依附與被看重（害怕成為空氣）』；ASPD 則是『刺激搜尋、測試操控力與漠視他人安全/規則』。'
   },
 
   'gu_qingcheng__wen_yan': {
     locationId: 'studio',
     title: '【三人同場】建築事務所裡的古建築圖紙（顧傾城 ＆ 溫言）',
     ambience: '頂樓落地窗外的風聲、咖啡杯輕放聲與翻動宣紙的沙沙聲',
+    criterionTags: ['F60.81-A3', 'F60.81-A9', 'F60.6-A4', 'F60.6-A2'],
+    differentialContrast: {
+      summary: '極端自尊防禦的兩種鏡像表現：自戀型（NPD）用居高臨下與挑剔貶低來維持優越安全感；畏避型（AvPD）將任何評價都內化為「我不夠好、快逃離現場」的自卑退縮。',
+      partnerA: { name: '顧傾城', disorder: '自戀型 NPD', motive: '透過權威姿態與菁英標準掌控對話高地，無法容忍不自信或平庸氣場。', mechanism: '貶低與高傲鏡像防衛（Devaluation & Superiority Armor）' },
+      partnerB: { name: '溫言', disorder: '畏避型 AvPD', motive: '將對方的銳利評價全盤接收為對整個人格的否定，寧可先退縮免於當場受辱。', mechanism: '羞恥內化與先發逃離（Shame Internalization & Escape）' }
+    },
     nodes: [
       {
         speaker: 'narrator',
@@ -425,26 +531,35 @@ export const TRIO_SCENES_DATA = {
           {
             text: '當著溫言的面大罵顧傾城：「妳講話怎麼這麼傲慢刻薄啊，仗著有錢有名就欺負老實人嗎！」',
             nextExpression: 'triggered',
-            reply: '顧傾城臉色驟變，冷冷下達逐客令；溫言更是嚇得渾身發抖，不斷向你和顧傾城鞠躬道歉。',
-            psychNote: '【三人互動解析】直接攻擊自戀型的自尊會引發自戀暴怒，同時讓害怕衝突的畏避型陷入極度恐慌。',
+            defenseMechanism: '自戀暴怒驅逐 × 畏避自責恐慌（Narcissistic Rage vs. Shame Freeze）',
+            reply: '顧傾城臉色驟變，冷冷下達逐客令：「不懂得區分品質與欺壓的蠢貨，請立刻離開我的視線！」溫言更是嚇得渾身發抖，不斷向你和顧傾城鞠躬道歉。',
+            psychNote: '【病理展演】直接攻擊自戀型的權威會觸發其自戀暴怒（NPD Rage）；衝突氛圍同時讓畏避型把過錯攬到自己身上。',
             stats: { affection: -10, security: -12, boundary: -6 }
           },
           {
             text: '跟著顧傾城一起數落溫言：「對啊溫言，你一個大男人畏畏縮縮的真的很丟臉耶，抬頭挺胸一點行不行！」',
             nextExpression: 'triggered',
-            reply: '溫言眼眶泛紅，抱著圖紙筒倉皇逃出辦公室，連電梯都不敢搭就直接衝下安全梯。',
-            psychNote: '【三人互動解析】雙重羞辱會直接擊穿畏避型的心理防線。',
+            defenseMechanism: '畏避型羞恥潰逃 × 自戀型菁英附和確認（Avoidant Collapse & NPD Contempt）',
+            reply: '溫言眼眶泛紅，抱著圖紙筒倉皇逃出辦公室，連電梯都不敢搭就直接衝下安全梯；顧傾城也微微皺眉：「一個毫無主見的跟風者，更顯平庸。」',
+            psychNote: '【病理展演】雙重羞辱直接擊穿畏避型 F60.6-A4 防線，引發奪門而逃的經典反應。',
             stats: { affection: -12, security: -15, boundary: -4 }
           }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】當隱含自卑但外顯誇大的 NPD 碰上內外皆感低人一等的 AvPD，同一句專業評語會被 NPD 用來區分等第（F60.81-A3）、被 AvPD 解讀為「我果然不配待在這裡」（F60.6-A4/A6）。'
   },
 
   'ruri__lu_qinglan': {
     locationId: 'atelier',
     title: '【三人同場】碎瓷片上的星象預言與金箔（星野琉璃 ＆ 陸晴嵐）',
     ambience: '風鈴叮噹聲、金繼生漆調合聲與歡快的笑聲',
+    criterionTags: ['F21-A7', 'F21-A2', 'F07.0-E', 'F07.0-B'],
+    differentialContrast: {
+      summary: '非器質精神病理信念 vs 器質性額葉脫抑制：思覺失調型透過「星象與萬物有靈符號」建構孤立心理防線；額葉腦傷性格改變則為神經過濾器受損後的直接直率與情緒擺盪，兩者皆保有對現實意義的創作連結。',
+      partnerA: { name: '星野琉璃', disorder: '思覺失調型 StPD', motive: '將破碎茶碗視為天鵝座星象的神秘對應，藉以緩衝殘酷現實的傷害。', mechanism: '魔幻思考與超自然符號投射（Magical Thinking）' },
+      partnerB: { name: '陸晴嵐', disorder: '腦傷所致性格改變 F07.0', motive: '無任何超自然妄想，單純因手部微顫打破碗後以金繼自嘲裂痕與腦傷。', mechanism: '脫抑制幽默與現實自嘲整合（Disinhibited Humor & Self-Acceptance）' }
+    },
     nodes: [
       {
         speaker: 'narrator',
@@ -473,26 +588,35 @@ export const TRIO_SCENES_DATA = {
           {
             text: '潑冷水說：「摔破的碗就是壞掉了，腦袋受傷也是醫療事故，講什麼星座銀河都只是自欺欺人吧。」',
             nextExpression: 'triggered',
-            reply: '工坊裡的笑聲瞬間消失。晴嵐握著畫筆的手微微發抖，琉璃則默默退回簾幕後面。',
-            psychNote: '【三人互動解析】冰冷殘酷的貶抑會同時刺痛兩人的核心創傷。',
+            defenseMechanism: '腦傷自卑退縮 × 思覺失調解離退回（Shame Collapse vs. Schizotypal Withdrawal）',
+            reply: '工坊裡的笑聲瞬間消失。晴嵐握著畫筆的手微微發抖：「……原來只是自我安慰嗎。」琉璃則默默退回天鵝絨簾幕後面切斷對話。',
+            psychNote: '【病理展演】無情否定裂痕的價值會撕下晴嵐樂觀面具下的深深自卑（F07.0-E），並推開本就社交焦慮的琉璃（F21-A9）。',
             stats: { affection: -10, security: -14, boundary: -4 }
           },
           {
             text: '叫晴嵐別再亂動以免又打破東西，叫琉璃也別在旁邊講怪話干擾工作。',
             nextExpression: 'anxious',
+            defenseMechanism: '抑制受挫壓抑 × 古怪語言靜音（Frustrated Restraint & Odd-Speech Suppression）',
             reply: '兩人尷尬地停下手邊的事，原本充滿生氣的工坊變得死氣沉沉。',
-            psychNote: '【三人互動解析】過度控制與否定會壓抑她們最珍貴的生命力。',
+            psychNote: '【病理展演】過度控制與貶低「怪話」會雙重壓抑兩位住戶的表達安全感。',
             stats: { affection: -6, security: -8, boundary: -6 }
           }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】區分 StPD（F21-A2 魔幻信念／心理防禦性怪異）與 F07.0（F07.0-B 器質損傷後的情緒易變與去抑制），不可將腦傷後直白口無遮攔誤診為思覺失調。'
   },
 
   'shen_mo__gu_qingcheng': {
     locationId: 'cafe',
     title: '【三人同場】競圖洩密案的針鋒相對（沈墨 ＆ 顧傾城）',
     ambience: '冰美式攪拌聲、加密筆電鍵盤聲與高跟鞋敲地聲',
+    criterionTags: ['F60.0-A6', 'F60.0-A3', 'F60.81-SPEC1', 'F60.81-A3'],
+    differentialContrast: {
+      summary: '高警戒 vs 高特權的正面衝撞：妄想型把要求保密條款解讀為「遮掩內鬼與不配合查案」；自戀型將全面審查私生活解讀為「對其頂級身份與管理權威的冒犯」。',
+      partnerA: { name: '沈墨', disorder: '妄想型 PPD', motive: '拒絕任何授權限制，深信委託人自身亦可能是洩密盲點或陷阱來源。', mechanism: '全盤懷疑與無豁免調查防衛（Zero-Trust Investigation）' },
+      partnerB: { name: '顧傾城', disorder: '自戀型 NPD', motive: '期待以金錢與地位享有特權豁免，無法忍受「管理傲慢」的指控戳痛脆弱核心。', mechanism: '特權豁免主張與傲慢防禦（Entitlement & Vulnerability Shield）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'anxious', text: '咖啡廳靠窗座，顧傾城把一份競圖外洩調查委託書推到沈墨面前。一個是絕不低頭的建築女王，一個是連委託人都懷疑的資安獵犬。' },
       {
@@ -501,17 +625,24 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '居中協調：「傾城需要的是對外絕對保密以維護商譽，沈墨需要的是權限範圍內的獨立調查。我們先簽雙向保密範疇協議如何？」', nextExpression: 'smile', reply: '顧傾城讚許地看了你一眼：「還是{player}懂專業溝通。」沈墨推了推眼鏡：「有你見證範疇，我可以接受。」', psychNote: '【三人互動解析】同時給予自戀型「尊榮面子」與妄想型「清晰契約邊界」。', stats: { affection: 12, security: 12, boundary: 10 } },
           { text: '請沈墨先展示一項外圍網路漏洞作為專業證明，讓傾城安心授權。', nextExpression: 'smile', reply: '沈墨敲了三下鍵盤調出紀錄，顧傾城眼神一凜：「確實有兩把刷子，這案子交給你了。」', psychNote: '【三人互動解析】用實力證據取代口舌之爭，滿足雙方的專業高標準。', stats: { affection: 10, security: 11, boundary: 9 } },
-          { text: '幫著顧傾城指責沈墨太無禮，要求他立刻向顧總道歉。', nextExpression: 'triggered', reply: '沈墨直接合上筆電起身走人：「另請高明。」', psychNote: '【三人互動解析】強迫妄想型在權威面前低頭，會立刻引發其防衛中斷合作。', stats: { affection: -8, security: -10, boundary: -5 } },
-          { text: '幫著沈墨嘲諷顧傾城：「就是因為妳平常太自大才被員工出賣吧！」', nextExpression: 'triggered', reply: '顧傾城冷笑一聲撕毀支票：「我的事務所不歡迎你們。」', psychNote: '【三人互動解析】當眾羞辱自戀型的管理能力會引爆自戀暴怒。', stats: { affection: -9, security: -11, boundary: -5 } }
+          { text: '幫著顧傾城指責沈墨太無禮，要求他立刻向顧總道歉。', nextExpression: 'triggered', defenseMechanism: '懷疑串謀與強制切斷連結（Collusion Suspicion & Hostile Exit）', reply: '沈墨直接合上筆電起身走人：「你幫她壓下審查權限？那我也沒有查這條線的必要了。」', psychNote: '【病理展演】強迫妄想型向權威低頭並放棄獨立檢視（F60.0-A6），會讓他認定你也被權勢收買而斷開合作。', stats: { affection: -8, security: -10, boundary: -5 } },
+          { text: '幫著沈墨嘲諷顧傾城：「就是因為妳平常太自大才被員工出賣吧！」', nextExpression: 'triggered', defenseMechanism: '自戀暴怒驅逐（Narcissistic Rage & Devaluing Termination）', reply: '顧傾城冷笑一聲撕毀支票：「不知天高地厚的蠢貨，我的事務所不歡迎你們這種酸葡萄心理的失敗者。」', psychNote: '【病理展演】當眾拆穿自戀型的傲慢與失敗（F60.81-SPEC1 脆弱端破口），會瞬間引爆毀滅性的自戀暴怒。', stats: { affection: -9, security: -11, boundary: -5 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】PPD 與 NPD 的猜忌差異：PPD 懷疑他人『想要害我／利用我』；NPD 則對冒犯優越感的評論敏感，重點在於『誰敢質疑我的卓越地位』。'
   },
 
   'lin_jianwei__su_fei': {
     locationId: 'rooftop',
     title: '【三人同場】絕對零度與攝氏一百度（林見微 ＆ 蘇緋）',
     ambience: '天台夜風、大提琴即興旋律與天文鐘滴答聲',
+    criterionTags: ['F60.1-A4', 'F60.1-A7', 'F60.3-A1', 'F60.3-A8'],
+    differentialContrast: {
+      summary: '情感調控光譜的兩極極端：孤僻型感受力扁平且表達純理性（聽出半音偏高 3 音分卻不表露共鳴）；邊緣型情感洪流過載，將對方的平靜視作冷酷拋棄。',
+      partnerA: { name: '蘇緋', disorder: '邊緣型 BPD', motive: '需要即刻強烈的情感回應確認自己在對方眼中重要，沉默對她等同拒絕。', mechanism: '情感過載與被忽視即拋棄歸因（Affective Storm & Rejection Hypersensitivity）' },
+      partnerB: { name: '林見微', disorder: '孤僻型 SzPD', motive: '專注於音律數據與樂器保養理性分析，完全不明白為何沒看眼睛就代表沒在聽。', mechanism: '情感平淡與純認知陳述（Constricted Affect & Literalism）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'anxious', text: '蘇緋抱著大提琴在天台拉奏一首悲傷到極點的夜曲，眼淚掉在琴板上；林見微在一旁記錄流星數據，全程沒有轉頭看她一眼。' },
       {
@@ -520,17 +651,24 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '遞手帕給蘇緋，笑著幫兩人翻譯：「蘇緋，見微連妳差了 3 音分都聽出來了，代表她從頭到尾都在認真聽妳拉琴喔！」', nextExpression: 'smile', reply: '蘇緋愣住，破涕為笑：「真、真的嗎？原來妳有在聽！」林見微輕輕點頭：「嗯，音色很有張力。」', psychNote: '【三人互動解析】幫情感濃烈的邊緣型「翻譯」孤僻型特有的理性關注方式，化解被忽視的恐慌。', stats: { affection: 12, security: 14, boundary: 9 } },
           { text: '邀請見微指出天琴座的位置，讓蘇緋為那顆星星拉一首溫柔的曲子。', nextExpression: 'smile', reply: '在琴聲與星光的交織下，一冷一熱的兩人意外達成了奇妙的平衡。', psychNote: '【三人互動解析】以共同的藝術與天文媒介搭建安全橋樑。', stats: { affection: 10, security: 12, boundary: 8 } },
-          { text: '跟著蘇緋一起罵林見微是沒血沒淚的機器人。', nextExpression: 'triggered', reply: '林見微默默收拾星圖下樓：「我回房了。」', psychNote: '【三人互動解析】強化邊緣型的黑白分裂並傷害孤僻型。', stats: { affection: -7, security: -9, boundary: -5 } },
-          { text: '冷冷對蘇緋說：「妳看人家見微多冷靜，妳別再無病呻吟吵人了！」', nextExpression: 'triggered', reply: '蘇緋臉色慘白，抱著琴衝下天台。', psychNote: '【三人互動解析】用他人的冷靜來羞辱邊緣型的情緒表達，會造成劇烈創傷。', stats: { affection: -10, security: -12, boundary: -4 } }
+          { text: '跟著蘇緋一起罵林見微是沒血沒淚的機器人。', nextExpression: 'triggered', defenseMechanism: '孤僻漠然抽離 × 邊緣全壞分裂放大（Schizoid Indifference vs. BPD Splitting）', reply: '林見微默默收拾星圖下樓：「我回房了。」蘇緋雖然一時出氣，隨後卻又焦慮起來：「連她也走了，會不會大家都嫌我太情緒化？」', psychNote: '【病理展演】順從邊緣型的分裂評價（F60.3-A2），既無法讓孤僻型感到愧疚（F60.1-A6），還會反過來加重邊緣型的內疚焦慮。', stats: { affection: -7, security: -9, boundary: -5 } },
+          { text: '冷冷對蘇緋說：「妳看人家見微多冷靜，妳別再無病呻吟吵人了！」', nextExpression: 'triggered', defenseMechanism: '羞辱誘發極端棄絕失控（Invalidation-Triggered Tantrum）', reply: '蘇緋臉色慘白，抱著琴衝下天台：「連你也覺得我是個惹人厭的瘋子！」', psychNote: '【病理展演】用高度扁平的人來羞辱情感敏感高喚起的 BPD，會立刻重演其「感情無人能接住」的童年無效化創傷。', stats: { affection: -10, security: -12, boundary: -4 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】臨床最明顯的情感光譜對照：BPD（情緒高振幅、過度偵測人際眼神）vs SzPD（F60.1-A7 情感冷漠與低表情起伏）。'
   },
 
   'ruri__shen_mo': {
     locationId: 'rooftop',
     title: '【三人同場】神秘符號與摩斯密碼（星野琉璃 ＆ 沈墨）',
     ambience: '夜風吹拂水晶簾、手電筒光束與緊張的低語',
+    criterionTags: ['F21-A1', 'F21-A2', 'F60.0-A4', 'F60.0-A1'],
+    differentialContrast: {
+      summary: 'DSM-5-TR Cluster A 核心鑑別（Ideas of Reference vs Paranoid Suspiciousness）：同對物理世界過敏解碼——思覺失調型傾向超自然與個人宇宙聯繫（星際精靈打招呼）；妄想型則鎖定人為敵對陰謀（莫斯密碼接頭）。',
+      partnerA: { name: '沈墨', disorder: '妄想型 PPD', motive: '認定三短三長敲擊必屬人為通訊暗號，高度戒備敵人外部接頭。', mechanism: '人際陰謀過度歸因（Hypervigilant Conspiracy Inference）' },
+      partnerB: { name: '星野琉璃', disorder: '思覺失調型 StPD', motive: '將物理風聲與風鈴排列體驗為宇宙精靈傳遞給自己的神祕訊息。', mechanism: '奇特關係意念與魔幻知覺（Ideas of Reference & Magical Thinking）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'anxious', text: '星野琉璃在頂樓欄杆上掛了一排不同長短的紫水晶風鈴，沈墨卻拿著筆記本在旁邊神情嚴肅地抄寫風鈴碰撞的節奏。' },
       {
@@ -539,17 +677,24 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '笑著向兩人解釋：「琉璃是照水晶大小排列的，剛好大風吹過形成了三短三長的節奏。沈墨你看，把第三顆水晶換個位置就不是摩斯密碼了。」', nextExpression: 'smile', reply: '沈墨看著調整後的風鈴節奏，終於合上筆記本：「……巧合機率萬分之一。」琉璃則崇拜地看著你們：「原來{player}跟沈墨先生都是解碼大師！」', psychNote: '【三人互動解析】用具體可驗證的操作解除妄想型的警報，同時不破壞思覺失調型的童話世界。', stats: { affection: 12, security: 12, boundary: 9 } },
           { text: '泡兩杯安神洋甘菊茶請兩人喝，聊起星座神話與古代密碼學的共通點。', nextExpression: 'smile', reply: '兩人竟然認真討論起古埃及星圖密碼，氣氛意外融洽。', psychNote: '【三人互動解析】找出兩位Cluster A角色對「隱藏規律」的共同興趣，轉化焦慮為知識交流。', stats: { affection: 10, security: 11, boundary: 8 } },
-          { text: '附和沈墨說琉璃一定是可疑的間諜，要把她的風鈴全部沒收。', nextExpression: 'triggered', reply: '琉璃嚇得抱緊風鈴躲到角落哭泣，沈墨也覺得你的反應過度誇張。', psychNote: '【三人互動解析】聯手壓迫弱勢者只會造成恐慌。', stats: { affection: -8, security: -10, boundary: -6 } },
-          { text: '對兩人翻白眼：「一個神神叨叨、一個疑神疑鬼，你們兩個乾脆一起去精神科掛號算了！」', nextExpression: 'triggered', reply: '兩人同時沉默下來，對你築起了深深的心防。', psychNote: '【三人互動解析】羞辱性標籤會同時摧毀兩人的信任。', stats: { affection: -12, security: -15, boundary: -5 } }
+          { text: '附和沈墨說琉璃一定是可疑的間諜，要把她的風鈴全部沒收。', nextExpression: 'triggered', defenseMechanism: '魔幻創傷恐慌 × 猜忌擴散（Schizotypal Panic vs. Paranoid Purge）', reply: '琉璃嚇得抱緊風鈴躲到角落哭泣，沈墨反而沉下臉看你：「沒取證就沒收證物，你想替誰毀滅線索？」', psychNote: '【病理展演】附和盲目行動反而觸動妄想型「銷毀線索」的警惕，並重創思覺失調型的安全寄託。', stats: { affection: -8, security: -10, boundary: -6 } },
+          { text: '對兩人翻白眼：「一個神神叨叨、一個疑神疑鬼，你們兩個乾脆一起去精神科掛號算了！」', nextExpression: 'triggered', defenseMechanism: '雙重病恥感隔離封閉（Dual Stigmatization Isolation）', reply: '兩人同時沉默下來，沈墨起身鎖上筆記本，琉璃則徹底躲回屋裡對你築起了深深的心防。', psychNote: '【病理展演】嘲笑式病理貼標是整個 Cluster A 最嚴重的破壞性處置。', stats: { affection: -12, security: -15, boundary: -5 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】同有「關係意念與猜疑」，但 PPD 猜測「有具體人為敵意勢力設計陷阱」，StPD 則偏向「怪異超自然因果與古怪知覺（F21-A1/A2）」。'
   },
 
   'han_xiao__bai_xiaolu': {
     locationId: 'cafe',
     title: '【三人同場】惡魔的玩笑與小鹿的眼淚（韓梟 ＆ 白小鹿）',
     ambience: '午後咖啡廳音樂、重機引擎熄火聲與攪拌匙輕響',
+    criterionTags: ['F60.2-A2', 'F60.2-A6', 'F60.7-A5', 'F60.7-A6'],
+    differentialContrast: {
+      summary: '掠食性操弄者 vs 高度依附順從者：反社會型視輕信他人者為無聊卻可測試的玩具；依賴型一旦被威脅「失去依附環境與保護」，哪怕條件極不合理也急於屈從求生。',
+      partnerA: { name: '韓梟', disorder: '反社會型 ASPD', motive: '純粹測試底線、利用資訊不對稱嚇唬人並尋求主導樂趣，毫無內疚感（F60.2-A2/A7）。', mechanism: '欺瞞試探與共情缺乏（Conning & Callous Teasing）' },
+      partnerB: { name: '白小鹿', disorder: '依賴型 DPD', motive: '深怕被丟棄與無法獨立存活（F60.7-A6），立即屈從勒索以換取留在安全圈的保障。', mechanism: '恐懼驅動的全面順從（Helpless Submissiveness）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'anxious', text: '韓梟難得在白天晃進咖啡廳，似笑非笑地逗弄正在擦桌子的白小鹿，騙她說店長要把咖啡廳賣掉改建成地下賭場。' },
       {
@@ -558,17 +703,24 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '走到小鹿身邊拍拍她的肩：「小鹿別怕，韓梟在逗妳玩呢，咖啡廳好得很。韓老闆，想吃小鹿烤的閃電泡芙就直接點單，別用嚇唬人的方式討點心。」', nextExpression: 'smile', reply: '白小鹿破涕為笑：「原來是開玩笑的！」韓梟被你看穿心思，摸了摸鼻子低笑：「嘖，有{player}護著，連逗一下都不行了。那給我來兩份泡芙，我付雙倍小費。」', psychNote: '【三人互動解析】替依賴型擋下操弄並給予確定感，同時溫和拆穿反社會型的惡作劇並立下規矩。', stats: { affection: 12, security: 14, boundary: 12 } },
           { text: '請小鹿端出一盤剛出爐的苦甜巧克力塔，跟韓梟交換一個「保證不再嚇店員」的承諾。', nextExpression: 'smile', reply: '韓梟咬了一口巧克力塔，挑眉道：「味道不錯，成交。」小鹿也開心地露出了自信的笑容。', psychNote: '【三人互動解析】將單向捉弄轉化為平等互惠的良性互動。', stats: { affection: 10, security: 11, boundary: 10 } },
-          { text: '跟著韓梟一起騙小鹿，看她嚇得掉眼淚覺得很好玩。', nextExpression: 'triggered', reply: '白小鹿哭著跑進廚房，對你的信任大打折扣。', psychNote: '【三人互動解析】參與霸凌與捉弄會嚴重傷害依賴型的安全感。', stats: { affection: -9, security: -14, boundary: -8 } },
-          { text: '叫小鹿乖乖聽韓梟的話去幫他跑腿一個月，免得惹怒他。', nextExpression: 'anxious', reply: '小鹿委屈地低頭答應，韓梟則覺得你們兩個人都無趣透頂。', psychNote: '【三人互動解析】向無理要求妥協只會助長剝削。', stats: { affection: -7, security: -10, boundary: -12 } }
+          { text: '跟著韓梟一起騙小鹿，看她嚇得掉眼淚覺得很好玩。', nextExpression: 'triggered', defenseMechanism: '共同霸凌潰堤 × 依賴恐慌崩潰（Collusive Exploitation & DPD Panic）', reply: '白小鹿哭著跑進廚房，手裡的抹布落了一地；韓梟看了一眼慌亂的小鹿又瞥向你，嘴角勾起冷冷的諷刺：「原來你跟我也沒什麼兩樣嘛。」', psychNote: '【病理展演】迎合欺瞞操弄不僅徹底摧毀依賴者的安全感，在反社會者眼裡也證實了這世界只是弱肉強食。', stats: { affection: -9, security: -14, boundary: -8 } },
+          { text: '叫小鹿乖乖聽韓梟的話去幫他跑腿一個月，免得惹怒他。', nextExpression: 'anxious', defenseMechanism: '強化受剝削共生體系（Subjugation & Predator Reinforcement）', reply: '小鹿委屈地低頭答應，韓梟則覺得你們兩個人都軟弱無趣透頂，連捉弄的興致也沒了。', psychNote: '【病理展演】勸弱勢者屈從不合理要求，直接將 DPD 推進受虐／被利用的典型高風險情境。', stats: { affection: -7, security: -10, boundary: -12 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】臨床高風險配對：ASPD 的欺瞞與索取（F60.2-A2/A7）往往精準吸引 DPD 透過過度付出討好求生（F60.7-A5），介入重點是建立現實保護界線。'
   },
 
   'xia_le__wen_yan': {
     locationId: 'archive',
     title: '【三人同場】新書發表會前的朗讀請求（夏樂 ＆ 溫言）',
     ambience: '麥克風測音聲、翻動書頁與遠處排練的掌聲',
+    criterionTags: ['F60.4-A1', 'F60.4-A7', 'F60.6-A1', 'F60.6-A5'],
+    differentialContrast: {
+      summary: '聚光燈焦慮的相反向量：做作型視上台與眾人注視為呼吸般不可或缺的養分（沒有目光就感覺失去價值）；畏避型則將舞台視為暴露個人缺點與招來當眾羞辱的刑場。',
+      partnerA: { name: '夏樂', disorder: '做作型 HPD', motive: '直覺將「觀眾注目」等同「被喜歡與存在感」，無法理解為何有人會拒絕成為主角。', mechanism: '聚光燈中心需求與過度社交自信（Spotlight Hunger & Impressionistic Optimism）' },
+      partnerB: { name: '溫言', disorder: '畏避型 AvPD', motive: '將大眾目光預測為災難性檢視與嘲笑（F60.6-A5），寧願退居幕後免得丟臉。', mechanism: '社交退避與自卑災難化（Catastrophic Embarrassment Avoidance）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'anxious', text: '圖書室的小型譯詩發表會即將開始，夏樂被請來當開場嘉賓，溫言則是譯者本人。休息室裡，夏樂正對著鏡子調整笑容，溫言縮在最角落的沙發邊緣。' },
       {
@@ -577,17 +729,24 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '提議改成「雙人朗讀」：由夏樂站在聚光燈下朗讀主詩句，溫言坐在溫暖的檯燈旁補充翻譯筆記。', nextExpression: 'smile', reply: '夏樂眼睛一亮：「這個形式超浪漫！我可以幫溫老師分擔目光！」溫言也鬆了一大口氣：「如果是坐著念筆記……我可以試試看。」', psychNote: '【三人互動解析】利用做作型熱愛聚光燈的特質，替畏避型分擔社交暴露焦慮，達成完美互補。', stats: { affection: 12, security: 12, boundary: 9 } },
           { text: '請溫言只看著台下第一排的你與夏樂朗讀就好，不必看其他觀眾。', nextExpression: 'smile', reply: '溫言看著你溫和的眼神，輕輕點頭：「……只要看著{player}，我的聲音就不會抖了。」', psychNote: '【三人互動解析】提供具體的「安全基地（Secure Base）」，幫助畏避型度過社交挑戰。', stats: { affection: 10, security: 11, boundary: 8 } },
-          { text: '對溫言說：「你是今天的主角，大家都是衝著你來的，你絕對不能怯場丟臉！」', nextExpression: 'triggered', reply: '溫言的臉色一下子慘白如紙，呼吸急促地抓緊胸口。', psychNote: '【三人互動解析】強調「不能丟臉」會直接觸發畏避型的童年羞辱創傷。', stats: { affection: -8, security: -12, boundary: -4 } },
-          { text: '叫溫言乾脆躲在後台別出來了，整場發表會全讓夏樂一個人自由發揮。', nextExpression: 'anxious', reply: '夏樂雖然過足了舞台癮，但溫言獨自坐在陰暗的後台，覺得自己再次成了毫無價值的透明人。', psychNote: '【三人互動解析】完全剝奪畏避型的參與機會，會強化其自我貶抑。', stats: { affection: -4, security: -8, boundary: -6 } }
+          { text: '對溫言說：「你是今天的主角，大家都是衝著你來的，你絕對不能怯場丟臉！」', nextExpression: 'triggered', defenseMechanism: '畏避型預期羞辱恐慌爆發（Anticipatory Humiliation Panic）', reply: '溫言的臉色一下子慘白如紙，呼吸急促地抓緊胸口：「……大家都看著我的話，我一定會又開始結巴……」', psychNote: '【病理展演】用「絕不能丟臉」施壓會直接激活 AvPD F60.6-A5 抑制反應與身體化焦慮（SAD 共病徵象）。', stats: { affection: -8, security: -12, boundary: -4 } },
+          { text: '叫溫言乾脆躲在後台別出來了，整場發表會全讓夏樂一個人自由發揮。', nextExpression: 'anxious', defenseMechanism: '做作獨攬焦點 × 畏避「我是透明人」驗證（HPD Spotlight Takeover vs. AvPD Erasure）', reply: '夏樂雖然過足了舞台癮，但溫言獨自坐在陰暗的後台，覺得自己再次成了毫無價值的透明人。', psychNote: '【病理展演】全面迎合 HPD 的舞台慾卻剝奪 AvPD 的嘗試機會，會雙重固化兩者各自的病理信念。', stats: { affection: -4, security: -8, boundary: -6 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】同為高度依賴他人眼光決定自我價值：HPD 以「外向演出與魅力攫取目光（F60.4-A1/A4）」；AvPD 則以「隱形、迴避與沉默躲避批判（F60.6-A1/A5）」。'
   },
 
   'bai_xiaolu__you_ziqian': {
     locationId: 'cafe',
     title: '【三人同場】打烊前的一杯「隨便」（白小鹿 ＆ 游子謙）',
     ambience: '咖啡機蒸氣聲、晚間爵士與關店前的清潔聲',
+    criterionTags: ['F60.7-A2', 'F60.7-A5', 'F60.89-GA', 'F60.89-GC'],
+    differentialContrast: {
+      summary: '兩者表面都講著「都可以、沒關係、好啊」，核心動機卻大相逕庭：依賴型（DPD）是因為害怕自主選擇出錯而被遺棄；被動攻擊型則是因壓抑內在怒氣與不滿，刻意退讓並誘發他人猜忌與內疚。',
+      partnerA: { name: '白小鹿', disorder: '依賴型 DPD', motive: '把決定權交給他人以求安全無錯，害怕點錯東西惹人討厭。', mechanism: '決策癱瘓與過度配合求生（Decision Paralysis & Compliance）' },
+      partnerB: { name: '游子謙', disorder: '被動攻擊型 Passive-Aggressive', motive: '內心煩厭無止境的配合卻不願撕破臉，以客氣笑臉掩蓋冷淡抱怨與怨恨情緒。', mechanism: '微笑式暗刺與反感壓抑（Smiling Cynicism & Covert Resentment）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'neutral', text: '咖啡廳快打烊了。白小鹿坐在吧台邊，游子謙笑盈盈地問她想喝什麼，她又說了一次「都可以」。他把杯子放下，笑容沒有變，但眼神微妙地冷了一點。' },
       {
@@ -596,17 +755,24 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '笑著發給兩人各一張便條紙：「今晚玩個遊戲，兩個人都在紙上寫下『自己真正想喝的飲料』，不准寫隨便或都可以！」', nextExpression: 'smile', reply: '白小鹿咬著筆頭寫下「草莓熱牛奶」；游子謙愣了一下，噗哧笑出聲，寫下「不加糖的冰美式」：「……被{player}治好了呢。」', psychNote: '【三人互動解析】同時引導依賴型與被動攻擊型練習「直接表達真實需求」。', stats: { affection: 11, security: 12, boundary: 10 } },
           { text: '對小鹿說：「先選熱的還是冰的就好。」再轉頭對子謙說：「子謙今天辛苦了，換我幫你沖一杯你喜歡的洋甘菊茶吧。」', nextExpression: 'smile', reply: '小鹿安心地說：「熱的！」游子謙耳根微紅地放下抹布：「……原來你記得我喜歡喝什麼呀。」', psychNote: '【三人互動解析】降低依賴者的決策門檻，同時主動看見被動攻擊者隱藏的疲憊。', stats: { affection: 9, security: 10, boundary: 8 } },
-          { text: '當著小鹿的面拆穿游子謙：「你講話幹嘛這麼陰陽怪氣欺負小鹿啊？」', nextExpression: 'triggered', reply: '游子謙立刻露出受盡委屈的苦笑：「對不起嘛，都是我嘴笨～」小鹿也慌張地跟著道歉，場面陷入僵局。', psychNote: '【三人互動解析】公開指責會讓被動攻擊者順理成章退回「無辜受害者」劇本。', stats: { affection: -6, security: -8, boundary: -3 } },
-          { text: '幫兩個人統一點兩杯白開水：「既然都說隨便，那就通通喝白開水最省事！」', nextExpression: 'anxious', reply: '兩個人看著面前的白開水，心裡同時感到一陣被敷衍的失落。', psychNote: '【三人互動解析】忽視雙方潛藏的情感訊號，只會讓溝通更加封閉。', stats: { affection: -5, security: -7, boundary: 0 } }
+          { text: '當著小鹿的面拆穿游子謙：「你講話幹嘛這麼陰陽怪氣欺負小鹿啊？」', nextExpression: 'triggered', defenseMechanism: '受害者委屈面具回防（Passive Victim Inversion）', reply: '游子謙立刻露出受盡委屈的苦笑：「對不起嘛，都是我嘴笨～」小鹿也慌張地跟著自責道歉，場面反而更尷尬。', psychNote: '【病理展演】公開情緒指責正中被動攻擊型的劇本下懷，讓他反轉為無辜受害者（F60.89-GC），也讓 DPD 自責升溫。', stats: { affection: -6, security: -8, boundary: -3 } },
+          { text: '幫兩個人統一點兩杯白開水：「既然都說隨便，那就通通喝白開水最省事！」', nextExpression: 'anxious', defenseMechanism: '無視隱性訊號致雙雙疏離（Mutual Detachment & Quiet Resentment）', reply: '兩個人看著面前的白開水，心裡同時感到一陣被敷衍的失落——小鹿覺得自己又沒做好，子謙微笑著把杯子推開一公分。', psychNote: '【病理展演】粗暴替代兩者做決定，表面省事卻關閉了真實意願被聽見的通道。', stats: { affection: -5, security: -7, boundary: 0 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】同為「不敢直接表達拒絕或主張」：DPD 是害怕「做了選擇失去他人」（F60.7-A2），故由真誠服從出發；被動攻擊型則心懷不滿與憤怒（F60.89-GB/GC），故以「都可以」或假笑暗藏抵制。'
   },
 
   'ji_yan__lu_qinglan': {
     locationId: 'atelier',
     title: '【三人同場】窯燒前夕的時刻表（紀嚴 ＆ 陸晴嵐）',
     ambience: '窯爐預熱聲、計時器滴答與午後蟬鳴',
+    criterionTags: ['F60.5-A1', 'F60.5-A8', 'F07.0-B', 'F07.0-SUB-DIS'],
+    differentialContrast: {
+      summary: '最高控制的強迫型（OCPD）vs 神經去抑制（F07.0）：強迫型用表格與 15 分鐘精度壓抑所有隨機焦慮；腦傷性格改變者則在瞬間直覺跳躍並難以維持僵化編號流程，卻極富創作生命力。',
+      partnerA: { name: '紀嚴', disorder: '強迫型 OCPD', motive: '將升溫曲線與坯體編號視為防範炸窯與失誤災難的唯一盾牌（F60.5-A1/A8）。', mechanism: '規則清單化與容錯零容忍（Hyper-Scheduling & Zero-Tolerance Control）' },
+      partnerB: { name: '陸晴嵐', disorder: '腦傷所致性格改變 F07.0', motive: '並非惡意搗亂，而是右側眶額葉受損後的計畫順序跳躍與去抑制自嘲。', mechanism: '衝動隨性行動與自嘲化解尷尬（Orbitofrontal Disinhibition & Humor）' }
+    },
     nodes: [
       { speaker: 'narrator', expression: 'neutral', text: '陸晴嵐的窯要在下午三點入窯，紀嚴受邀來協助記錄燒製曲線。他帶來了三份表格與兩支溫度計，陸晴嵐則抱著一堆還沒修坯的杯子，一邊笑一邊哼歌。' },
       {
@@ -615,11 +781,12 @@ export const TRIO_SCENES_DATA = {
         choices: [
           { text: '幫晴嵐把坯體分成「精密溫控區」與「自由落灰區」兩層，讓紀嚴控管第一層數據，晴嵐自由擺放第二層。', nextExpression: 'smile', reply: '紀嚴看著分層圖，點頭道：「結構合理，誤差可控。」晴嵐開心地拍手：「太棒了！這樣既不會炸窯，又有驚喜！」', psychNote: '【三人互動解析】把「秩序需求」和「自由需求」切割成可共存的範圍，讓強迫型與脫抑制型完美合作。', stats: { affection: 11, security: 12, boundary: 10 } },
           { text: '自告奮勇當碼錶記錄員，幫紀嚴抄寫升溫數據，並陪晴嵐一起核對杯底編號。', nextExpression: 'smile', reply: '紀嚴把鋼筆遞給你：「有你協助，時程剛好在 14:54 完成。」晴嵐也笑彎了眼：「我們三個簡直是黃金組合！」', psychNote: '【三人互動解析】成為穩定緩衝橋樑，降低強迫型的時間焦慮與腦傷者的記憶負荷。', stats: { affection: 9, security: 10, boundary: 8 } },
-          { text: '勸晴嵐別再嘻皮笑臉，完全照紀嚴的SOP一個口令一個動作。', nextExpression: 'anxious', reply: '晴嵐笑容收了一半，緊張得手抖打破了一只陶坯，紀嚴的眉頭也皺得更深了。', psychNote: '【三人互動解析】高壓控制會加劇額葉損傷者的動作失誤與挫折感。', stats: { affection: -6, security: -8, boundary: -5 } },
-          { text: '把紀嚴的表格收起來說：「燒陶就是要隨性，看什麼表格，直接關窯門點火啦！」', nextExpression: 'triggered', reply: '紀嚴臉色鐵青地站在原地，呼吸急促，完全無法忍受這種毫無章法的失控風險。', psychNote: '【三人互動解析】強行抽走強迫型的規則支撐，會引發劇烈的失控恐慌。', stats: { affection: -8, security: -11, boundary: -6 } }
+          { text: '勸晴嵐別再嘻皮笑臉，完全照紀嚴的SOP一個口令一個動作。', nextExpression: 'anxious', defenseMechanism: '強壓引發挫折顫抖（Sensorimotor Stress Overload）', reply: '晴嵐笑容收了一半，緊張得手抖打破了一只陶坯；紀嚴看著破掉的陶坯眉頭鎖得更緊：「……不精準反而消耗時間。」', psychNote: '【病理展演】強行要求額葉損傷者遵守嚴密 SOP，會誘發高壓力動作失誤，並加重其「壞掉的我什麼都做不好」的自卑。', stats: { affection: -6, security: -8, boundary: -5 } },
+          { text: '把紀嚴的表格收起來說：「燒陶就是要隨性，看什麼表格，直接關窯門點火啦！」', nextExpression: 'triggered', defenseMechanism: '失控急停與情感隔離凍結（Loss-of-Control Freeze）', reply: '紀嚴臉色鐵青地站在原地，呼吸急促，完全無法忍受這種毫無章法的失控風險：「若無溫度曲線紀錄，我無法為任何可能失敗負責。」', psychNote: '【病理展演】強行抽走強迫型賴以為生的工具清單，會直接引發急性失控恐慌。', stats: { affection: -8, security: -11, boundary: -6 } }
         ]
       }
-    ]
+    ],
+    studySummary: '【鑑別考點】當缺乏秩序耐受度的 OCPD（F60.5-A8）協助 TBI 後去抑制型（F07.0）時，關鍵教學觀念是「分工分層」——讓系統型人格負責外圍結構保護，而非要求神經受損者抑制天性。'
   }
 };
 
@@ -1953,6 +2120,979 @@ export const EXTRA_DAILY_TALKS = {
 };
 
 // ==================== 15 個事件完整決策樹產生器（100% 角色專屬劇本與獨立天災，零罐頭選項） ====================
+// ==================== 初步攻略：每位角色「靈魂真名（DSM-5-TR 法定最低門檻確立）」的觸發事件 ====================
+// 嚴格採「雙階段教學架構」：
+// Phase I~II（E01～E08）精準收集齊該疾患 DSM-5-TR 法定最低診斷門檻數量之核心準則；
+// 在 E08（突發天災危機事件）結尾頒發【🥇 初步成就：確立臨床診斷（靈魂真名）】，解鎖診斷卡與下一位房客！
+// Phase III~IV（E09～E15）則解鎖剩餘進階準則、臨床特徵／亞型註記（Specifiers）與共病傾向（Comorbidities）。
+export const DIAGNOSIS_REVEAL_CONFIG = {
+  shen_mo: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：4/7 項（F60.0-A1, A2, A3, A4）】從頂樓雙鎖試探、瓶裝水對質、加密帳冊隱瞞到強震裡死抱硬碟防線鬆動——你的觀察筆記已收集齊妄想型人格障礙症的法定診斷門檻。他並非拒絕被愛，而是早已無法停止掃描背叛訊號。\n🔓 進入 Phase III~IV（E09～E15）：解鎖剩餘進階準則（A5～A7）、現實扭曲亞型區辨與失眠焦慮共病脈絡。'
+  },
+  lin_jianwei: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：4/7 項（F60.1-A1, A2, A6, A7）】從拒絕交換心事、極度偏愛獨處算星圖、對讚貶同樣平靜到暴風眼停電夜只關切赤道儀與恆溫數據——孤僻型的核心特徵已達法定門檻。她不是畏懼人群，而是真切覺得不需要社交獎賞。\n🔓 進入 Phase III~IV（E09～E15）：解鎖剩餘準則（A3～A5）、與畏避型鑑別註記及偽裝耗竭共病。'
+  },
+  ruri: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：5/9 項（F21-A1, A2, A3, A7, A9）】街燈摩斯碼的關係意念、跨門檻鹽線的魔幻信念、紫羅蘭電流音錯覺、不合時宜的古怪穿著到日食濃霧裡急升的社交恐懼——思覺失調型法定五項門檻已集齊。\n🔓 進入 Phase III~IV（E09～E15）：解鎖進階準則（A4, A5, A6, A8）、防禦性隱喻鑑別與急性解離恐慌共病。'
+  },
+  han_xiao: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：3 項成人準則 + CD 史（F60.2-A2, A3, A5, CD）】謊言套牌局、街頭無計畫挑釁、時速兩百不顧雙方安危與酒吧淹水仍冷笑不逞強的叢林規則——你已確認其從 13 歲行為規範障礙延續至今的反社會型門檻。\n🔓 進入 Phase III~IV（E09～E15）：解鎖剩餘準則（A1, A4, A6, A7）、有限親社會情緒註記與物質成癮共病。'
+  },
+  su_fei: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：5/9 項（F60.3-A1, A2, A6, A7, A8）】狂熱與冰封交替、十二分鐘內從神明變惡魔的分裂擺盪、夜雨中情緒急墜、靈魂黑洞空虛感與落雷踩碎玻璃護畫——邊緣型法定五項核心準則完全顯現。\n🔓 進入 Phase III~IV（E09～E15）：解鎖自我認同混亂（A3）、衝動自毀（A4/A5）與解離（A9），以及 C-PTSD／情感疾患共病。'
+  },
+  xia_le: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：5/8 項（F60.4-A1, A2, A4, A5, A6）】聚光燈外即刻失溫、無界線肢體調情、靠外貌吸引全場注視、印象派式空洞讚美與停電卸妝時的戲劇性崩潰——做作型五項法定門檻已在危機中定型。\n🔓 進入 Phase III~IV（E09～E15）：解鎖情感淺薄（A3）、易受暗示（A7）、過度解讀親密度（A8）與憂鬱空虛共病。'
+  },
+  gu_qingcheng: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：5/9 項（F60.81-A1, A3, A4, A7, A9）】「平庸傳染病」的自我重要性誇大、頂級階級菁英圈鎖定、索取無條件崇拜、缺乏同理貶低助手與強陣風玻璃前死撐女王姿態——自戀型五項門檻完整拼合。\n🔓 進入 Phase III~IV（E09～E15）：解鎖特權剝削（A5/A6）、羨嫉（A8）、無限成功幻想（A2）及「誇大 vs 脆弱自戀」切換註記。'
+  },
+  wen_yan: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：4/7 項（F60.6-A2, A4, A5, A6）】確認百分之百喜歡才敢靠近、對微皺眉即啟動被拒絕敏感、社交場合過度自我壓抑、自認貧瘠低人一等與梅雨短路時的自我封閉責怪——畏避型法定四項門檻正式確立。\n🔓 進入 Phase III~IV（E09～E15）：解鎖職業迴避（A1）、親密怕受辱保留（A3）、冒險抗拒（A7）、與孤僻型鑑別及社交焦慮症（SAD）共病。'
+  },
+  bai_xiaolu: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：5/8 項（F60.7-A1, A2, A3, A5, A6）】挑草莓藍莓需他人決定、把關鍵人生控制讓渡他人、怕惹怒人不敢表達「不喜歡」、連代五天夜班討好求生與寒流停水即無助恐慌——依賴型五項法定門檻已全數就位。\n🔓 進入 Phase III~IV（E09～E15）：解鎖缺乏啟動能力（A4）、急尋替代關係（A7）、誇張獨活恐懼（A8）與廣泛性焦慮症（GAD）共病。'
+  },
+  ji_yan: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：4/8 項（F60.5-A1, A2, A3, A8）】十五分鐘刻度日程迷戀細節、追求 100% 完美反覆覆核報告而耽誤進度、視人際與休息為時間損耗、強迫寫下十二頁互動合約與暴雨脫軌恐慌——強迫型四項法定門檻正式達成。\n🔓 進入 Phase III~IV（E09～E15）：解鎖道德潔癖（A4）、囤積舊物（A5）、難授權他人（A6）、吝嗇防災金（A7）、OCD 鑑別及次發性憂鬱共病。'
+  },
+  lu_qinglan: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：F07.0-A～E 核心五準則全齊】從醫護同僚證言性格劇變（A）、右側眶額葉損傷之明確器質病因（B）、發病切分於車禍當晚並排除原發精神病（C/D），到熱浪跳電警報誘發痛苦受損（E）——因腦傷所致性格改變臨床門檻已完整確認。\n🔓 進入 Phase III~IV（E09～E15）：解鎖「情緒易變型＋去抑制型」複合亞型註記、與雙相/BPD鑑別及創傷適應悲傷共病。'
+  },
+  you_ziqian: {
+    revealEvent: 8,
+    revealNote:
+      '【Phase I~II 最低法定門檻達成：F60.89 總準則 GA～GD 齊備】表面順從說好卻手滑弄濕企劃（GA）、在工作人際全面展現被動怠工反抗（GB）、帶來內心疲憊愧疚與職場人際困擾（GC），以及源於童年禁怒家規之長期穩定性格模式（GD）——其他特定人格障礙症門檻確立。\n🔓 進入 Phase III~IV（E09～E15）：解鎖被動攻擊研究準則（PA1/PA2）、混合特徵亞型註記及壓抑憤怒致身心症／持續性憂鬱共病。'
+  }
+};
+
+export function getDiagnosisRevealEvent(charId) {
+  return DIAGNOSIS_REVEAL_CONFIG[charId]?.revealEvent || 8;
+}
+
+// ==================== 雙階段臨床教學覆寫層（Phase I~II 門檻錨點 × Phase III~IV 亞型與共病 × 防衛展演 × 小結） ====================
+const CLINICAL_EVENT_OVERLAY = {
+  shen_mo: {
+    E04: { unlockCriteria: ['F60.0-A1'], criterionTags: ['F60.0-A1', 'F60.0-A4', 'F60.1-A1'], studySummary: '【鑑別要點】妄想型（PPD）在雙人互動裡把「望遠鏡角度」視為惡意監控；孤僻型（SzPD）只是毫不在乎他人在場。' },
+    E07: {
+      unlockCriteria: ['F60.0-A1', 'F60.0-A4'],
+      criterionTags: ['F60.0-A1', 'F60.0-A4'],
+      choiceDefenses: {
+        2: '共依附雙向監控擴張（Paranoid Merger Control）',
+        3: '背叛印證與敵對切割（Betrayal Confirmation & Freeze）'
+      },
+      studySummary: '【階段檢核】進入緊繃試探時，PPD 出現「先切斷親密以免成為軟肋」的反撲防衛，展現準則 A1/A4 的深層不安全感。'
+    },
+    E08: {
+      unlockCriteria: ['F60.0-A4'],
+      criterionTags: ['F60.0-A4'],
+      choiceDefenses: {
+        2: '隱私讓渡與監視依戀固化（Surveillance Codependency）',
+        3: '安全象徵威脅防衛（Security-Threat Withdrawal）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.0-A1, A2, A3, A4 共 4/7 項核心準則，達到 DSM-5-TR 妄想型人格障礙症最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F60.0-A6'], criterionTags: ['F60.0-A6', 'F60.81-A3'], studySummary: '【Phase III 進階鑑別】PPD 對他人的動機攻擊敏感；NPD 對尊嚴冒犯敏感。面對沈墨必須維持獨立與程序透明。' },
+    E10: {
+      unlockCriteria: ['F60.0-A5'],
+      criterionTags: ['F60.0-A5'],
+      choiceDefenses: {
+        2: '同意監控合謀（Collusive Hyper-Surveillance）',
+        3: '羞恥與舊恨激活絕交（Grudge-Triggered Severance）'
+      },
+      studySummary: '【Phase III 準則 A5】暗房裡的長久記恨與「十字架式清單記憶」（三年前一句話永不遺忘）正是 A5 的核心展現。'
+    },
+    E11: {
+      unlockCriteria: ['F60.0-A6', 'F60.0-A1'],
+      unlockSpecifiers: ['F60.0-SPEC1'],
+      criterionTags: ['F60.0-A6'],
+      specifierTags: ['F60.0-SPEC1'],
+      choiceDefenses: {
+        2: '雙人孤島妄想合流（Folie-à-Deux Isolation）',
+        3: '被拋棄背叛感誘發暴烈猜忌（Persecutory Rage Reaction）'
+      },
+      studySummary: '【Phase III 準則 A6 × 亞型註記】將正常勸說扭曲為惡意攻擊與串謀，並在現實證據檢核下區分「性格多疑（F60.0-SPEC1）」與「精神病性固定妄想」。'
+    },
+    E13: {
+      unlockComorbidities: ['F60.0-COM1'],
+      comorbidityTags: ['F60.0-COM1'],
+      choiceDefenses: {
+        2: '復仇反擊投射（Retaliatory Hostility Escalation）',
+        3: '創傷失格防衛抽離（Trauma-Invalidated Shutdown）'
+      },
+      studySummary: '【Phase IV 共病傾向】長期戰備狀態（聽見電流聲即難入眠）與泰迪熊錄音筆童年創傷，常共病廣泛性焦慮症與慢性失眠（F60.0-COM1）。'
+    },
+    E14: {
+      unlockCriteria: ['F60.0-A7'],
+      unlockSpecifiers: ['F60.0-SPEC1'],
+      unlockComorbidities: ['F60.0-COM1'],
+      criterionTags: ['F60.0-A7'],
+      specifierTags: ['F60.0-SPEC1'],
+      comorbidityTags: ['F60.0-COM1'],
+      choiceDefenses: {
+        2: '無界線共生鎖定（Boundless Enmeshment）',
+        3: '客體距離退防（Neutralizing Detachment）'
+      },
+      studySummary: '【Phase IV 綜合整理】伴侶親密穩定能減緩對忠誠的強迫試探（A7），但臨床處遇必須保留「先確認、不過度侵略隱私」的清楚界線。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜妄想型 F60.0】門檻：4/7（E01 A1、E02 A2、E03 A3、E06/E08 A4）➔ 進階：A5（E10）、A6（E11）、A7（E12/E14）｜亞型：高度警戒但仍保有現實核對彈性（SPEC1）｜共病：慢性失眠／焦慮症（COM1）。'
+    }
+  },
+  lin_jianwei: {
+    E04: { unlockCriteria: ['F60.1-A1'], criterionTags: ['F60.1-A1', 'F60.0-A1'], studySummary: '【Phase I】孤僻型缺乏進入人際情感交換的驅力（A1），面對誤會僅陳述客觀座標而非防衛反擊。' },
+    E07: {
+      unlockCriteria: ['F60.1-A1', 'F60.1-A7'],
+      criterionTags: ['F60.1-A1', 'F60.1-A7'],
+      choiceDefenses: {
+        2: '感官過載與系統關閉（Sensory-Social Overload Shutdown）',
+        3: '情緒剝離冷靜退場（Affective Detachment Withdrawal）'
+      },
+      studySummary: '【Phase II】孤僻型的「反鎖工作間」不是生氣傲嬌，而是高強度的社群負荷過載後的自然冷卻需求。'
+    },
+    E08: {
+      unlockCriteria: ['F60.1-A7'],
+      criterionTags: ['F60.1-A7'],
+      choiceDefenses: {
+        2: '物理空間侵佔引發窒息防衛（Intrusive Claustrophobia）',
+        3: '強制社交引發徹夜關機（Forced-Social Retreat）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.1-A1, A2, A6, A7 共 4/7 項，達到 DSM-5-TR 孤僻型人格障礙症最低診斷門檻！'
+    },
+    E09: {
+      unlockSpecifiers: ['F60.1-SPEC1'],
+      specifierTags: ['F60.1-SPEC1', 'F60.6-SPEC1'],
+      criterionTags: ['F60.1-A1', 'F60.1-A6'],
+      studySummary: '【Phase III 亞型鑑別註記】透過林見微 ＆ 溫言同場事件，確立「無慾疏離（SzPD）vs 恐懼退縮（AvPD）」的臨床鑑別。'
+    },
+    E10: {
+      unlockCriteria: ['F60.1-A3'],
+      criterionTags: ['F60.1-A3'],
+      choiceDefenses: {
+        2: '順從抹除與木偶化空洞（Hollow Compliance）',
+        3: '低社交親密驗證退回（Detached Validation Exit）'
+      },
+      studySummary: '【Phase III 準則 A3】「三十八光年並肩而行」具象化孤僻型對性與近距離親密經驗的低需求（F60.1-A3），但仍能建立專屬知音連結。'
+    },
+    E11: {
+      unlockCriteria: ['F60.1-A4'],
+      criterionTags: ['F60.1-A4'],
+      choiceDefenses: {
+        2: '群眾焦點感官超載崩潰（Public-Focus Overload）',
+        3: '情感系統強制休眠（Emotional System Shutdown）'
+      },
+      studySummary: '【Phase III 準則 A4】在嘈雜酒會上無感官與社交愉悅感（快感缺失 Anhedonia），唯有安靜天台與可控的星圖能使其復原。'
+    },
+    E13: {
+      unlockCriteria: ['F60.1-A5'],
+      unlockComorbidities: ['F60.1-COM1'],
+      criterionTags: ['F60.1-A5'],
+      comorbidityTags: ['F60.1-COM1'],
+      choiceDefenses: {
+        2: '理智隔離衝突逃避（Intellectualization Escape）',
+        3: '自我隔離關閉情感輸出（Affective Seal-Off）'
+      },
+      studySummary: '【Phase IV 準則 A5 × 共病傾向】幾乎沒有除了直系親屬外的親密朋友（A5）；長期「假裝表現熱情」可能引發慢性疲勞與持續性憂鬱情緒（F60.1-COM1）。'
+    },
+    E14: {
+      unlockSpecifiers: ['F60.1-SPEC1'],
+      unlockComorbidities: ['F60.1-COM1'],
+      specifierTags: ['F60.1-SPEC1'],
+      comorbidityTags: ['F60.1-COM1'],
+      choiceDefenses: {
+        2: '高頻情緒索求誘發倦怠（Affective Demand Fatigue）',
+        3: '零衝突平行退讓（Neutral Parallel Shift）'
+      },
+      studySummary: '【Phase IV 處遇總結】尊重雙星軌道距離而非強迫改變其社交基線，能避免社交偽裝耗竭共病。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜孤僻型 F60.1】門檻：4/7（E01 A1、E02/E03 A2、E06 A6、E05/E08 A7）➔ 進階：A3（E10）、A4（E11）、A5（E12/E13）｜鑑別註記：無慾疏離 vs 畏避恐懼（SPEC1）｜共病：持續性憂鬱／面具耗竭（COM1）。'
+    }
+  },
+  ruri: {
+    E04: { unlockCriteria: ['F21-A7'], criterionTags: ['F21-A7', 'F07.0-E'], studySummary: '【Phase I】準則 A7「古怪奇特的穿著與星象外表儀軌」，結合其對破碎瓷片賦予神祕宇宙意涵的表現。' },
+    E07: {
+      unlockCriteria: ['F21-A3'],
+      criterionTags: ['F21-A3'],
+      choiceDefenses: {
+        2: '隔離現實的魔幻共犯退行（Shared Magical Withdrawal）',
+        3: '霸凌創傷閃回與解離退縮（Stigma-Triggered Dissociation）'
+      },
+      studySummary: '【Phase II 準則 A3】異常感官體驗與鹽線淨化儀式，常反映她高度不安時企圖隔絕厄運的保護方式。'
+    },
+    E08: {
+      unlockCriteria: ['F21-A9'],
+      criterionTags: ['F21-A9'],
+      choiceDefenses: {
+        2: '被害妄想合流鎖閉（Shared Persecutory Locking）',
+        3: '知覺嘲諷引發絨布藏匿防衛（Traumatic Concealment）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F21-A1, A2, A3, A7, A9 共 5/9 項，達到 DSM-5-TR 思覺失調型人格障礙症最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F21-A1', 'F21-A2'], criterionTags: ['F21-A1', 'F21-A2', 'F60.0-A4'], studySummary: '【Phase III 鑑別比較】對同一陣風吹動風鈴的解碼：StPD（北風精靈問候）vs PPD（敵對摩斯密碼）。' },
+    E10: {
+      unlockCriteria: ['F21-A4'],
+      criterionTags: ['F21-A4'],
+      choiceDefenses: {
+        2: '禁止回歸現實之魔幻共生（Magical Isolation Lock）',
+        3: '全盤自我否定誘發退縮（Identity Invalidating Exit）'
+      },
+      studySummary: '【Phase III 準則 A4】脫下隱喻與占星面紗走進真實街道時，呈現詩意、跳躍卻充滿感知負荷的奇特思維語言（A4）。'
+    },
+    E11: {
+      unlockCriteria: ['F21-A5'],
+      unlockComorbidities: ['F21-COM1'],
+      criterionTags: ['F21-A5'],
+      comorbidityTags: ['F21-COM1'],
+      choiceDefenses: {
+        2: '全面社交封閉型偏執逃亡（Paranoid Social Isolation）',
+        3: '烏鴉知覺閃回與現實感解離（Stress-Induced Dissociation）'
+      },
+      studySummary: '【Phase III 準則 A5 × 共病傾向】壓力霸凌同時引發準則 A5 猜疑信念，並可能共病「短暫微精神病發作／急性解離恐慌（F21-COM1）」。'
+    },
+    E13: {
+      unlockCriteria: ['F21-A6'],
+      unlockSpecifiers: ['F21-SPEC1'],
+      criterionTags: ['F21-A6'],
+      specifierTags: ['F21-SPEC1'],
+      choiceDefenses: {
+        2: '妄想附和與現實界線流失（Delusional Collusion）',
+        3: '生存符號摧毀防衛反鎖（Survival-Metaphor Guard）'
+      },
+      studySummary: '【Phase IV 準則 A6 × 特徵註記】A6 不合宜情感反應實為外婆神龕與霸凌經歷下的防禦性解離隱喻（SPEC1），非真正思覺失調症情感平淡或固定妄想。'
+    },
+    E14: {
+      unlockCriteria: ['F21-A8'],
+      unlockComorbidities: ['F21-COM1'],
+      criterionTags: ['F21-A8'],
+      comorbidityTags: ['F21-COM1'],
+      choiceDefenses: {
+        2: '依賴式儀式占卜代償（Ritual-Dependent Decision Proxy）',
+        3: '界線安全退位（Gentle Boundary Distance）'
+      },
+      studySummary: '【Phase IV 準則 A8】過去因古怪而缺乏親密知心朋友（A8）；在真實地面定錨後仍能保存想像力與藝術天賦。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜思覺失調型 F21】門檻：5/9（E01 A1、E02 A2、E06/E07 A3、E04 A7、E05/E08 A9）➔ 進階：A4（E10）、A5（E11）、A6（E12/E13）、A8（E14）｜註記：具現實檢驗力與隱喻防禦功能（SPEC1）｜共病：短暫知覺解離／焦慮恐慌（COM1）。'
+    }
+  },
+  han_xiao: {
+    E04: { unlockCriteria: ['F60.2-A5'], criterionTags: ['F60.2-A5', 'F60.4-A1'], studySummary: '【Phase I 鑑別】同於聚光燈與危險氛圍中活躍：ASPD 藉由火焰賭局製造風險與操控快感（A5），HPD 則恐懼被搶走注目焦點。' },
+    E07: {
+      unlockCriteria: ['F60.2-CD'],
+      criterionTags: ['F60.2-CD'],
+      choiceDefenses: {
+        2: '工具性掠奪與獵物測試（Exploitative Prey Testing）',
+        3: '冷酷自認標籤拒絕改變（Cynical Anti-Moral Dismissal）'
+      },
+      studySummary: '【Phase II 準則 CD】在暴露感情風險時先亮出「混蛋」招牌推開人，同時透露早期街頭行為規範障礙的生存習性。'
+    },
+    E08: {
+      unlockCriteria: ['F60.2-CD'],
+      criterionTags: ['F60.2-CD'],
+      choiceDefenses: {
+        2: '抗拒被情感挾持之硬派推斥（Anti-Manipulation Rejection）',
+        3: '叢林法則冷漠自足驗證（Jungle-Law Hardening）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 3 項成人準則（A2 欺瞞、A3 衝動、A5 罔顧安全）及 15 歲前 CD 病史線索，達到 DSM-5-TR 反社會型最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F60.2-A2', 'F60.2-A4'], criterionTags: ['F60.2-A2', 'F60.2-A4', 'F60.7-A5'], studySummary: '【Phase III 鑑別比較】ASPD 利用不對等恐嚇測試邊界；DPD 則立即自我降價討好保命。' },
+    E10: {
+      unlockCriteria: ['F60.2-A7'],
+      unlockSpecifiers: ['F60.2-SPEC1'],
+      criterionTags: ['F60.2-A7'],
+      specifierTags: ['F60.2-SPEC1'],
+      choiceDefenses: {
+        2: '共犯毀滅盟約誘發（Antisocial Dyad Escalation）',
+        3: '武裝冷血面具復位（Callous Armor Re-Latching）'
+      },
+      studySummary: '【Phase III 準則 A7 × 亞型註記】表面缺少悔意（A7），卻在十六歲擋刀舊疤背後的被背叛記憶裡揭示：非先天「有限親社會情緒（CU 特質）」，而是創傷武裝出的工具性防衛（SPEC1）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.2-A4'],
+      unlockComorbidities: ['F60.2-COM1'],
+      criterionTags: ['F60.2-A4'],
+      comorbidityTags: ['F60.2-COM1'],
+      choiceDefenses: {
+        2: '高喚起極限衝動共謀（Reckless Escalation）',
+        3: '弱者退場驗證叢林信念（Distrust Validation）'
+      },
+      studySummary: '【Phase III 準則 A4 × 共病傾向】面對暴力與威脅習慣用「以暴制暴／賭命飆車（A4）」解決，且臨床上高度共病物質酒精使用與賭博成癮（F60.2-COM1）。'
+    },
+    E13: {
+      unlockCriteria: ['F60.2-A1'],
+      unlockComorbidities: ['F60.2-COM1'],
+      criterionTags: ['F60.2-A1'],
+      comorbidityTags: ['F60.2-COM1'],
+      choiceDefenses: {
+        2: '合理化施暴生存哲學（Hostile Worldview Reinforcement）',
+        3: '標籤防衛徹底閉鎖（Labeling Shutoff）'
+      },
+      studySummary: '【Phase IV 準則 A1 × 共病】後巷毒打與父母雙雙入獄（A1 藐視法規範之成長背景），理解同理心曾如何被家庭懲罰。'
+    },
+    E14: {
+      unlockCriteria: ['F60.2-A6'],
+      criterionTags: ['F60.2-A6'],
+      choiceDefenses: {
+        2: '控制對抗與反支配遊戲（Dominance Resistance）',
+        3: '情感抽離回安全距（Detached Neutrality）'
+      },
+      studySummary: '【Phase IV 準則 A6】過往不負責任與無固定承諾（A6）在邊界穩定的真實關係中轉化為願意為一個人的安全守規矩。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜反社會型 F60.2】門檻：3 項成人+CD（E01/E02 A2、E03/E06 A3、E04/E05 A5、E07/E08 CD）➔ 進階：A4（E09/E11）、A7（E10/E12）、A1（E13）、A6（E14）｜註記：創傷防衛 vs 原發性有限親社會情緒（SPEC1）｜共病：物質使用與嗜賭傾向（COM1）。'
+    }
+  },
+  su_fei: {
+    E04: { unlockCriteria: ['F60.3-A1'], criterionTags: ['F60.3-A1', 'F60.3-A2', 'F60.7-A5'], studySummary: '【Phase I 鑑別】同恐懼失去重視者，BPD 在瞬間觸發「我會被比下去而被丟棄（A1）」並展開言語貶抑。' },
+    E07: {
+      unlockCriteria: ['F60.3-A7'],
+      criterionTags: ['F60.3-A7'],
+      choiceDefenses: {
+        2: '無界線全天候共生綁定（24h Fusion Surveillance）',
+        3: '推開自驗預言崩潰（Self-Sabotaging Abandonment Validation）'
+      },
+      studySummary: '【Phase II 準則 A7】慢回一小時即爆發極度空虛與「你先走吧」的預防性推開，呈現 BPD 的經典測試反應。'
+    },
+    E08: {
+      unlockCriteria: ['F60.3-A8'],
+      criterionTags: ['F60.3-A8'],
+      choiceDefenses: {
+        2: '情緒海嘯與人際獨佔誓言（Symbiotic Enmeshment Pact）',
+        3: '無效化咆哮引發創傷劇痛（Invalidation-Triggered Rage/Despair）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.3-A1, A2, A6, A7, A8 共 5/9 項，達到 DSM-5-TR 邊緣型人格障礙症最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F60.3-A8'], criterionTags: ['F60.3-A8', 'F60.1-A7'], studySummary: '【Phase III 鑑別比較】面對大提琴與星座，BPD 用強烈情緒渴求鏡像；SzPD 用冷靜音律數據回應。' },
+    E10: {
+      unlockCriteria: ['F60.3-A3'],
+      unlockComorbidities: ['F60.3-COM1'],
+      criterionTags: ['F60.3-A3'],
+      comorbidityTags: ['F60.3-COM1'],
+      choiceDefenses: {
+        2: '病態共生囚禁合謀（Object-Loss Fusion）',
+        3: '恐懼嫌惡擊碎自我客體（Self-Fragmentation Collapse）'
+      },
+      studySummary: '【Phase III 準則 A3 × 共病傾向】「看不見你，我就記不得自己是誰、自己被愛嗎？」揭示準則 A3 自我認同不穩與 C-PTSD 依附斷裂共病（F60.3-COM1）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.3-A4'],
+      criterionTags: ['F60.3-A4'],
+      choiceDefenses: {
+        2: '衝動自毀破壞共謀（Impulsive Wrecking Escapism）',
+        3: '被否定羞辱引發舞台創傷崩壞（Shame-Rage Self-Harm Act）'
+      },
+      studySummary: '【Phase III 準則 A4】受母親掛電話否定後想拿起剪刀毀琴（準則 A4 衝動自毀風險），須即時設立安全停損並區分核心價值。'
+    },
+    E13: {
+      unlockCriteria: ['F60.3-A5', 'F60.3-A9'],
+      unlockComorbidities: ['F60.3-COM1'],
+      criterionTags: ['F60.3-A5', 'F60.3-A9'],
+      comorbidityTags: ['F60.3-COM1'],
+      choiceDefenses: {
+        2: '仇恨轉移失焦（Misdirected Anger Escalation）',
+        3: '宿命標籤二次重創（Biological-Fate Stigma Injury）'
+      },
+      studySummary: '【Phase IV 準則 A5/A9 × 共病】赤腳追計程車的紅色皮箱揭示為何壓力下出現解離迷霧（A9）與自傷念頭（A5），並常共病重鬱/雙相共病診斷考量。'
+    },
+    E14: {
+      unlockCriteria: ['F60.3-A9'],
+      unlockSpecifiers: ['F60.3-SPEC1'],
+      criterionTags: ['F60.3-A9'],
+      specifierTags: ['F60.3-SPEC1'],
+      choiceDefenses: {
+        2: '消滅個人空間共生（Boundary-Free Painting）',
+        3: '依附安全退場（Bittersweet Boundary Exit）'
+      },
+      studySummary: '【Phase IV 鑑別筆記】BPD 的情緒轉換（minutes/hours，受人際觸發）顯著不同於雙相情緒障礙症持續數日～數週的生理躁鬱週期（F60.3-SPEC1）。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜邊緣型 F60.3】門檻：5/9（E01/E04 A1、E02 A2、E03/E06 A6、E05/E07 A7、E08 A8）➔ 進階：A3（E10）、A4（E11）、A5（E12/E13）、A9（E13/E14）｜註記：與雙相情緒障礙症鑑別（SPEC1）｜共病：C-PTSD／情感疾患（COM1）。'
+    }
+  },
+  xia_le: {
+    E04: { unlockCriteria: ['F60.4-A1'], criterionTags: ['F60.4-A1', 'F60.2-A5'], studySummary: '【Phase I 鑑別】同樣搶占舞台焦點：HPD 恐懼被觀眾忘記而情緒外顯失落（A1）；ASPD 只為控制感與冒險撩撥。' },
+    E07: {
+      unlockCriteria: ['F60.4-A5'],
+      criterionTags: ['F60.4-A5'],
+      choiceDefenses: {
+        2: '戲劇張力嫉妒成癮循環（Dramatic Triangulation Hook）',
+        3: '「成為透明人」羞恥熄火（Spotlight-Loss Collapse）'
+      },
+      studySummary: '【Phase II 準則 A5】用緋聞戲碼索求關注，背後呈現 HPD 印象派式卻空泛缺乏深度的言詞表達（A5）。'
+    },
+    E08: {
+      unlockCriteria: ['F60.4-A6'],
+      criterionTags: ['F60.4-A6'],
+      choiceDefenses: {
+        2: '條件式自尊表演綁架（Conditional Spotlight Dependency）',
+        3: '外貌羞辱引發舞台幕後萎縮（Cosmetic-Shame Collapse）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.4-A1, A2, A4, A5, A6 共 5/8 項，達到 DSM-5-TR 做作型人格障礙症最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F60.4-A1', 'F60.4-A7'], criterionTags: ['F60.4-A1', 'F60.4-A7', 'F60.6-A5'], studySummary: '【Phase III 鑑別比較】對公開朗讀的完全相反反應：做作型視眾目為保護色；畏避型視眾目為處刑台。' },
+    E10: {
+      unlockCriteria: ['F60.4-A3'],
+      unlockComorbidities: ['F60.4-COM1'],
+      criterionTags: ['F60.4-A3'],
+      comorbidityTags: ['F60.4-COM1'],
+      choiceDefenses: {
+        2: '強迫性濃妝面具共生（Persona-Only Attachment）',
+        3: '素顏否定引發虛無崩解（False-Self Rejection Despair）'
+      },
+      studySummary: '【Phase III 準則 A3 × 共病傾向】卸下亮片戲服後的情感空洞感與快速切換（A3），揭露當失去表演強化時容易出現身體化疲勞與次發性憂鬱情緒（F60.4-COM1）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.4-A7'],
+      criterionTags: ['F60.4-A7'],
+      choiceDefenses: {
+        2: '極端戲劇操弄（Histrionic Crisis Escalation）',
+        3: '負評內化致存在消散焦慮（Public-Rejection Despair）'
+      },
+      studySummary: '【Phase III 準則 A7】容易受他人留言與環境聲音過度影響（易受暗示性 A7），粉絲退粉即等同自己存在被擦除。'
+    },
+    E13: {
+      unlockCriteria: ['F60.4-A7'],
+      unlockComorbidities: ['F60.4-COM1'],
+      criterionTags: ['F60.4-A7'],
+      comorbidityTags: ['F60.4-COM1'],
+      choiceDefenses: {
+        2: '強迫巨星代償壓迫（Compensatory Fame Drive）',
+        3: '輕忽童年被遺忘創傷（Invisible-Child Invalidation）'
+      },
+      studySummary: '【Phase IV 準則 × 共病】破舊小丑紙帽揭示其「不閃亮就不存在」的起源，是區分 HPD 與僅愛自戀獨尊的 NPD 的深層共情鑰匙。'
+    },
+    E14: {
+      unlockCriteria: ['F60.4-A8'],
+      unlockSpecifiers: ['F60.4-SPEC1'],
+      criterionTags: ['F60.4-A8'],
+      specifierTags: ['F60.4-SPEC1'],
+      choiceDefenses: {
+        2: '獨佔囚禁削弱自信（Possessive Stage-Lock）',
+        3: '崇拜距離安全切割（Audience-Zone Detachment）'
+      },
+      studySummary: '【Phase IV 準則 A8 × 特徵註記】A8 將「台下觀眾席關係過度誇大解讀為緊密親密」，最終在專屬兩人劇場中轉向真實而非僅僅表層魅惑（F60.4-SPEC1）。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜做作型 F60.4】門檻：5/8（E01/E04 A1、E03 A2、E02/E05 A4、E07 A5、E08 A6）➔ 進階：A3（E10）、A7（E09/E11/E13）、A8（E12/E14）｜註記：淺薄表演下的真實依附渴求（SPEC1）｜共病：身體化困擾／憂鬱空虛傾向（COM1）。'
+    }
+  },
+  gu_qingcheng: {
+    E04: { unlockCriteria: ['F60.81-A3', 'F60.81-A9'], criterionTags: ['F60.81-A3', 'F60.81-A9', 'F60.6-A4'], studySummary: '【Phase I 鑑別】對專業能力的挑剔評價：NPD 利用優越感拉開高低階序；AvPD 則全盤當真並逃離。' },
+    E07: {
+      unlockCriteria: ['F60.81-A7'],
+      criterionTags: ['F60.81-A7'],
+      choiceDefenses: {
+        2: '階層附庸與特權剝削餵養（Submissive Entitlement Feeding）',
+        3: '自戀暴怒與全盤驅逐防衛（Narcissistic Rage & Cut-off）'
+      },
+      studySummary: '【Phase II 準則 A7】面對自卑感微露，NPD 立即使用高壓「施捨時間」貶低對方，展現缺乏同理心的防禦甲冑（A7）。'
+    },
+    E08: {
+      unlockCriteria: ['F60.81-A9'],
+      criterionTags: ['F60.81-A9'],
+      choiceDefenses: {
+        2: '奴僕化討好強化高傲剝削（Grandiose Servitude Lock）',
+        3: '自尊脆弱拆穿觸發反鎖防禦（Vulnerability-Triggered Rage Seal）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.81-A1, A3, A4, A7, A9 共 5/9 項，達到 DSM-5-TR 自戀型人格障礙症最低診斷門檻！'
+    },
+    E09: {
+      unlockSpecifiers: ['F60.81-SPEC1'],
+      criterionTags: ['F60.81-A3'],
+      specifierTags: ['F60.81-SPEC1', 'F60.0-A6'],
+      studySummary: '【Phase III 亞型鑑別】面對沈墨的平視挑戰，揭露 NPD 在外顯高壓特權下「誰也不能質疑我權威」的敏感脆弱底層。'
+    },
+    E10: {
+      unlockCriteria: ['F60.81-A5'],
+      unlockSpecifiers: ['F60.81-SPEC1'],
+      criterionTags: ['F60.81-A5'],
+      specifierTags: ['F60.81-SPEC1'],
+      choiceDefenses: {
+        2: '虛妄造神共同攻擊外界（Grandiose Delusional Collusion）',
+        3: '第二名羞恥暴怒極端斷交（Shame-Triggered Narcissistic Rage）'
+      },
+      studySummary: '【Phase III 準則 A5 × 亞型切換】98 分第二名碎裂時，外顯「誇大自戀 Grandiose」瞬間塌縮為「脆弱自戀 Vulnerable」，呈現特權要求（A5）與無價值毀滅感的急劇交替（F60.81-SPEC1）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.81-A6'],
+      criterionTags: ['F60.81-A6'],
+      choiceDefenses: {
+        2: '報復性剝削與資源傾軋（Vindictive Exploitativeness）',
+        3: '認同羞辱權威引發冰封死寂（Parental-Shame Collapse）'
+      },
+      studySummary: '【Phase III 準則 A6】被父親權威打壓後，傾向動用優勢資源報復或壓制他人（A6 人際剝削防禦）以奪回優越位置。'
+    },
+    E13: {
+      unlockCriteria: ['F60.81-A2'],
+      unlockSpecifiers: ['F60.81-SPEC1'],
+      criterionTags: ['F60.81-A2'],
+      specifierTags: ['F60.81-SPEC1'],
+      choiceDefenses: {
+        2: '復仇對抗延續評價輪迴（Competitive Rage Cycle）',
+        3: '二次嘲諷焊接黃金盔甲（Shame Armor Permanent Lock）'
+      },
+      studySummary: '【Phase IV 準則 A2 × 亞型註記】壁爐灰燼中的半張亞軍獎狀證明：無限成功、受仰望成神（A2）只是怕「拿第二名就會被父母丟進火裡」的童年求生術。'
+    },
+    E14: {
+      unlockCriteria: ['F60.81-A8'],
+      unlockComorbidities: ['F60.81-COM1'],
+      criterionTags: ['F60.81-A8'],
+      comorbidityTags: ['F60.81-COM1'],
+      choiceDefenses: {
+        2: '虛榮物化強化孤高焦慮（Grandiose Objectification）',
+        3: '崇拜仰望平行結案（Admirer Boundary Distance）'
+      },
+      studySummary: '【Phase IV 準則 A8 × 共病傾向】不再羨嫉他人的平凡快樂（A8），也療癒了自戀潰敗期潛藏的低自尊憂鬱困擾（F60.81-COM1）。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜自戀型 F60.81】門檻：5/9（E01 A1、E03/E04 A3、E05/E06 A4、E02/E07 A7、E08 A9）➔ 進階：A5（E10）、A6（E11）、A2（E12/E13）、A8（E14）｜亞型：誇大自戀 ↔ 脆弱自戀切換（SPEC1）｜共病：自戀潰敗鬱期（COM1）。'
+    }
+  },
+  wen_yan: {
+    E04: { unlockCriteria: ['F60.6-A4'], criterionTags: ['F60.6-A4', 'F60.81-A3'], studySummary: '【Phase I 鑑別】面對同一句「像來道歉的學徒」，AvPD 立刻將嚴苛評論內化並先退場自責（A4）。' },
+    E07: {
+      unlockCriteria: ['F60.6-A6'],
+      criterionTags: ['F60.6-A6'],
+      choiceDefenses: {
+        2: '無能羞愧強化逃避隱形（Incompetence Confirmation）',
+        3: '徹底印證「我惹人厭」而鎖門哭泣（Rejection Confirmation Withdrawal）'
+      },
+      studySummary: '【Phase II 準則 A6】門縫下的道歉信具體展示 A6「認定自己在社交上極為拙劣、無趣且低人一等」，並主動提前自我放逐。'
+    },
+    E08: {
+      unlockCriteria: ['F60.6-A6'],
+      criterionTags: ['F60.6-A6'],
+      choiceDefenses: {
+        2: '過度代勞印證自己無用（Helpless Inadequacy Proof）',
+        3: '嚴厲批評觸發羞恥逃離（Criticism-Driven Escape）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.6-A2, A4, A5, A6 共 4/7 項，達到 DSM-5-TR 畏避型人格障礙症最低診斷門檻！'
+    },
+    E09: {
+      unlockSpecifiers: ['F60.6-SPEC1'],
+      criterionTags: ['F60.6-A4'],
+      specifierTags: ['F60.6-SPEC1', 'F60.1-SPEC1'],
+      studySummary: '【Phase III 亞型鑑別註記】與孤僻型林見微同場對照：溫言不是不想參與慶功茶會，而是渴望連結卻因「怕講錯話冷場」的深度自我厭惡退縮。'
+    },
+    E10: {
+      unlockCriteria: ['F60.6-A1'],
+      unlockComorbidities: ['F60.6-COM1'],
+      criterionTags: ['F60.6-A1'],
+      comorbidityTags: ['F60.6-COM1'],
+      choiceDefenses: {
+        2: '替他發言強化終身畏避（Co-Avoidant Silencing）',
+        3: '重演嘲笑創傷瞬間休克失語（Trauma-Triggered Speech Freeze）'
+      },
+      studySummary: '【Phase III 準則 A1 × 共病傾向】在公開朗讀恐慌裡同時展現社交場合口吃、心跳狂飆等「廣泛性社交焦慮症（SAD）」共病特徵（F60.6-COM1）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.6-A3'],
+      criterionTags: ['F60.6-A3'],
+      choiceDefenses: {
+        2: '共謀逃避加速社會萎縮（Avoidant Sanctuary Isolation）',
+        3: '羞辱逼迫自我否定坍塌（Shame-Induced Collapse）'
+      },
+      studySummary: '【Phase III 準則 A3】當眾受到挑釁後立即想簽解約永不見人（退縮與人際保留 A3），考驗支持者是「推入防空洞」還是「陪同暴露面對」。'
+    },
+    E13: {
+      unlockCriteria: ['F60.6-A7'],
+      criterionTags: ['F60.6-A7'],
+      choiceDefenses: {
+        2: '對立情緒驚嚇畏避者（Hostile Tension Discomfort）',
+        3: '否定創傷觸發再度鎖櫃（Shame-Reinforced Shutoff）'
+      },
+      studySummary: '【Phase IV 準則 A7】小學五年級講台受嘲與母親的長嘆，種下他極度不願冒險開啟新社交或任何可能讓他出醜之活動的種子（A7）。'
+    },
+    E14: {
+      unlockCriteria: ['F60.6-A7'],
+      unlockComorbidities: ['F60.6-COM1'],
+      criterionTags: ['F60.6-A7'],
+      comorbidityTags: ['F60.6-COM1'],
+      choiceDefenses: {
+        2: '社交圈封鎖式保護依附（Protective Isolation）',
+        3: '安全旁觀溫和結案（Safe-Distance Acquaintance）'
+      },
+      studySummary: '【Phase IV 預後總結】畏避型共病廣泛性社交焦慮症（SAD）比例極高；臨床關鍵不是替代說話，而是與個案建立不批評的安全暴露梯度。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜畏避型 F60.6】門檻：4/7（E01/E04 A4、E02/E05 A2、E03/E06 A5、E07/E08 A6）➔ 進階：A1（E10）、A3（E11/E12）、A7（E13/E14）｜註記：與孤僻型「無慾 vs 渴望但怕痛」鑑別（SPEC1）｜共病：廣泛性社交焦慮症（COM1）。'
+    }
+  },
+  bai_xiaolu: {
+    E04: { unlockCriteria: ['F60.7-A3'], criterionTags: ['F60.7-A3', 'F60.3-A1'], studySummary: '【Phase I 鑑別】同面對失誤衝突：BPD 激烈指責被棄；DPD 則即刻攬下所有錯處、自我貶低並請求留情（A3）。' },
+    E07: {
+      unlockCriteria: ['F60.7-A5'],
+      criterionTags: ['F60.7-A5'],
+      choiceDefenses: {
+        2: '順從退行與自主能力剝奪（Infantilizing Symbiosis）',
+        3: '怕被拋棄而自我跪求貶抑（Terror-Driven Subjugation）'
+      },
+      studySummary: '【Phase II 準則 A5】把「被鼓勵自己挑配方」解讀為「要丟下不管了」，連代五天夜班正是為了取得別人照護而過度忍受勞苦（A5）。'
+    },
+    E08: {
+      unlockCriteria: ['F60.7-A6'],
+      criterionTags: ['F60.7-A6'],
+      choiceDefenses: {
+        2: '徹底退行回金絲雀籠（Total Regression Compliance）',
+        3: '拋棄危機引發癱瘓無助哭泣（Helpless Abandonment Collapse）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.7-A1, A2, A3, A5, A6 共 5/8 項，達到 DSM-5-TR 依賴型人格障礙症最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F60.7-A2', 'F60.7-A5'], criterionTags: ['F60.7-A2', 'F60.7-A5', 'F60.89-GA'], studySummary: '【Phase III 鑑別比較】句型同樣是「都可以」：小鹿是害怕做錯被棄的恐慌；子謙則是隱性冷笑與反擊抱怨。' },
+    E10: {
+      unlockCriteria: ['F60.7-A4'],
+      unlockSpecifiers: ['F60.7-SPEC1'],
+      criterionTags: ['F60.7-A4'],
+      specifierTags: ['F60.7-SPEC1'],
+      choiceDefenses: {
+        2: '簽立主從切結鎖死共生（Subjugated-Bond Codependency）',
+        3: '推開巨嬰批判引發被棄絕崩盤（Abandonment Panic Breakdown）'
+      },
+      studySummary: '【Phase III 準則 A4 × 臨床註記】不敢啟動個人獨立計畫（A4），必須區分她渴望的不是拒絕長大，而是「怕獨立就會換來照顧者哭泣與離別（SPEC1）」。'
+    },
+    E11: {
+      unlockCriteria: ['F60.7-A7'],
+      unlockComorbidities: ['F60.7-COM1'],
+      criterionTags: ['F60.7-A7'],
+      comorbidityTags: ['F60.7-COM1'],
+      choiceDefenses: {
+        2: '替換式控制爭奪權力（Savior-Controller Swap）',
+        3: '交還家庭情緒勒索源（Enmeshed Family Recapture）'
+      },
+      studySummary: '【Phase III 準則 A7 × 共病傾向】面對家庭施壓即刻想換取保護依附傘，或陷入持續對外在危險過度擔憂的廣泛性焦慮症（GAD，F60.7-COM1）共病表現。'
+    },
+    E13: {
+      unlockCriteria: ['F60.7-A7'],
+      criterionTags: ['F60.7-A7'],
+      choiceDefenses: {
+        2: '強制斷親引發生存依附焦慮（Forced-Cut Loyalty Conflict）',
+        3: '印證先天無能信念（Learned-Helplessness Reinforcement）'
+      },
+      studySummary: '【Phase IV 準則 A7 根源】被母親剪掉拉鍊的小背包解釋了一切：她學會了「獨立＝會害媽媽死或被丟下」，遂極度依賴他人的指引才敢行動。'
+    },
+    E14: {
+      unlockCriteria: ['F60.7-A8'],
+      unlockComorbidities: ['F60.7-COM1'],
+      criterionTags: ['F60.7-A8'],
+      comorbidityTags: ['F60.7-COM1'],
+      choiceDefenses: {
+        2: '打壓伴侶獨立成長回退（Growth-Suppressing Control）',
+        3: '自主祝福平行離席（Supportive Independence Farewell）'
+      },
+      studySummary: '【Phase IV 準則 A8 × 共病療癒】對獨力照顧自己不切實際的恐懼（A8）與 GAD 慢性焦慮在自主成功經驗中大幅緩解。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜依賴型 F60.7】門檻：5/8（E01/E02 A1、E05 A2、E03/E04 A3、E06/E07 A5、E08 A6）➔ 進階：A4（E10/E12）、A7（E11/E13）、A8（E14）｜註記：共生恐懼源於控制依附學習（SPEC1）｜共病：廣泛性焦慮症 GAD（COM1）。'
+    }
+  },
+  ji_yan: {
+    E04: { unlockCriteria: ['F60.5-A8'], criterionTags: ['F60.5-A8', 'F60.89-GB'], studySummary: '【Phase I 鑑別】OCPD 對時間表與字距的 15 分鐘級別剛性控制（A8），在遇到消極阻撓時越發收緊準則防禦。' },
+    E07: {
+      unlockCriteria: ['F60.5-A2'],
+      criterionTags: ['F60.5-A2'],
+      choiceDefenses: {
+        2: '僵化規則納管標本化（Hyper-Regulated Objectification）',
+        3: '破壞結構誘發失控冷戰（Structure-Loss Defensive Freeze）'
+      },
+      studySummary: '【Phase II 準則 A2】心率上升時立即寫出十二頁 SOP 防範失控感（理智化與情感隔離 Defense），並以嚴格格式追求無懈可擊的安全性（A2）。'
+    },
+    E08: {
+      unlockCriteria: ['F60.5-A8'],
+      criterionTags: ['F60.5-A8'],
+      choiceDefenses: {
+        2: '助長僵化冒險規則執行（Rigid Compliance Hazard）',
+        3: '羞辱秩序需求導致隔離鎖門（Order-Shaming Lockout）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F60.5-A1, A2, A3, A8 共 4/8 項，達到 DSM-5-TR 強迫型人格障礙症最低診斷門檻！'
+    },
+    E09: { unlockCriteria: ['F60.5-A1', 'F60.5-A8'], criterionTags: ['F60.5-A1', 'F60.5-A8', 'F07.0-B'], studySummary: '【Phase III 鑑別比較】OCPD 靠剛性時刻表壓制失控焦慮；TBI 性格改變則無法仰賴大腦抑制迴路。' },
+    E10: {
+      unlockCriteria: ['F60.5-A6'],
+      criterionTags: ['F60.5-A6'],
+      choiceDefenses: {
+        2: '強迫讀秒共謀牢籠（Compulsive-Clock Collusion）',
+        3: '創傷失格羞辱觸發決裂（Trauma-Object Desecration Freeze）'
+      },
+      studySummary: '【Phase III 準則 A6】不願委派任何人，連壞掉的懷錶失去刻度都要獨自拼命補償（A6 不願授權除非完全依我方式執行）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.5-A4'],
+      unlockComorbidities: ['F60.5-COM1'],
+      criterionTags: ['F60.5-A4'],
+      comorbidityTags: ['F60.5-COM1'],
+      choiceDefenses: {
+        2: '觸犯道德潔癖引發極端排斥（Scrupulosity Moral Breach）',
+        3: '羞辱職責加深強迫自懲（Self-Punitive Overwork Escalation）'
+      },
+      studySummary: '【Phase III 準則 A4 × 共病傾向】一點貼反的非核心標籤引發極度的過度良知與道德審判（A4），背後常伴隨焦慮緊繃與自責性次發憂鬱（F60.5-COM1）。'
+    },
+    E13: {
+      unlockCriteria: ['F60.5-A5'],
+      unlockComorbidities: ['F60.5-COM1'],
+      criterionTags: ['F60.5-A5'],
+      comorbidityTags: ['F60.5-COM1'],
+      choiceDefenses: {
+        2: '強化倖存者內疚自懲（Survivor-Guilt Reinforcement）',
+        3: '理智化割裂創傷共鳴（Empathic Disconnect Freeze）'
+      },
+      studySummary: '【Phase IV 準則 A5 × 共病】保存舊照與發票物件（A5 不捨丟棄無感情價值舊物），源於十一歲漏看胎壓的倖存者內疚與慢性鬱悶（F60.5-COM1）。'
+    },
+    E14: {
+      unlockCriteria: ['F60.5-A7'],
+      unlockSpecifiers: ['F60.5-SPEC1'],
+      criterionTags: ['F60.5-A7'],
+      specifierTags: ['F60.5-SPEC1'],
+      choiceDefenses: {
+        2: '剝奪秩序框架引發隱微焦慮（Routine-Deprivation Anxiety）',
+        3: '禮貌邊界尊敬道別（Respectful Boundary Parting）'
+      },
+      studySummary: '【Phase IV 準則 A7 × 臨床鑑別】把防錯預備視作愛與保護的方式（A7）；並確認「自我協調型 OCPD（覺得規章沒錯）」與「自我衝突型 OCD（痛苦於強迫儀式）」的關鍵分化（F60.5-SPEC1）。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜強迫型 F60.5】門檻：4/8（E01/E02 A1、E05/E07 A2、E03/E06 A3、E04/E08 A8）➔ 進階：A6（E10/E12）、A4（E11）、A5（E13）、A7（E14）｜註記：Ego-syntonic OCPD vs Ego-dystonic OCD（SPEC1）｜共病：焦慮／次發性憂鬱（COM1）。'
+    }
+  },
+  lu_qinglan: {
+    E04: { unlockCriteria: ['F07.0-E'], criterionTags: ['F07.0-E', 'F21-A7'], studySummary: '【Phase I】即使對陶瓷自嘲幽默，她依然真切體驗到失去過去精密手術能力的苦痛與人際落差（準則 E）。' },
+    E07: {
+      unlockCriteria: ['F07.0-D'],
+      criterionTags: ['F07.0-D'],
+      choiceDefenses: {
+        2: '病理標籤化剝奪主體尊嚴（Medicalized Invalidism）',
+        3: '失去自我價值自卑潰敗（Post-Injury Worthlessness Despair）'
+      },
+      studySummary: '【Phase II 準則 D】在情緒低落自貶中，她的人格雖變卻無譫妄或失智混亂（準則 D：非發生於譫妄時，意識與認知定向完全清晰）。'
+    },
+    E08: {
+      unlockCriteria: ['F07.0-B', 'F07.0-E'],
+      criterionTags: ['F07.0-B', 'F07.0-E'],
+      choiceDefenses: {
+        2: '過度醫療保護禁錮（Over-Medicalized Deprivation）',
+        3: '機能殘障斥責加劇自我否定（Competence-Loss Shame）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 F07.0-A, B, C, D, E 全部 5 項診斷門檻，確立車禍右額葉腦傷（一般醫學狀況）所致之性格改變！'
+    },
+    E09: {
+      unlockCriteria: ['F07.0-SUB-DIS'],
+      criterionTags: ['F07.0-SUB-DIS', 'F60.5-A8'],
+      studySummary: '【Phase III 亞型註記｜去抑制型】在窯燒排列與對話中自然表現出眶額葉過濾器缺損（衝動直率、無法按僵化編號操作）。'
+    },
+    E10: {
+      unlockCriteria: ['F07.0-SUB-LAB'],
+      criterionTags: ['F07.0-SUB-LAB'],
+      choiceDefenses: {
+        2: '強迫偽裝創傷前完美幻影（Pre-Morbid Persona Coercion）',
+        3: '身體創疤嫌惡羞恥擊碎（Somatic-Scar Rejection Trauma）'
+      },
+      studySummary: '【Phase III 亞型註記｜情緒易變型】摘下額角金箔髮夾展現開顱疤痕時，迅速湧現不穩卻真實的悲喜流動（F07.0-SUB-LAB）。'
+    },
+    E11: {
+      unlockCriteria: ['F07.0-SUB-DIS'],
+      unlockSpecifiers: ['F07.0-SPEC1'],
+      criterionTags: ['F07.0-SUB-DIS'],
+      specifierTags: ['F07.0-SPEC1'],
+      choiceDefenses: {
+        2: '煽動脫抑制衝動毀損社會功能（Disinhibited Wrecking Escalation）',
+        3: '內化舊同事鄙夷引發失力潰敗（Social-Stigma Abandonment Collapse）'
+      },
+      studySummary: '【Phase III 亞型與鑑別註記】面對前未婚夫嘲笑，「氣到嗡嗡叫手停不下來」揭示雙重課題：需保護其「衝動控制障礙（SUB-DIS）」，且病理切線明確落於車禍神經學損傷而非原發性狂躁症（SPEC1）。'
+    },
+    E13: {
+      unlockCriteria: ['F07.0-COMB'],
+      unlockComorbidities: ['F07.0-COM1'],
+      criterionTags: ['F07.0-COMB'],
+      comorbidityTags: ['F07.0-COM1'],
+      choiceDefenses: {
+        2: '無視器質限制之復原強求（Organic-Limit Denial Stress）',
+        3: '社會階級墜落感羞辱（Status-Loss Stigma Blow）'
+      },
+      studySummary: '【Phase IV 複合亞型 × 共病傾向】顯微器械與初代金繼碗整合了情緒易變與去抑制「複合亞型（COMB）」，並照見TBI 後常見的認知疲勞與失去過往完美自我的適應性悲傷（F07.0-COM1）。'
+    },
+    E14: {
+      unlockComorbidities: ['F07.0-COM1'],
+      comorbidityTags: ['F07.0-COM1'],
+      choiceDefenses: {
+        2: '過度糾正神經學特質（Behavioral Over-Suppression）',
+        3: '爽朗支持式朋友距離（Appreciative Companionship）'
+      },
+      studySummary: '【Phase IV 預後總結】「金繼（Kintsugi）」概念成為接納器質受損與性格新貌的最佳隱喻，緩解其失落悲傷並建立互助結構。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜腦傷所致性格改變 F07.0】門檻：A～E 五核心準則齊備（E01～E08）➔ 亞型揭曉：情緒易變型（E10）＋去抑制型（E09/E11）➔ 複合亞型（E12/E13）｜鑑別註記：神經器質病因 vs 原發雙相/BPD（SPEC1）｜共病：TBI 認知疲勞／喪失前自我之適應性悲傷（COM1）。'
+    }
+  },
+  you_ziqian: {
+    E04: { unlockCriteria: ['F60.89-GC'], criterionTags: ['F60.89-GC', 'F60.7-A5'], studySummary: '【Phase I 鑑別】同是迴避衝突，小鹿是害怕被拋棄的自貶（DPD）；子謙則因長期隱忍累積成暗刺與疲憊困擾（GC）。' },
+    E07: {
+      unlockCriteria: ['F60.89-GD'],
+      criterionTags: ['F60.89-GD'],
+      choiceDefenses: {
+        2: '吞下苦水加劇陰陽失衡（Passive-Resentment Escalation）',
+        3: '無辜受虐劇本道德反殺（Martyr-Victim Inversion）'
+      },
+      studySummary: '【Phase II 準則 GD】「隨身碟不小心丟進洗衣機」＋雙倍苦拿鐵＋微笑自嘲，呈現跨越長期生命的穩定被動攻擊模式（GD）。'
+    },
+    E08: {
+      unlockCriteria: ['F60.89-GD'],
+      criterionTags: ['F60.89-GD'],
+      choiceDefenses: {
+        2: '縱容消極躺平依附破壞界線（Passive-Dependency Enabling）',
+        3: '誤信假笑累加隱性怨懟（Resentment Ledger Accumulation）'
+      },
+      studySummary: '【🥇 Phase I~II 門檻結算】已完成 DSM-5-TR 人格障礙總準則 GA～GD（跨情境僵化模式、功能困擾、童年起始穩定軌跡），正式確立其他特定人格障礙症！'
+    },
+    E09: { unlockCriteria: ['F60.89-GA', 'F60.89-GC'], criterionTags: ['F60.89-GA', 'F60.89-GC', 'F60.7-A2'], studySummary: '【Phase III 鑑別比較】透過咖啡廳一杯「隨便」區分：真誠順從怕出錯（DPD）vs 微笑冷眼拒表態（被動攻擊型）。' },
+    E10: {
+      unlockCriteria: ['F60.89-PA1'],
+      criterionTags: ['F60.89-PA1'],
+      choiceDefenses: {
+        2: '金錢支配順從假面（Servile-Mask Enmeshment）',
+        3: '面具焊死冷酷隔離（Smile-Armor Permanent Seal）'
+      },
+      studySummary: '【Phase III 研究準則 PA1】被家族當成無情緒提款機時邊微笑邊咬出血背，具體體現被動阻撓與難以承接合理期望背後不被看見的委屈怒氣（PA1）。'
+    },
+    E11: {
+      unlockCriteria: ['F60.89-PA2'],
+      criterionTags: ['F60.89-PA2'],
+      choiceDefenses: {
+        2: '自我毀滅式破壞共犯（Self-Sabotage Collusion）',
+        3: '怒棄後徹底自我抹除（Self-Destructive Retaliation）'
+      },
+      studySummary: '【Phase III 研究準則 PA2】截稿前想打翻水毀掉主機，演繹「抱怨不被理解卻同時透過自我設障與拖延懲罰自己與世界（PA2）」。'
+    },
+    E13: {
+      unlockCriteria: ['F60.89-PA2'],
+      unlockComorbidities: ['F60.89-COM1'],
+      criterionTags: ['F60.89-PA2'],
+      comorbidityTags: ['F60.89-COM1'],
+      choiceDefenses: {
+        2: '擴張隱性報復（Covert-Revenge Generalization）',
+        3: '道德說教重啟營業假笑（Moral-Shaming Mask Reset）'
+      },
+      studySummary: '【Phase IV 研究準則 × 共病傾向】「家裡不准皺眉」強制冷暴力罰跪揭示起源，且長年的微笑壓抑常導致慢性憂鬱情緒與心身化胃痛困擾（F60.89-COM1）。'
+    },
+    E14: {
+      unlockCriteria: ['F60.89-MIX'],
+      unlockSpecifiers: ['F60.89-SPEC1'],
+      unlockComorbidities: ['F60.89-COM1'],
+      criterionTags: ['F60.89-MIX'],
+      specifierTags: ['F60.89-SPEC1'],
+      comorbidityTags: ['F60.89-COM1'],
+      choiceDefenses: {
+        2: '拒絕伴侶真實情感成長（Compliance-Preference Regression）',
+        3: '不用假笑之真誠友誼（Honest Boundary Friendship）'
+      },
+      studySummary: '【Phase IV 亞型與共病總結】DSM-5-TR 已將傳統「被動攻擊型」納入 F60.89（混合型／被動攻擊特徵註記 SPEC1），練習在安全關係裡直接說「不」才是去面具治本之道。'
+    },
+    E15: {
+      studySummary: '【全章病理總結｜其他特定人格障礙（含被動攻擊特徵）F60.89】門檻：總準則 GA～GD 齊備（E01～E08）➔ 進階研究準則：PA1（E10）、PA2（E11/E13）、MIX（E12/E14）｜註記：DSM-5-TR F60.89 被動攻擊特徵分類轉變（SPEC1）｜共病：持續性憂鬱／心身症腸胃緊繃（COM1）。'
+    }
+  }
+};
+
+function mergeTags(...lists) {
+  return [...new Set(lists.flat().filter(Boolean))];
+}
+
+function enrichChoicesWithOverlay(choices = [], overlay = {}) {
+  return choices.map((c, idx) => {
+    const next = { ...c };
+    if (overlay.choiceDefenses && overlay.choiceDefenses[idx] && !next.defenseMechanism) {
+      next.defenseMechanism = overlay.choiceDefenses[idx];
+    }
+    if (idx === 0 && overlay.unlockCriteria?.[0] && !next.unlockCriterion) {
+      next.unlockCriterion = overlay.unlockCriteria[0];
+    }
+    if (idx === 0 && overlay.unlockSpecifiers?.[0] && !next.unlockSpecifier) {
+      next.unlockSpecifier = overlay.unlockSpecifiers[0];
+    }
+    if (idx === 0 && overlay.unlockComorbidities?.[0] && !next.unlockComorbidity) {
+      next.unlockComorbidity = overlay.unlockComorbidities[0];
+    }
+    return next;
+  });
+}
+
+// 將「靈魂真名（Phase I~II 法定最低門檻達成）」揭曉點統一套用到 E08，並將 E01~E15 的教學詮釋與防禦標註整合完成
+function applyDiagnosisReveal(charId, events) {
+  const cfg = DIAGNOSIS_REVEAL_CONFIG[charId];
+  const revealNum = getDiagnosisRevealEvent(charId);
+  const charOverlay = CLINICAL_EVENT_OVERLAY[charId] || {};
+
+  return events.map((ev) => {
+    const ov = charOverlay[ev.code] || {};
+    const mergedEvent = {
+      ...ev,
+      unlockCriteria: mergeTags(ev.unlockCriteria, ev.criterionId ? [ev.criterionId] : [], ov.unlockCriteria),
+      unlockSpecifiers: mergeTags(ev.unlockSpecifiers, ov.unlockSpecifiers),
+      unlockComorbidities: mergeTags(ev.unlockComorbidities, ov.unlockComorbidities),
+      criterionTags: mergeTags(ev.criterionTags, ov.criterionTags, ov.unlockCriteria),
+      specifierTags: mergeTags(ev.specifierTags, ov.specifierTags, ov.unlockSpecifiers),
+      comorbidityTags: mergeTags(ev.comorbidityTags, ov.comorbidityTags, ov.unlockComorbidities),
+      studySummary: ov.studySummary || ev.studySummary || null
+    };
+
+    if (ov.choiceDefenses || ov.unlockCriteria || ov.unlockSpecifiers || ov.unlockComorbidities) {
+      mergedEvent.nodes = (mergedEvent.nodes || []).map((node) => {
+        if (!Array.isArray(node.choices) || node.choices.length === 0) return node;
+        return {
+          ...node,
+          choices: enrichChoicesWithOverlay(node.choices, ov)
+        };
+      });
+    }
+
+    if (mergedEvent.eventNumber === 12 && revealNum !== 12) {
+      return {
+        ...mergedEvent,
+        unlockDiagnosisOnComplete: false,
+        title: mergedEvent.title.replace(/（🥇 解鎖臨床真相）/, '')
+      };
+    }
+
+    if (mergedEvent.eventNumber === revealNum) {
+      const nodes = Array.isArray(mergedEvent.nodes) ? [...mergedEvent.nodes] : [];
+      if (cfg?.revealNote) {
+        nodes.push({
+          speaker: 'narrator',
+          expression: 'vulnerable',
+          text: `📓 ${cfg.revealNote}`
+        });
+      }
+      return {
+        ...mergedEvent,
+        unlockDiagnosisOnComplete: true,
+        title: `${mergedEvent.title}（🥇 確立臨床診斷）`,
+        nodes
+      };
+    }
+    return mergedEvent;
+  });
+}
+
 export function getCharacter15Events(charId, scenarioData) {
   const char = CHARACTERS.find((c) => c.id === charId);
   const lore = CHARACTER_EXTENDED_LORE[charId];
@@ -1969,7 +3109,7 @@ export function getCharacter15Events(charId, scenarioData) {
   const chap2 = baseChaps[1] || { title: '心防的裂隙', ambience: '傍晚暮色', nodes: [] };
   const chap3 = baseChaps[2] || { title: '靈魂的真名', ambience: '深夜靜謐', nodes: [] };
 
-  // 建立自訂節點的輔助函式（保留完整角色專屬選項，絕不塞入罐頭選項）
+  // 建立自訂節點的輔助函式（保留完整角色專屬選項、防禦標記與亞型／共病解鎖）
   const makeCustomNodes = (title, promptText, charLine, choices, unlockCritId) => [
     {
       speaker: 'narrator',
@@ -1985,8 +3125,11 @@ export function getCharacter15Events(charId, scenarioData) {
         nextExpression: c.nextExpression || (c.stats?.security > 0 ? 'smile' : c.stats?.security < -10 ? 'triggered' : 'vulnerable'),
         reply: c.reply,
         psychNote: c.psychNote,
+        defenseMechanism: c.defenseMechanism || null,
         stats: c.stats,
-        unlockCriterion: idx === 0 && unlockCritId ? unlockCritId : c.unlockCriterion || null
+        unlockCriterion: idx === 0 && unlockCritId ? unlockCritId : c.unlockCriterion || null,
+        unlockSpecifier: c.unlockSpecifier || null,
+        unlockComorbidity: c.unlockComorbidity || null
       }))
     }
   ];
@@ -2001,7 +3144,7 @@ export function getCharacter15Events(charId, scenarioData) {
   const trio1 = findTrio(lore.trioPartner1);
   const trio2 = findTrio(lore.trioPartner2);
 
-  // 檢查是否有 eventBlueprint 專屬 E02 / E03 / E06（如沈墨），否則使用 scenarioData.dailyTalks 的專屬 5 選項劇本
+  // 檢查是否有 eventBlueprint 專屬 E02 / E03 / E06（如沈墨），否則使用 scenarioData.dailyTalks 的專屬劇本
   const bpMap = {};
   if (Array.isArray(lore.eventBlueprint)) {
     lore.eventBlueprint.forEach((bp) => {
@@ -2009,9 +3152,10 @@ export function getCharacter15Events(charId, scenarioData) {
     });
   }
 
-  const buildDailyOrBlueprintEvent = (eventNumber, code, phase, phaseName, locId, talkIdx, critId) => {
+  const buildDailyOrBlueprintEvent = (eventNumber, code, phase, phaseName, locId, talkIdx, fallbackCritId) => {
     const bp = bpMap[code];
     if (bp && bp.type === 'custom' && bp.choices) {
+      const targetCritId = critList[bp.critIdx]?.id || fallbackCritId;
       return {
         eventNumber,
         code,
@@ -2021,19 +3165,22 @@ export function getCharacter15Events(charId, scenarioData) {
         type: 'story',
         title: `${code}｜${bp.title}`,
         ambience: `${LOCATIONS.find((l) => l.id === (bp.loc || locId))?.name}的微光與呼吸`,
-        criterionId: critList[bp.critIdx]?.id || critId,
+        criterionId: targetCritId,
+        criterionTags: mergeTags(bp.criterionTags, [targetCritId]),
+        studySummary: bp.studySummary || null,
         nodes: makeCustomNodes(
           bp.title,
           bp.prompt,
           bp.charLine,
           bp.choices,
-          critList[bp.critIdx]?.id || critId
+          targetCritId
         )
       };
     }
 
     const tk = talks[talkIdx] || {};
     const locName = LOCATIONS.find((l) => l.id === locId)?.name || '公寓';
+    const targetCritId = tk.unlockCriterion || fallbackCritId;
     return {
       eventNumber,
       code,
@@ -2043,16 +3190,26 @@ export function getCharacter15Events(charId, scenarioData) {
       type: 'story',
       title: `${code}｜${tk.title || '日常交會'}`,
       ambience: `${locName}的柔和光影`,
-      criterionId: critId,
+      criterionId: targetCritId,
+      unlockCriteria: targetCritId ? [targetCritId] : [],
+      unlockSpecifiers: tk.unlockSpecifier ? [tk.unlockSpecifier] : [],
+      unlockComorbidities: tk.unlockComorbidity ? [tk.unlockComorbidity] : [],
+      criterionTags: mergeTags(tk.criterionTags, targetCritId ? [targetCritId] : []),
+      specifierTags: tk.specifierTags || (tk.unlockSpecifier ? [tk.unlockSpecifier] : []),
+      comorbidityTags: tk.comorbidityTags || (tk.unlockComorbidity ? [tk.unlockComorbidity] : []),
+      studySummary: tk.studySummary || null,
       nodes: makeCustomNodes(
         tk.title || '日常交會',
         `在【${locName}】，${tk.prompt || `你遇見了${char.name}。`}`,
         tk.response || char.tagline,
         Array.isArray(tk.choices) && tk.choices.length > 0 ? tk.choices : [],
-        critId
+        targetCritId
       )
     };
   };
+
+  const extractNodeTags = (nodes = [], field) =>
+    mergeTags(...nodes.map((n) => [n[field], ...(n.choices || []).map((c) => c[field])].flat()));
 
   const events = [
     // ==================== PHASE I：初識與日常表象 (E01 ~ E04) ====================
@@ -2060,49 +3217,57 @@ export function getCharacter15Events(charId, scenarioData) {
       eventNumber: 1,
       code: 'E01',
       phase: 1,
-      phaseName: 'Phase I：初識與日常表象',
+      phaseName: 'Phase I：初識與日常表象（門檻蒐集）',
       locationId: locs[0],
       type: 'story',
       title: `E01｜初遇：${chap1.title.replace(/^第.章：/, '')}`,
       ambience: chap1.ambience,
-      criterionId: critList[0]?.id,
+      criterionId: chap1.nodes?.find((n) => n.unlockCriterion)?.unlockCriterion || critList[0]?.id,
+      criterionTags: mergeTags(chap1.criterionTags, extractNodeTags(chap1.nodes, 'unlockCriterion')),
+      studySummary: chap1.studySummary || null,
       nodes: chap1.nodes
     },
-    buildDailyOrBlueprintEvent(2, 'E02', 1, 'Phase I：初識與日常表象', locs[1], 0, critList[0]?.id),
-    buildDailyOrBlueprintEvent(3, 'E03', 1, 'Phase I：初識與日常表象', locs[2], 1, critList[1]?.id || critList[0]?.id),
+    buildDailyOrBlueprintEvent(2, 'E02', 1, 'Phase I：初識與日常表象（門檻蒐集）', locs[1], 0, critList[0]?.id),
+    buildDailyOrBlueprintEvent(3, 'E03', 1, 'Phase I：初識與日常表象（門檻蒐集）', locs[2], 1, critList[1]?.id || critList[0]?.id),
     {
       eventNumber: 4,
       code: 'E04',
       phase: 1,
-      phaseName: 'Phase I：初識與日常表象',
+      phaseName: 'Phase I：初識與日常表象（門檻蒐集）',
       locationId: trio1.locationId,
       type: 'trio',
       partnerId: lore.trioPartner1,
       title: `E04｜${trio1.title}`,
       ambience: trio1.ambience,
       criterionId: critList[1]?.id || critList[0]?.id,
+      criterionTags: trio1.criterionTags || [],
+      specifierTags: trio1.specifierTags || [],
+      differentialContrast: trio1.differentialContrast || null,
+      studySummary: trio1.studySummary || null,
       nodes: trio1.nodes
     },
 
-    // ==================== PHASE II：試探與防衛初現 (E05 ~ E08) ====================
+    // ==================== PHASE II：試探、防衛與法定門檻確立 (E05 ~ E08) ====================
     {
       eventNumber: 5,
       code: 'E05',
       phase: 2,
-      phaseName: 'Phase II：試探與防衛初現',
+      phaseName: 'Phase II：試探、防衛與法定門檻確立',
       locationId: locs[0],
       type: 'story',
       title: `E05｜深入試探：${chap2.title.replace(/^第.章：/, '')}`,
       ambience: chap2.ambience,
-      criterionId: critList[1]?.id || critList[0]?.id,
+      criterionId: chap2.nodes?.find((n) => n.unlockCriterion)?.unlockCriterion || critList[1]?.id || critList[0]?.id,
+      criterionTags: mergeTags(chap2.criterionTags, extractNodeTags(chap2.nodes, 'unlockCriterion')),
+      studySummary: chap2.studySummary || null,
       nodes: chap2.nodes
     },
-    buildDailyOrBlueprintEvent(6, 'E06', 2, 'Phase II：試探與防衛初現', locs[3], 2, critList[2]?.id || critList[1]?.id),
+    buildDailyOrBlueprintEvent(6, 'E06', 2, 'Phase II：試探、防衛與法定門檻確立', locs[3], 2, critList[2]?.id || critList[1]?.id),
     {
       eventNumber: 7,
       code: 'E07',
       phase: 2,
-      phaseName: 'Phase II：試探與防衛初現',
+      phaseName: 'Phase II：試探、防衛與法定門檻確立',
       locationId: locs[1],
       type: 'story',
       title: bespoke.e07.title,
@@ -2120,12 +3285,12 @@ export function getCharacter15Events(charId, scenarioData) {
       eventNumber: 8,
       code: 'E08',
       phase: 2,
-      phaseName: 'Phase II：試探與防衛初現',
+      phaseName: 'Phase II：試探、防衛與法定門檻確立',
       locationId: locs[0],
       type: 'shared_quake',
       title: uniqueDisaster.title,
       ambience: uniqueDisaster.ambience,
-      criterionId: critList[2]?.id || critList[1]?.id,
+      criterionId: critList[Math.min((char.minThreshold || 4) - 1, critList.length - 1)]?.id || critList[2]?.id,
       nodes: [
         {
           speaker: 'narrator',
@@ -2138,31 +3303,35 @@ export function getCharacter15Events(charId, scenarioData) {
           text: uniqueDisaster.charLine,
           choices: uniqueDisaster.choices.map((c, idx) => ({
             ...c,
-            unlockCriterion: idx === 0 ? (critList[2]?.id || critList[1]?.id) : null
+            unlockCriterion: idx === 0 ? (critList[Math.min((char.minThreshold || 4) - 1, critList.length - 1)]?.id || critList[2]?.id) : null
           }))
         }
       ]
     },
 
-    // ==================== PHASE III：風暴、修羅場與核心創傷 (E09 ~ E12) ====================
+    // ==================== PHASE III：進階準則、亞型註記與核心風暴 (E09 ~ E12) ====================
     {
       eventNumber: 9,
       code: 'E09',
       phase: 3,
-      phaseName: 'Phase III：風暴、修羅場與核心創傷',
+      phaseName: 'Phase III：進階準則、亞型註記與核心風暴',
       locationId: trio2.locationId,
       type: 'trio',
       partnerId: lore.trioPartner2,
       title: `E09｜${trio2.title}`,
       ambience: trio2.ambience,
       criterionId: critList[critList.length - 1]?.id,
+      criterionTags: trio2.criterionTags || [],
+      specifierTags: trio2.specifierTags || [],
+      differentialContrast: trio2.differentialContrast || null,
+      studySummary: trio2.studySummary || null,
       nodes: trio2.nodes
     },
     {
       eventNumber: 10,
       code: 'E10',
       phase: 3,
-      phaseName: 'Phase III：風暴、修羅場與核心創傷',
+      phaseName: 'Phase III：進階準則、亞型註記與核心風暴',
       locationId: locs[0],
       type: 'shared_typhoon',
       title: bespoke.e10.title,
@@ -2181,7 +3350,7 @@ export function getCharacter15Events(charId, scenarioData) {
           choices: bespoke.e10.choices.map((c, idx) => ({
             ...c,
             nextExpression: c.nextExpression || (c.stats?.security >= 15 ? 'smile' : c.stats?.security < 0 ? 'triggered' : 'vulnerable'),
-            unlockCriterion: idx < 2 ? critList[critList.length - 1]?.id : null
+            unlockCriterion: idx < 2 ? (CLINICAL_EVENT_OVERLAY[charId]?.E10?.unlockCriteria?.[0] || critList[critList.length - 1]?.id) : null
           }))
         }
       ]
@@ -2190,7 +3359,7 @@ export function getCharacter15Events(charId, scenarioData) {
       eventNumber: 11,
       code: 'E11',
       phase: 3,
-      phaseName: 'Phase III：風暴、修羅場與核心創傷',
+      phaseName: 'Phase III：進階準則、亞型註記與核心風暴',
       locationId: locs[2],
       type: 'story',
       title: bespoke.e11.title,
@@ -2201,29 +3370,33 @@ export function getCharacter15Events(charId, scenarioData) {
         bespoke.e11.prompt,
         bespoke.e11.charLine,
         bespoke.e11.choices,
-        critList[critList.length - 1]?.id
+        CLINICAL_EVENT_OVERLAY[charId]?.E11?.unlockCriteria?.[0] || critList[critList.length - 1]?.id
       )
     },
     {
       eventNumber: 12,
       code: 'E12',
       phase: 3,
-      phaseName: 'Phase III：風暴、修羅場與核心創傷',
+      phaseName: 'Phase III：進階準則、亞型註記與核心風暴',
       locationId: locs[0],
       type: 'story',
-      unlockDiagnosisOnComplete: true,
-      title: `E12｜心門對峙：${chap3.title.replace(/^第.章：/, '')}（🥇 解鎖臨床真相）`,
+      unlockDiagnosisOnComplete: false,
+      title: `E12｜心門對峙：${chap3.title.replace(/^第.章：/, '')}`,
       ambience: chap3.ambience,
-      criterionId: critList[critList.length - 1]?.id,
+      criterionId: chap3.nodes?.find((n) => n.unlockCriterion)?.unlockCriterion || critList[critList.length - 1]?.id,
+      criterionTags: mergeTags(chap3.criterionTags, extractNodeTags(chap3.nodes, 'unlockCriterion')),
+      specifierTags: mergeTags(chap3.specifierTags, extractNodeTags(chap3.nodes, 'unlockSpecifier')),
+      comorbidityTags: mergeTags(chap3.comorbidityTags, extractNodeTags(chap3.nodes, 'unlockComorbidity')),
+      studySummary: chap3.studySummary || null,
       nodes: chap3.nodes
     },
 
-    // ==================== PHASE IV：養成故事揭曉與命定結局 (E13 ~ E15) ====================
+    // ==================== PHASE IV：童年溯源、共病解析與命定結局 (E13 ~ E15) ====================
     {
       eventNumber: 13,
       code: 'E13',
       phase: 4,
-      phaseName: 'Phase IV：成長養成故事揭曉與命定結局',
+      phaseName: 'Phase IV：童年溯源、共病解析與命定結局',
       locationId: locs[0],
       type: 'backstory',
       unlockBackstoryOnComplete: true,
@@ -2250,7 +3423,7 @@ export function getCharacter15Events(charId, scenarioData) {
       eventNumber: 14,
       code: 'E14',
       phase: 4,
-      phaseName: 'Phase IV：成長養成故事揭曉與命定結局',
+      phaseName: 'Phase IV：童年溯源、共病解析與命定結局',
       locationId: locs[1],
       type: 'story',
       title: bespoke.e14.title,
@@ -2267,7 +3440,7 @@ export function getCharacter15Events(charId, scenarioData) {
       eventNumber: 15,
       code: 'E15',
       phase: 4,
-      phaseName: 'Phase IV：成長養成故事揭曉與命定結局',
+      phaseName: 'Phase IV：童年溯源、共病解析與命定結局',
       locationId: locs[0],
       type: 'ending',
       title: `E15｜命定結局：愛的邊緣最終章`,
@@ -2276,43 +3449,92 @@ export function getCharacter15Events(charId, scenarioData) {
     }
   ];
 
-  return events;
+  return applyDiagnosisReveal(charId, events);
 }
 
-// 取得角色 4 階段心靈成就徽章狀態
-export function getCharacterAchievements(char, cs, isDiagnosed) {
-  const evDone = cs.eventCompleted || 0;
-  const disasterSurvived = Boolean(cs.sharedQuakeDone || cs.sharedTyphoonDone || evDone >= 8);
-  const backstoryUnlocked = Boolean(cs.backstoryUnlocked || evDone >= 13);
+// ==================== 完美攻略：每個抉擇的「最佳選項」分數（親密＋依戀安全感＋邊界）====================
+// 以 E01～E14 每個抉擇節點中三項數值加總最高的選項為「最佳選項」，全部加總即該角色的完美分數
+export function getChoiceScore(stats = {}) {
+  return (stats.affection || 0) + (stats.security || 0) + (stats.boundary || 0);
+}
+
+export function getPerfectScoreTable(events = []) {
+  const nodes = {};
+  let maxTotal = 0;
+  const maxAxis = { affection: 0, security: 0, boundary: 0 };
+  events.forEach((ev) => {
+    if (!ev || ev.eventNumber > 14 || !Array.isArray(ev.nodes)) return;
+    ev.nodes.forEach((nd, idx) => {
+      if (!Array.isArray(nd.choices) || nd.choices.length === 0) return;
+      let bestIdx = 0;
+      let best = -Infinity;
+      nd.choices.forEach((ch, ci) => {
+        const sc = getChoiceScore(ch.stats);
+        if (sc > best) {
+          best = sc;
+          bestIdx = ci;
+        }
+      });
+      nodes[`${ev.eventNumber}_${idx}`] = best;
+      maxTotal += best;
+      const bs = nd.choices[bestIdx].stats || {};
+      maxAxis.affection += bs.affection || 0;
+      maxAxis.security += bs.security || 0;
+      maxAxis.boundary += bs.boundary || 0;
+    });
+  });
+  return { nodes, maxTotal, maxAxis, nodeCount: Object.keys(nodes).length };
+}
+
+// 根據玩家在每個抉擇節點「最近一次」的選擇，計算完美度
+export function getPerfectProgress(table, cs) {
+  const picks = cs?.choiceScores || {};
+  let total = 0;
+  let perfectCount = 0;
+  const axis = { affection: 0, security: 0, boundary: 0 };
+  Object.entries(table.nodes).forEach(([key, max]) => {
+    const p = picks[key];
+    if (!p) return;
+    const sc = getChoiceScore(p);
+    total += sc;
+    axis.affection += p.affection || 0;
+    axis.security += p.security || 0;
+    axis.boundary += p.boundary || 0;
+    if (sc >= max) perfectCount += 1;
+  });
+  return {
+    total,
+    axis,
+    perfectCount,
+    maxTotal: table.maxTotal,
+    maxAxis: table.maxAxis,
+    nodeCount: table.nodeCount,
+    isPerfect: table.nodeCount > 0 && perfectCount >= table.nodeCount
+  };
+}
+
+// 取得角色 2 枚心靈成就：🥇 初步攻略（靈魂真名）＋ 👑 終極成就（完美攻略）
+export function getCharacterAchievements(char, cs, isDiagnosed, perfect = null) {
+  const revealNum = getDiagnosisRevealEvent(char.id);
+  const revealCode = `E${String(revealNum).padStart(2, '0')}`;
+  const perfectDesc = perfect
+    ? `E01～E14 的 ${perfect.nodeCount} 個抉擇全部選到最佳選項（親密＋依戀＋邊界加總達滿分 ${perfect.maxTotal}；目前 ${perfect.total} 分、完美抉擇 ${perfect.perfectCount}/${perfect.nodeCount}）`
+    : 'E01～E14 每個抉擇都選到最佳選項，親密＋依戀＋邊界加總達該角色滿分';
 
   return [
     {
-      id: 'ach_phase1',
-      icon: '🥉',
-      title: '初識微光',
-      desc: '完成 Phase I（第 1～4 號事件）並經歷三人同場交會',
-      unlocked: evDone >= 4
-    },
-    {
-      id: 'ach_storm',
-      icon: '🥈',
-      title: '共度風暴',
-      desc: '共同經歷專屬「突發天災危機 (E08)」並突破第二章節心防阻擋',
-      unlocked: disasterSurvived && evDone >= 8
-    },
-    {
       id: 'ach_diagnosis',
       icon: '🥇',
-      title: '靈魂真名（診斷揭曉）',
-      desc: `收集滿核心臨床線索並完成 E12，正式揭曉【${isDiagnosed ? char.dsmTitle : '？？？'}】`,
-      unlocked: isDiagnosed
+      title: '初步攻略・靈魂真名',
+      desc: `完成 ${revealCode}，正式揭曉【${isDiagnosed ? char.dsmTitle : '？？？'}】並解鎖下一位可攻略房客`,
+      unlocked: Boolean(isDiagnosed)
     },
     {
-      id: 'ach_backstory',
+      id: 'ach_perfect',
       icon: '👑',
-      title: '記憶深處的迴響',
-      desc: '完成 E13【過去的房間】，解鎖角色童年成長背景與人格疾患養成故事',
-      unlocked: backstoryUnlocked
+      title: '終極成就・完美攻略',
+      desc: perfectDesc,
+      unlocked: Boolean(cs?.perfectAchieved)
     }
   ];
 }

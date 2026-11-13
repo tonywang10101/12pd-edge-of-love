@@ -94,11 +94,11 @@ Otome romance game character illustration in the style of Love and Producer (戀
 - **圖片路徑**: `./assets/characters/han_xiao.png`
 - **角色外觀錨點 (Appearance Anchor)**:
   ```text
-  A dangerously handsome 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), styled jet-black undercut hair, captivating crimson-amber eyes, wearing a burgundy dress shirt with top buttons undone and a black leather jacket
+  A dangerously handsome and muscular 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), athletic bodybuilder physique with sculpted pecs and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, wearing an open black biker leather jacket with bare muscular chest
   ```
 - **預設角色立繪完整 Prompt**:
   ```text
-  Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dangerously handsome 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), styled jet-black undercut hair, captivating crimson-amber eyes, a charming and provocative half-smile. Wearing a burgundy dress shirt with the top buttons undone and a black leather jacket draped over his shoulders, holding a crystal cocktail glass with amber liquid. Warm golden-rose bar lighting with dreamy bokeh sparkles, intense romantic tension, masterpiece anime illustration.
+  Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dangerously handsome and muscular 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), athletic physique with sculpted chest and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, a charming and provocative half-smile. Wearing an open black leather jacket revealing his muscular bare torso, holding a crystal cocktail glass with amber whiskey. Warm golden-rose bar lighting with dreamy bokeh sparkles, intense romantic tension, masterpiece anime illustration.
   ```
 - **各章節專屬劇情動作 Prompts**:
   - **第一章動作：吧台撐顎挑眉博弈**:
@@ -138,7 +138,7 @@ Otome romance game character illustration in the style of Love and Producer (戀
     Otome romance game character illustration in the style of Love and Producer (戀與製作人), SSR card art style, refined semi-realistic anime art, delicate eyelashes and expressive eyes, soft dreamy rim lighting, floating bokeh light flares and prism sparkles, vertical portrait framing, masterpiece anime illustration, high resolution. Character: A gorgeous 22-year-old East Asian woman (Su Fei, expressionist painter and indie vocalist), wavy rose-crimson hair tied in soft side ribbons, emotional and sparkling ruby-pink eyes, wearing an off-shoulder cream knit sweater, vintage pastel-pink plush bunny. Scene & Action: standing in a brightly lit art gallery hugging her pastel plush bunny, smiling through tears with glowing rose-gold spotlights and floating petals. Emotion: soft affectionate smile, warm blush on cheeks, tender and loving gaze, reaching one hand gently toward the viewer, surrounded by warm rose-gold bokeh sparkles.
     ```
 
-### #06 夏樂 / Charlotte (Xia Le) [SSR]
+### #06 夏樂 (Xia Le) [SSR]
 - **圖片路徑**: `./assets/characters/xia_le.png`
 - **角色外觀錨點 (Appearance Anchor)**:
   ```text
@@ -286,11 +286,11 @@ Otome romance game character illustration in the style of Love and Producer (戀
 - **圖片路徑**: `./assets/characters/you_ziqian.png`
 - **角色外觀錨點 (Appearance Anchor)**:
   ```text
-  A charming, gentle-looking 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft wavy ash-brown hair with a subtle lavender tint, expressive violet-brown eyes, wearing a stylish barista apron over a lavender-gray shirt with rolled-up sleeves
+  An adorable, puppy-eyed 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), fluffy messy-wavy ash-brown hair, innocent droopy violet-amber puppy eyes, soft blushed cheeks and sweet harmless smile, wearing a cozy cream knit sweater
   ```
 - **預設角色立繪完整 Prompt**:
   ```text
-  Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A charming, gentle-looking 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft wavy ash-brown hair with a subtle lavender tint in the light, expressive violet-brown eyes with a playful, enigmatic gentle smile. Wearing a stylish barista apron over a lavender-gray shirt with rolled-up sleeves, pouring steaming coffee from a copper gooseneck kettle. Cozy sunlit cafe background with rainbow lens flare and warm bokeh, romantic otome CG illustration.
+  Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An adorable, handsome puppy-boy archetype 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft fluffy wavy ash-brown hair with soft bangs, big innocent round droopy puppy eyes with violet-amber reflections, soft pink blushed cheeks, sweet harmless smile. Wearing a cozy cream cable-knit sweater, holding a warm ceramic latte mug with both hands, tilting head with an endearing gaze. Cozy sunlit cafe background with rainbow lens flare and warm bokeh sparkles, masterpiece anime illustration.
   ```
 - **各章節專屬劇情動作 Prompts**:
   - **第一章動作：手沖咖啡吧台後的完美微笑面具**:

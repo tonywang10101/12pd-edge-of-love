@@ -1,6 +1,7 @@
 // 《愛的邊緣》角色立繪與情緒特效渲染器
 
-import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=14';
+import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=24';
+import { resolveAssetUrl } from './assetPreloader.js?v=24';
 
 export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrait') {
   const promptData = CHARACTER_PROMPTS[char.id];
@@ -9,7 +10,7 @@ export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrai
   const baseImg = promptData ? promptData.imagePath : `./assets/characters/${char.id}.png`;
   const emotionalImg =
     promptData?.emotionalImagePath || `./assets/characters/${char.id}_emotional.png`;
-  const imgSrc = isIntenseEmotion ? emotionalImg : baseImg;
+  const imgSrc = resolveAssetUrl(isIntenseEmotion ? emotionalImg : baseImg);
   const rarity = promptData?.rarity || 'SSR';
   const isMini = mode === 'mini';
 
@@ -18,7 +19,7 @@ export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrai
   if (isMini) {
     return `
       <div class="otome-mini-card ${exprClass}">
-        <img src="${imgSrc}" alt="${char.name}" class="otome-char-img" loading="lazy" />
+        <img src="${imgSrc}" alt="${char.name}" class="otome-char-img" loading="eager" />
         <span class="otome-rarity-mini rarity-${rarity.toLowerCase()}">${rarity}</span>
         <div class="otome-shimmer-overlay"></div>
       </div>

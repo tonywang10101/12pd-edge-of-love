@@ -130,10 +130,11 @@ export const CHARACTER_PROMPTS = {
     name: '韓梟 (Han Xiao)',
     rarity: 'SSR',
     imagePath: './assets/characters/han_xiao.png',
+    emotionalImagePath: './assets/characters/han_xiao_emotional.png',
     appearanceAnchor:
-      'A dangerously handsome 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), styled jet-black undercut hair, captivating crimson-amber eyes, wearing a burgundy dress shirt with top buttons undone and a black leather jacket',
+      'A dangerously handsome and muscular 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), athletic bodybuilder physique with sculpted pecs and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, wearing an open black biker leather jacket with bare muscular chest',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dangerously handsome 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), styled jet-black undercut hair, captivating crimson-amber eyes, a charming and provocative half-smile. Wearing a burgundy dress shirt with the top buttons undone and a black leather jacket draped over his shoulders, holding a crystal cocktail glass with amber liquid. Warm golden-rose bar lighting with dreamy bokeh sparkles, intense romantic tension, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dangerously handsome and muscular 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), athletic physique with sculpted chest and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, a charming and provocative half-smile. Wearing an open black leather jacket revealing his muscular bare torso, holding a crystal cocktail glass with amber whiskey. Warm golden-rose bar lighting with dreamy bokeh sparkles, intense romantic tension, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -191,7 +192,7 @@ export const CHARACTER_PROMPTS = {
   xia_le: {
     id: 'xia_le',
     number: '06',
-    name: '夏樂 / Charlotte (Xia Le)',
+    name: '夏樂 (Xia Le)',
     rarity: 'SSR',
     imagePath: './assets/characters/xia_le.png',
     appearanceAnchor:
@@ -386,10 +387,11 @@ export const CHARACTER_PROMPTS = {
     name: '游子謙 (You Ziqian)',
     rarity: 'SSR',
     imagePath: './assets/characters/you_ziqian.png',
+    emotionalImagePath: './assets/characters/you_ziqian_emotional.png',
     appearanceAnchor:
-      'A charming, gentle-looking 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft wavy ash-brown hair with a subtle lavender tint, expressive violet-brown eyes, wearing a stylish barista apron over a lavender-gray shirt with rolled-up sleeves',
+      'An adorable, puppy-eyed 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), fluffy messy-wavy ash-brown hair, innocent droopy violet-amber puppy eyes, soft blushed cheeks and sweet harmless smile, wearing a cozy cream knit sweater',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A charming, gentle-looking 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft wavy ash-brown hair with a subtle lavender tint in the light, expressive violet-brown eyes with a playful, enigmatic gentle smile. Wearing a stylish barista apron over a lavender-gray shirt with rolled-up sleeves, pouring steaming coffee from a copper gooseneck kettle. Cozy sunlit cafe background with rainbow lens flare and warm bokeh, romantic otome CG illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An adorable, handsome puppy-boy archetype 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft fluffy wavy ash-brown hair with soft bangs, big innocent round droopy puppy eyes with violet-amber reflections, soft pink blushed cheeks, sweet harmless smile. Wearing a cozy cream cable-knit sweater, holding a warm ceramic latte mug with both hands, tilting head with an endearing gaze. Cozy sunlit cafe background with rainbow lens flare and warm bokeh sparkles, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,

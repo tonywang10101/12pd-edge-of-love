@@ -1,24 +1,34 @@
 // 《愛的邊緣》(Edge of Love) 2.0 — 15 事件決策樹、跨地點動態出沒、三人同場、12 角色專屬天災危機、角色雙層背景與心靈成就控制器
 
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=15';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=15';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=15';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=15';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=15';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=24';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=24';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=24';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=24';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=24';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
   UNIQUE_DISASTER_EVENTS,
   EXTRA_DAILY_TALKS,
   getCharacter15Events,
-  getCharacterAchievements
-} from './data/eventTreeEngine.js?v=15';
+  getCharacterAchievements,
+  getDiagnosisRevealEvent,
+  getPerfectScoreTable,
+  getPerfectProgress
+} from './data/eventTreeEngine.js?v=24';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=15';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=15';
-import { audio } from './ui/audioEngine.js?v=15';
+} from './data/characterPrompts.js?v=24';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=24';
+import { audio } from './ui/audioEngine.js?v=24';
+import {
+  preloadAllAssets,
+  resolveAssetUrl,
+  areAllAssetsPreloaded,
+  getAllGameImageAssets,
+  formatBytesMB
+} from './ui/assetPreloader.js?v=24';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
@@ -28,6 +38,15 @@ const ALL_SCENARIOS = {
 
 const STORAGE_KEY_AUTOSAVE = 'edge_of_love_browser_save_v4';
 const STORAGE_KEY_SESSION = 'edge_of_love_session_save_v4';
+
+function escapeHtml(str = '') {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
 
 function getDeviceType() {
   const ua = navigator.userAgent || '';
@@ -72,6 +91,9 @@ class EdgeOfLoveGame {
     this.dsmWidgetTab = 'criteria'; // 'criteria' (12角色與準則核對) | 'general' (DSM-5-TR 通則與四大類群)
     this.mobileNavOpen = false;
     this.sessionStartTime = Date.now();
+    this.selectedFirstCharId = null; // 封面合照選定之開場角色 ID（null 代表預設隨機挑選）
+    this._lastHoveredPillar = null;
+    this.loadingState = null;
   }
 
   getEventsForChar(charId) {
@@ -91,18 +113,24 @@ class EdgeOfLoveGame {
         eventCompleted: 0, // 0 ~ 15
         chapterCompleted: 0,
         unlockedCriteria: [],
+        unlockedSpecifiers: [],
+        unlockedComorbidities: [],
+        evidenceLog: {}, // { [itemId]: { eventCode, eventTitle, quote, behavior, choiceText, defenseMechanism } }
         diagnosed: false,
         sharedQuakeDone: false,
         sharedTyphoonDone: false,
         backstoryUnlocked: false,
         unlockedEndings: [],
         dailyTalkIndex: 0,
+        choiceScores: {}, // 每個抉擇節點最近一次選擇的 {affection, security, boundary}（用於完美攻略判定）
+        perfectAchieved: false,
         diary: []
       };
     });
 
     return {
       initialized: false,
+      studyMode: false, // 教學檢視模式（可隨時於頂部工具列切換）
       player: {
         name: '林予安',
         sex: 'female',
@@ -112,6 +140,7 @@ class EdgeOfLoveGame {
       },
       roamCycle: 0,
       metCharacters: [],
+      unlockedRoutes: [], // 已開放可攻略（可切換主線）的角色；每揭曉一位角色的人格疾患即再開放一位
       currentStoryChar: null,
       storyStack: [],
       characters: charState
@@ -162,6 +191,11 @@ class EdgeOfLoveGame {
 
     this.bindGlobalEvents();
     this.render();
+
+    // 若玩家帶著舊存檔重整進入遊戲，於背景靜默預載剩餘立繪與背景，減少後續切換等待
+    if (this.state.initialized && !areAllAssetsPreloaded()) {
+      preloadAllAssets({ concurrency: 4 });
+    }
   }
 
   trackRetention(reason = 'check') {
@@ -237,6 +271,7 @@ class EdgeOfLoveGame {
       loadedState.player.pronoun = loadedState.player.pronoun || def.player.pronoun;
     }
     if (typeof loadedState.roamCycle !== 'number') loadedState.roamCycle = 0;
+    if (typeof loadedState.studyMode !== 'boolean') loadedState.studyMode = false;
     loadedState.storyStack = [];
     if (
       typeof loadedState.currentStoryChar !== 'string' ||
@@ -260,19 +295,40 @@ class EdgeOfLoveGame {
       loadedState.currentStoryChar = firstId;
     }
 
+    const legacyIdMap = {
+      'F60.3-ASSOC': 'F60.3-A9',
+      'F60.5-ASSOC': 'F60.5-A8',
+      'F07.0-SUB1': 'F07.0-SUB-LAB',
+      'F07.0-PSYCH': 'F07.0-E'
+    };
+
     CHARACTERS.forEach((c) => {
       if (!loadedState.characters[c.id]) {
         loadedState.characters[c.id] = def.characters[c.id];
       } else {
         const cs = loadedState.characters[c.id];
         if (!Array.isArray(cs.unlockedCriteria)) cs.unlockedCriteria = [];
+        cs.unlockedCriteria = [...new Set(cs.unlockedCriteria.map((id) => legacyIdMap[id] || id))];
+        if (!Array.isArray(cs.unlockedSpecifiers)) cs.unlockedSpecifiers = [];
+        if (!Array.isArray(cs.unlockedComorbidities)) cs.unlockedComorbidities = [];
+        if (!cs.evidenceLog || typeof cs.evidenceLog !== 'object') cs.evidenceLog = {};
         if (!Array.isArray(cs.unlockedEndings)) cs.unlockedEndings = [];
         if (typeof cs.dailyTalkIndex !== 'number') cs.dailyTalkIndex = 0;
         if (typeof cs.eventCompleted !== 'number') {
           cs.eventCompleted = (cs.chapterCompleted || 0) * 4;
         }
+        const thresholdIds = c.criteria.filter((cr) => (cr.stage || 'threshold') === 'threshold').map((cr) => cr.id);
+        const minReq = c.minThreshold || thresholdIds.length || c.criteria.length;
+        const reachedThresh = cs.unlockedCriteria.filter((id) => thresholdIds.includes(id)).length >= minReq;
         if (typeof cs.diagnosed !== 'boolean') {
-          cs.diagnosed = cs.unlockedCriteria.length >= c.criteria.length && cs.eventCompleted >= 12;
+          cs.diagnosed = reachedThresh && cs.eventCompleted >= getDiagnosisRevealEvent(c.id);
+        }
+        // 雙階段門檻遷移：若已完成 E08 揭曉點但尚未領取診斷，僅補齊 Phase I~II 最低門檻準則（保留 Phase III~IV 進階／亞型／共病後續探索）
+        if (!cs.diagnosed && cs.eventCompleted >= getDiagnosisRevealEvent(c.id)) {
+          cs.diagnosed = true;
+          thresholdIds.forEach((tid) => {
+            if (!cs.unlockedCriteria.includes(tid)) cs.unlockedCriteria.push(tid);
+          });
         }
         if (typeof cs.backstoryUnlocked !== 'boolean') {
           cs.backstoryUnlocked = cs.eventCompleted >= 13;
@@ -280,8 +336,27 @@ class EdgeOfLoveGame {
         if (!Array.isArray(cs.diary)) {
           cs.diary = [];
         }
+        if (!cs.choiceScores || typeof cs.choiceScores !== 'object') cs.choiceScores = {};
+        if (typeof cs.perfectAchieved !== 'boolean') cs.perfectAchieved = false;
       }
     });
+
+    // 可攻略角色（路線解鎖）：舊存檔沿用「目前主線 ＋ 已有進度的角色」，再依已揭曉人數補足開放名額
+    if (!Array.isArray(loadedState.unlockedRoutes)) {
+      loadedState.unlockedRoutes = CHARACTERS.filter(
+        (c) =>
+          c.id === loadedState.currentStoryChar ||
+          (loadedState.characters[c.id]?.eventCompleted || 0) > 0
+      ).map((c) => c.id);
+    } else {
+      loadedState.unlockedRoutes = loadedState.unlockedRoutes.filter((id) =>
+        CHARACTERS.some((c) => c.id === id)
+      );
+    }
+    if (loadedState.currentStoryChar && !loadedState.unlockedRoutes.includes(loadedState.currentStoryChar)) {
+      loadedState.unlockedRoutes.push(loadedState.currentStoryChar);
+    }
+    this.ensureRouteUnlocks(loadedState);
     return loadedState;
   }
 
@@ -356,42 +431,88 @@ class EdgeOfLoveGame {
     };
   }
 
+  getThresholdStats(char, cs) {
+    const threshCriteria = (char.criteria || []).filter((cr) => (cr.stage || 'threshold') === 'threshold');
+    const threshIds = threshCriteria.map((cr) => cr.id);
+    const minReq = char.minThreshold || threshIds.length;
+    const unlockedList = cs?.unlockedCriteria || [];
+    const threshCount = unlockedList.filter((id) => threshIds.includes(id)).length;
+    return {
+      threshCriteria,
+      threshIds,
+      minReq,
+      threshCount,
+      advCount: unlockedList.length - threshCount,
+      totalUnlocked: unlockedList.length,
+      totalCriteria: (char.criteria || []).length,
+      specCount: (cs?.unlockedSpecifiers || []).length,
+      specTotal: (char.specifiers || []).length,
+      comCount: (cs?.unlockedComorbidities || []).length,
+      comTotal: (char.comorbidities || []).length
+    };
+  }
+
   isDiagnosed(charId) {
     const char = CHARACTERS.find((c) => c.id === charId);
     const cs = this.state.characters[charId];
     if (!char || !cs) return false;
-    return Boolean(cs.diagnosed || (cs.unlockedCriteria.length >= char.criteria.length && cs.eventCompleted >= 12));
+    const st = this.getThresholdStats(char, cs);
+    return Boolean(
+      cs.diagnosed || (st.threshCount >= st.minReq && cs.eventCompleted >= getDiagnosisRevealEvent(charId))
+    );
+  }
+
+  getRevealCode(charId) {
+    return `E${String(getDiagnosisRevealEvent(charId)).padStart(2, '0')}`;
+  }
+
+  // 完美攻略進度：以每個抉擇的最佳選項（親密＋依戀＋邊界加總最高）為滿分
+  getPerfectInfo(charId) {
+    if (!this.perfectTableCache) this.perfectTableCache = {};
+    if (!this.perfectTableCache[charId]) {
+      this.perfectTableCache[charId] = getPerfectScoreTable(this.getEventsForChar(charId));
+    }
+    return getPerfectProgress(this.perfectTableCache[charId], this.state.characters[charId]);
+  }
+
+  getAchievements(char) {
+    const cs = this.state.characters[char.id];
+    return getCharacterAchievements(char, cs, this.isDiagnosed(char.id), this.getPerfectInfo(char.id));
   }
 
   getDiagnosisDisplay(char) {
     const cs = this.state.characters[char.id];
-    const total = char.criteria.length;
-    const count = cs ? cs.unlockedCriteria.length : 0;
+    const st = this.getThresholdStats(char, cs);
     const diagnosed = this.isDiagnosed(char.id);
+    const showReal = diagnosed || Boolean(this.state.studyMode);
 
-    if (diagnosed) {
+    if (showReal) {
       return {
-        diagnosed: true,
+        diagnosed,
+        revealedByStudyMode: !diagnosed && Boolean(this.state.studyMode),
         code: char.dsmCode,
         title: char.dsmTitle,
         fullTitle: `${char.dsmTitle} (${char.dsmTitleEn})`,
         clusterLabel: `Cluster ${char.cluster}`,
         badgeColor: CLUSTERS[char.cluster]?.color || char.themeColor,
-        progressText: `🥇 靈魂真名已揭曉 (${count}/${total})`
+        progressText: diagnosed
+          ? `🥇 診斷確立（門檻 ${st.threshCount}/${st.minReq} ｜ 準則 ${st.totalUnlocked}/${st.totalCriteria} ｜ 亞型 ${st.specCount}/${st.specTotal} ｜ 共病 ${st.comCount}/${st.comTotal}）`
+          : `🎓 教學預覽：門檻 ${st.threshCount}/${st.minReq}（總計 ${st.totalUnlocked}/${st.totalCriteria}）`
       };
     }
 
     return {
       diagnosed: false,
-      code: `線索 ${count}/${total}`,
-      title: count === 0 ? '？？？・心靈特質待觀察' : `？？？・已收集 ${count}/${total} 項特徵`,
+      revealedByStudyMode: false,
+      code: `門檻 ${st.threshCount}/${st.minReq}`,
+      title: st.totalUnlocked === 0 ? '？？？・心靈特質待觀察' : `？？？・已收集門檻 ${st.threshCount}/${st.minReq} 項`,
       fullTitle:
-        count === 0
-          ? '【尚未揭曉】需推進 15 事件決策樹並收集行為線索'
-          : `【心靈觀察中：已解鎖 ${count}/${total} 項特徵】達診斷標準後揭曉`,
+        st.totalUnlocked === 0
+          ? `【Phase I~II 觀察中】集滿法定門檻（${char.thresholdLabel || `${st.minReq} 項`}）並完成 ${this.getRevealCode(char.id)} 即可確診`
+          : `【Phase I~II 觀察中：門檻 ${st.threshCount}/${st.minReq} 項】完成 ${this.getRevealCode(char.id)} 揭曉診斷`,
       clusterLabel: '未分類',
       badgeColor: '#9f6b8c',
-      progressText: `🔍 診斷線索 ${count}/${total}`
+      progressText: `🔍 門檻線索 ${st.threshCount}/${st.minReq}（總 ${st.totalUnlocked}/${st.totalCriteria}）`
     };
   }
 
@@ -437,31 +558,75 @@ class EdgeOfLoveGame {
     return (this.state.characters[charId]?.eventCompleted || 0) >= 15;
   }
 
-  // 完整線性故事走訪（移除 DFS 強制跳轉）：一次完整走完一個人的 15 個事件，即使在三人同場認識新房客也不中斷當前故事線
+  // ==================== 路線解鎖：每揭曉一位角色的人格疾患（初步攻略），即開放一位新角色 ====================
+  isRouteUnlocked(charId, st = this.state) {
+    return (st.unlockedRoutes || []).includes(charId);
+  }
+
+  // 下一位開放的角色：優先選擇在三人同場已邂逅（故事上已有交集）的房客，其次隨機開啟一位尚未邂逅的房客
+  pickNextRouteChar(st = this.state, fromCharId = null) {
+    const unlocked = st.unlockedRoutes || [];
+    const candidates = CHARACTERS.filter((c) => !unlocked.includes(c.id));
+    if (!candidates.length) return null;
+
+    const fromLore = fromCharId ? CHARACTER_EXTENDED_LORE[fromCharId] : null;
+    const preferred = [fromLore?.trioPartner1, fromLore?.trioPartner2].filter(
+      (id) => id && candidates.some((c) => c.id === id)
+    );
+    if (preferred.length) return preferred[0];
+
+    const metLocked = candidates.filter((c) => (st.metCharacters || []).includes(c.id));
+    if (metLocked.length) return metLocked[0].id;
+
+    return candidates[Math.floor(Math.random() * candidates.length)].id;
+  }
+
+  // 確保開放名額 = 1（起始角色）＋ 已揭曉人格疾患的角色數；回傳本次新開放的角色 ID 列表
+  ensureRouteUnlocks(st = this.state, fromCharId = null) {
+    if (!Array.isArray(st.unlockedRoutes)) st.unlockedRoutes = [];
+    if (!Array.isArray(st.metCharacters)) st.metCharacters = [];
+    const diagnosedCount = CHARACTERS.filter((c) => {
+      const cs = st.characters?.[c.id];
+      return cs && st.unlockedRoutes.includes(c.id) && cs.diagnosed;
+    }).length;
+    const target = Math.min(CHARACTERS.length, 1 + diagnosedCount);
+    const newly = [];
+    while (st.unlockedRoutes.length < target) {
+      const nextId = this.pickNextRouteChar(st, fromCharId);
+      if (!nextId) break;
+      st.unlockedRoutes.push(nextId);
+      if (!st.metCharacters.includes(nextId)) st.metCharacters.push(nextId);
+      newly.push(nextId);
+    }
+    return newly;
+  }
+
+  // 故事走訪：預設持續走目前角色的故事；揭曉人格疾患後玩家可隨時切換到新開放的角色
   resolveStoryStep() {
     const st = this.state;
     st.storyStack = [];
 
-    // 若目前角色尚未走完，直接繼續走目前角色的故事到底（E01 ~ E15）
-    if (st.currentStoryChar && !this.isStoryFinished(st.currentStoryChar)) {
+    // 若目前角色尚未走完，直接繼續走目前角色的故事（E01 ~ E15）
+    if (st.currentStoryChar && this.isRouteUnlocked(st.currentStoryChar) && !this.isStoryFinished(st.currentStoryChar)) {
       return st.currentStoryChar;
     }
 
-    // 目前角色已走完時，優先選擇在三人同場事件中已認識但尚未走完的房客
-    const unfinishedMet = CHARACTERS.filter((c) => this.isMet(c.id) && !this.isStoryFinished(c.id));
-    if (unfinishedMet.length) {
-      st.currentStoryChar = unfinishedMet[0].id;
+    // 目前角色已走完時，選擇已開放但尚未走完的角色
+    const unfinishedUnlocked = CHARACTERS.filter((c) => this.isRouteUnlocked(c.id) && !this.isStoryFinished(c.id));
+    if (unfinishedUnlocked.length) {
+      st.currentStoryChar = unfinishedUnlocked[0].id;
       return st.currentStoryChar;
     }
 
-    // 若已認識的都走完了，從尚未認識的房客中開啟下一段邂逅
-    const unmet = CHARACTERS.filter((c) => !this.isMet(c.id));
-    if (!unmet.length) {
+    // 保險：若已開放的都走完了，再開放下一位
+    const nextId = this.pickNextRouteChar(st, st.currentStoryChar);
+    if (!nextId) {
       st.currentStoryChar = null;
       return null;
     }
-    st.currentStoryChar = unmet[0].id;
-    this.meetCharacter(st.currentStoryChar);
+    st.unlockedRoutes.push(nextId);
+    st.currentStoryChar = nextId;
+    this.meetCharacter(nextId);
     return st.currentStoryChar;
   }
 
@@ -496,7 +661,7 @@ class EdgeOfLoveGame {
   }
 
   maskUndiagnosedText(text = '', charId) {
-    if (this.isDiagnosed(charId)) return text;
+    if (this.state.studyMode || this.isDiagnosed(charId)) return text;
     return text
       .replace(/妄想型人格障礙症|妄想型人格|妄想型個體|妄想型/g, '此類高警覺特質者')
       .replace(/孤僻型人格障礙症|孤僻型人格|孤僻型個體|孤僻型/g, '此類偏好獨處特質者')
@@ -514,6 +679,8 @@ class EdgeOfLoveGame {
   }
 
   startNewGameFromForm() {
+    if (this.loadingState?.active) return;
+
     const nameInput = document.getElementById('player-name-input');
     const pronounInput = document.getElementById('player-pronoun-input');
 
@@ -535,24 +702,193 @@ class EdgeOfLoveGame {
     }
     fresh.player.trait = 'balanced';
 
-    // 小說式開場：先遇見第一位房客，並能完整走完一個人的故事
-    const firstChar = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+    // 封面大合照選角：若使用者點選指定了角色，則以此角色開啟故事；若未指定，預設隨機挑選一位
+    let firstChar = null;
+    if (this.selectedFirstCharId) {
+      firstChar = CHARACTERS.find((c) => c.id === this.selectedFirstCharId);
+    }
+    if (!firstChar) {
+      firstChar = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+    }
+
     fresh.metCharacters = [firstChar.id];
+    fresh.unlockedRoutes = [firstChar.id];
     fresh.currentStoryChar = firstChar.id;
 
+    const pendingGame = {
+      fresh,
+      firstChar,
+      selectionMode: this.selectedFirstCharId ? 'manual' : 'random'
+    };
+
+    audio.playSelect();
+
+    if (areAllAssetsPreloaded()) {
+      this.finalizeNewGameStart(pendingGame);
+      return;
+    }
+
+    this.beginPreloadAndStart(pendingGame);
+  }
+
+  async beginPreloadAndStart(pendingGame) {
+    const totalAssets = getAllGameImageAssets().length;
+    this.loadingState = {
+      active: true,
+      pendingGame,
+      failedAssets: [],
+      snapshot: {
+        totalCount: totalAssets,
+        loadedCount: 0,
+        failedCount: 0,
+        completedCount: 0,
+        loadedBytes: 0,
+        percent: 0,
+        currentLabel: '正在連結公寓記憶檔案…',
+        done: false
+      }
+    };
+    this.render();
+
+    const result = await preloadAllAssets({
+      concurrency: 6,
+      onProgress: (snapshot) => {
+        if (!this.loadingState) return;
+        this.loadingState.snapshot = snapshot;
+        this.updateLoadingProgressUI(snapshot);
+      }
+    });
+
+    if (!this.loadingState) return;
+    this.loadingState.snapshot = result;
+    this.updateLoadingProgressUI(result);
+
+    if (result.failedAssets && result.failedAssets.length > 0) {
+      this.loadingState.failedAssets = result.failedAssets;
+      this.render();
+      return;
+    }
+
+    setTimeout(() => {
+      if (!this.loadingState) return;
+      this.finalizeNewGameStart(pendingGame);
+    }, 320);
+  }
+
+  updateLoadingProgressUI(snapshot) {
+    if (!snapshot) return;
+    const fillEl = document.getElementById('loading-progress-fill');
+    const percentEl = document.getElementById('loading-percent');
+    const countEl = document.getElementById('loading-count');
+    const bytesEl = document.getElementById('loading-bytes');
+    const currentEl = document.getElementById('loading-current-item');
+
+    if (fillEl) fillEl.style.width = `${snapshot.percent}%`;
+    if (percentEl) percentEl.textContent = `${snapshot.percent}%`;
+    if (countEl) countEl.textContent = `${snapshot.loadedCount} / ${snapshot.totalCount} 張圖片`;
+    if (bytesEl) bytesEl.textContent = `${formatBytesMB(snapshot.loadedBytes)} MB`;
+    if (currentEl) {
+      currentEl.textContent = snapshot.done && snapshot.failedCount === 0
+        ? '✨ 所有人物立繪與場景記憶已就緒，正在推開大門…'
+        : `正在下載：${snapshot.currentLabel}`;
+    }
+  }
+
+  finalizeNewGameStart(pendingGame) {
+    if (!pendingGame) return;
+    const { fresh, firstChar, selectionMode } = pendingGame;
+
+    this.loadingState = null;
     this.state = fresh;
     this.activeScene = null;
     this.activeMainTab = 'locations';
     this.activeLocationId = 'apartment';
     this.autoSave();
-    audio.playSelect();
+
     trackGA('game_start', {
       player_sex: fresh.player.sex,
       first_character_id: firstChar.id,
-      first_character_name: firstChar.name
+      first_character_name: firstChar.name,
+      selection_mode: selectionMode
     });
+
     this.render();
     this.startEvent(firstChar.id, 1);
+  }
+
+  setFirstCharSelection(charId) {
+    if (this.selectedFirstCharId === charId) {
+      this.selectedFirstCharId = null;
+    } else {
+      this.selectedFirstCharId = charId;
+    }
+    audio.playSelect();
+
+    // 暫存輸入框已填寫的姓名與代名詞
+    const nameInput = document.getElementById('player-name-input');
+    if (nameInput) this.state.player.name = nameInput.value;
+    const pronounInput = document.getElementById('player-pronoun-input');
+    if (pronounInput) this.state.player.pronoun = pronounInput.value;
+
+    this.updateGroupPhotoSelectionUI();
+  }
+
+  updateGroupPhotoSelectionUI() {
+    const selectedChar = this.selectedFirstCharId
+      ? CHARACTERS.find((c) => c.id === this.selectedFirstCharId)
+      : null;
+
+    // 更新角色立繪柱之選中狀態、ARIA 屬性與標籤
+    document.querySelectorAll('.photo-char-pillar').forEach((pillar) => {
+      const cid = pillar.dataset.charId;
+      const isSel = Boolean(this.selectedFirstCharId && cid === this.selectedFirstCharId);
+      pillar.classList.toggle('is-selected', isSel);
+      pillar.setAttribute('aria-pressed', isSel ? 'true' : 'false');
+
+      const imgWrapper = pillar.querySelector('.photo-char-img-wrapper');
+      let badge = pillar.querySelector('.photo-selected-badge');
+      if (isSel && !badge && imgWrapper) {
+        const b = document.createElement('span');
+        b.className = 'photo-selected-badge';
+        b.textContent = '✦ 首選';
+        imgWrapper.appendChild(b);
+      } else if (!isSel && badge) {
+        badge.remove();
+      }
+
+      const actionText = pillar.querySelector('.hover-card-action');
+      if (actionText) {
+        actionText.textContent = isSel ? '✦ 已選中為首發故事 ✦' : '點擊選擇由此開啟故事';
+      }
+    });
+
+    // 更新底部選擇提示列
+    const statusDesc = document.getElementById('selection-status-desc');
+    const actionsBox = document.getElementById('selection-actions');
+    const statusIcon = document.querySelector('.selection-status-text .status-icon');
+    const startBtn = document.getElementById('btn-start-game');
+
+    if (statusDesc) {
+      statusDesc.innerHTML = selectedChar
+        ? `已指定故事起點：<strong class="selected-char-highlight">${selectedChar.name}</strong>（${selectedChar.occupation}）`
+        : `目前狀態：<strong>未指定（隨機邂逅）</strong> — 點選合照中的房客可指定故事起點，或直接進入由命運隨機安排。`;
+    }
+
+    if (statusIcon) {
+      statusIcon.textContent = selectedChar ? '✨' : '🎲';
+    }
+
+    if (actionsBox) {
+      actionsBox.innerHTML = selectedChar
+        ? `<button type="button" class="btn-clear-selection" data-action="clear-char-selection" title="取消指定，改為隨機選擇">🎲 改為隨機選擇</button>`
+        : '';
+    }
+
+    if (startBtn) {
+      startBtn.innerHTML = selectedChar
+        ? `📖 與「${selectedChar.name}」推開公寓木門，翻開第一頁故事`
+        : `📖 推開公寓木門，翻開第一頁故事（隨機邂逅一位房客）`;
+    }
   }
 
   clampStat(val) {
@@ -573,38 +909,156 @@ class EdgeOfLoveGame {
     }
   }
 
-  unlockCriterion(charId, criterionId) {
-    if (!criterionId) return false;
+  unlockCriterion(charId, criterionId, logEntry = null) {
+    return this.unlockClinicalItem(charId, 'criterion', criterionId, logEntry);
+  }
+
+  unlockClinicalItem(charId, itemType, itemId, logEntry = null) {
+    if (!itemId) return false;
     const char = CHARACTERS.find((c) => c.id === charId);
     const cs = this.state.characters[charId];
     if (!char || !cs) return false;
 
+    if (!Array.isArray(cs.unlockedCriteria)) cs.unlockedCriteria = [];
+    if (!Array.isArray(cs.unlockedSpecifiers)) cs.unlockedSpecifiers = [];
+    if (!Array.isArray(cs.unlockedComorbidities)) cs.unlockedComorbidities = [];
+    if (!cs.evidenceLog || typeof cs.evidenceLog !== 'object') cs.evidenceLog = {};
+
+    const bucket =
+      itemType === 'specifier'
+        ? cs.unlockedSpecifiers
+        : itemType === 'comorbidity'
+        ? cs.unlockedComorbidities
+        : cs.unlockedCriteria;
+
     let newlyAdded = false;
-    if (!cs.unlockedCriteria.includes(criterionId)) {
-      cs.unlockedCriteria.push(criterionId);
+    if (!bucket.includes(itemId)) {
+      bucket.push(itemId);
       newlyAdded = true;
     }
 
-    const total = char.criteria.length;
-    const currentCount = cs.unlockedCriteria.length;
+    if (logEntry && logEntry.eventCode) {
+      const prev = Array.isArray(cs.evidenceLog[itemId]) ? cs.evidenceLog[itemId] : [];
+      const dup = prev.some(
+        (x) => x.eventCode === logEntry.eventCode && x.choiceText === logEntry.choiceText
+      );
+      if (!dup) {
+        cs.evidenceLog[itemId] = [...prev, logEntry];
+      }
+    }
 
     if (newlyAdded) {
-      const crit = char.criteria.find((cr) => cr.id === criterionId);
-      if (currentCount >= total && cs.eventCompleted >= 11 && !cs.diagnosed) {
-        cs.diagnosed = true;
-        audio.playUnlockDSM();
-        this.showToast(
-          `🥇 達成成就【靈魂真名】！正式揭曉 ${char.name} 臨床診斷：${char.dsmTitle} (${char.dsmCode})`
-        );
-      } else if (crit) {
-        audio.playChime(660, 0.14);
-        this.showToast(
-          `🌸 觀察到【${char.name}】心靈特徵：「${crit.title}」（線索 ${currentCount}/${total}）`
-        );
+      audio.playChime(660, 0.14);
+      if (itemType === 'criterion') {
+        const crit = (char.criteria || []).find((cr) => cr.id === itemId);
+        const st = this.getThresholdStats(char, cs);
+        if (st.threshCount >= st.minReq && cs.eventCompleted >= getDiagnosisRevealEvent(charId) - 1 && !cs.diagnosed) {
+          this.showToast(
+            `🌸 【${char.name}】已收齊法定門檻線索（${st.threshCount}/${st.minReq}），臨床診斷即將確立……`
+          );
+        } else if (crit) {
+          const stageTag = crit.stage === 'advanced' ? '進階準則' : '核心準則';
+          this.showToast(
+            `🌸 觀察到【${char.name}】${stageTag}：「${crit.title}」（門檻 ${st.threshCount}/${st.minReq}・全數 ${st.totalUnlocked}/${st.total}）`
+          );
+        }
+      } else if (itemType === 'specifier') {
+        const spec = (char.specifiers || []).find((sp) => sp.id === itemId);
+        if (spec) {
+          this.showToast(`🏷️ 辨識【${char.name}】臨床亞型註記：「${spec.title}」`);
+        }
+      } else if (itemType === 'comorbidity') {
+        const como = (char.comorbidities || []).find((cm) => cm.id === itemId);
+        if (como) {
+          this.showToast(`🩺 辨識【${char.name}】常見共病傾向：「${como.title}」`);
+        }
       }
+      this.autoSave();
+    } else if (logEntry && logEntry.eventCode) {
       this.autoSave();
     }
     return newlyAdded;
+  }
+
+  getClinicalItemMeta(char, itemType, itemId) {
+    if (!char) return null;
+    if (itemType === 'specifier') {
+      return (char.specifiers || []).find((sp) => sp.id === itemId) || null;
+    }
+    if (itemType === 'comorbidity') {
+      return (char.comorbidities || []).find((cm) => cm.id === itemId) || null;
+    }
+    return (char.criteria || []).find((cr) => cr.id === itemId) || null;
+  }
+
+  renderEvidenceModal(charId, itemType, itemId) {
+    const root = document.getElementById('modal-root');
+    if (!root) return;
+    const char = CHARACTERS.find((c) => c.id === charId);
+    const cs = this.state.characters[charId];
+    const item = this.getClinicalItemMeta(char, itemType, itemId);
+    if (!char || !cs || !item) return;
+
+    const anchor = item.behavioralAnchor || null;
+    const logs = (cs.evidenceLog && cs.evidenceLog[itemId]) || [];
+    const typeLabel =
+      itemType === 'specifier'
+        ? '🏷️ 臨床亞型／特徵註記'
+        : itemType === 'comorbidity'
+        ? '🩺 常見共病傾向'
+        : item.stage === 'advanced'
+        ? '🔬 進階 DSM-5-TR 診斷準則'
+        : '📋 核心 DSM-5-TR 診斷準則';
+
+    const logsHtml = logs.length
+      ? logs
+          .map(
+            (l) => `
+          <div class="evidence-log-entry">
+            <div class="evidence-log-head">
+              <strong>${escapeHtml(l.eventCode || '')} ${escapeHtml(l.eventTitle || '')}</strong>
+              ${l.defenseMechanism ? `<span class="defense-showcase-badge">🛡️ ${escapeHtml(l.defenseMechanism)}</span>` : ''}
+            </div>
+            ${l.choiceText ? `<div class="evidence-log-choice">互動選擇：「${escapeHtml(l.choiceText)}」</div>` : ''}
+            ${l.reply ? `<div class="evidence-log-reply">${escapeHtml(l.reply)}</div>` : ''}
+          </div>`
+          )
+          .join('')
+      : `<div class="evidence-log-empty">此項目已由事件診斷節點直接觸發解鎖；亦可透過上方「原典行為錨點」對應回劇情事件。</div>`;
+
+    root.innerHTML = `
+      <div class="modal-backdrop" data-action="close-modal">
+        <div class="modal-window evidence-modal" style="--char-color: ${char.themeColor}">
+          <div class="modal-header">
+            <div>
+              <h2>${escapeHtml(char.name)}｜${escapeHtml(item.title)}</h2>
+              <p>${typeLabel} · ${escapeHtml(item.code || item.id)}</p>
+            </div>
+            <button type="button" class="btn-close" data-action="close-modal" aria-label="關閉">✕</button>
+          </div>
+          <div class="modal-body">
+            <p class="evidence-modal-desc">${escapeHtml(item.desc || '')}</p>
+            ${
+              anchor
+                ? `
+              <div class="evidence-anchor-box">
+                <div class="evidence-anchor-head">📌 行為佐證對照簿（${escapeHtml(anchor.eventCode || '')} · ${escapeHtml(anchor.eventTitle || '')}）</div>
+                ${anchor.quote ? `<blockquote class="evidence-anchor-quote">「${escapeHtml(anchor.quote)}」</blockquote>` : ''}
+                ${anchor.behavior ? `<div class="evidence-anchor-behavior"><strong>臨床觀察行為：</strong>${escapeHtml(anchor.behavior)}</div>` : ''}
+              </div>`
+                : ''
+            }
+            <div class="evidence-logs-section">
+              <div class="evidence-anchor-head">📝 本局實際觀察紀錄</div>
+              ${logsHtml}
+            </div>
+            <div class="route-unlock-actions">
+              <button type="button" class="btn-primary-large" data-action="close-modal">關閉對照簿</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   // ==================== 啟動 15 事件決策樹中的特定事件 ====================
@@ -689,7 +1143,7 @@ class EdgeOfLoveGame {
                     data-char-id="${c.id}"
                     data-disaster="${disasterType}"
                   >
-                    <img src="./assets/characters/${c.id}.png" alt="${c.name}" />
+                    <img src="${resolveAssetUrl(`./assets/characters/${c.id}.png`)}" alt="${c.name}" />
                     <div>
                       <strong>#${c.number} ${c.name}</strong>
                       <small>${uTitle.replace(/^E\d+｜/, '')}</small>
@@ -923,9 +1377,16 @@ class EdgeOfLoveGame {
     }
     cs.chapterCompleted = Math.min(3, Math.floor(cs.eventCompleted / 4));
 
+    const logFallback = {
+      eventCode: eventData.code,
+      eventTitle: eventData.title
+    };
     if (eventData.criterionId) {
-      this.unlockCriterion(charId, eventData.criterionId);
+      this.unlockCriterion(charId, eventData.criterionId, logFallback);
     }
+    (eventData.unlockCriteria || []).forEach((cid) => this.unlockCriterion(charId, cid, logFallback));
+    (eventData.unlockSpecifiers || []).forEach((sid) => this.unlockClinicalItem(charId, 'specifier', sid, logFallback));
+    (eventData.unlockComorbidities || []).forEach((cmid) => this.unlockClinicalItem(charId, 'comorbidity', cmid, logFallback));
 
     if (eventData.type === 'shared_quake') {
       cs.sharedQuakeDone = true;
@@ -939,26 +1400,38 @@ class EdgeOfLoveGame {
       this.applyStats(partnerId, { affection: 5, security: 5 });
     }
 
-    // 若完成 E12，確保所有臨床準則與診斷正式揭曉（達成🥇靈魂真名成就）
-    if (eventNumber >= 12 || eventData.unlockDiagnosisOnComplete) {
-      char.criteria.forEach((cr) => {
-        if (!cs.unlockedCriteria.includes(cr.id)) {
-          cs.unlockedCriteria.push(cr.id);
-        }
-      });
+    // Phase I~II 結尾（E08）：收齊該疾患法定最低診斷門檻準則，頒發【🥇 初步成就：確立臨床診斷（靈魂真名）】並解鎖下一位房客；
+    // Phase III~IV（E09～E15）才陸續解鎖剩餘進階準則、亞型註記與共病傾向
+    let newlyUnlockedRoutes = [];
+    let newlyDiagnosed = false;
+    if (eventNumber >= getDiagnosisRevealEvent(charId) || eventData.unlockDiagnosisOnComplete) {
+      (char.criteria || [])
+        .filter((cr) => (cr.stage || 'threshold') === 'threshold')
+        .forEach((cr) => {
+          if (!cs.unlockedCriteria.includes(cr.id)) {
+            cs.unlockedCriteria.push(cr.id);
+          }
+        });
       if (!cs.diagnosed) {
         cs.diagnosed = true;
+        newlyDiagnosed = true;
         audio.playUnlockDSM();
-        this.showToast(`🥇 達成成就【靈魂真名】！正式揭曉 ${char.name} 臨床診斷：${char.dsmTitle} (${char.dsmCode})`);
+        trackGA('story_diagnosis_reveal', {
+          character_id: char.id,
+          character_name: char.name,
+          event_number: eventNumber
+        });
       }
+      if (!this.isRouteUnlocked(charId)) this.state.unlockedRoutes.push(charId);
+      newlyUnlockedRoutes = this.ensureRouteUnlocks(this.state, charId);
     }
 
-    // 若完成 E13，正式解鎖「成長背景與人格疾患養成故事」（達成👑記憶深處的迴響成就）
+    // 若完成 E13，正式解鎖「成長背景與人格疾患養成故事」
     if (eventNumber >= 13 || eventData.unlockBackstoryOnComplete) {
       if (!cs.backstoryUnlocked) {
         cs.backstoryUnlocked = true;
         audio.playUnlockDSM();
-        this.showToast(`👑 達成終極成就【記憶深處的迴響】！已解鎖 ${char.name} 的成長背景與人格疾患養成故事！`);
+        this.showToast(`📜 已解鎖 ${char.name} 的成長背景與人格疾患養成故事！`);
       }
     }
 
@@ -981,6 +1454,125 @@ class EdgeOfLoveGame {
     this.autoSave();
     this.showToast(`✨ 已完成【${char.name}】劇情事件 E${String(eventNumber).padStart(2, '0')}！`);
     this.render();
+
+    if (newlyUnlockedRoutes.length) {
+      newlyUnlockedRoutes.forEach((nid) => {
+        const nc = CHARACTERS.find((c) => c.id === nid);
+        if (!nc) return;
+        trackGA('route_unlock', {
+          character_id: nc.id,
+          character_name: nc.name,
+          from_character_id: char.id
+        });
+      });
+    }
+
+    // 兩段式彈窗：① 🥇 初步攻略成就 → ② 🔓 新角色已解鎖
+    if (newlyDiagnosed) {
+      this.renderAchievementModal(charId, newlyUnlockedRoutes[0] || null);
+    } else if (newlyUnlockedRoutes.length) {
+      this.renderRouteUnlockModal(newlyUnlockedRoutes[0], charId);
+    }
+  }
+
+  // ==================== 彈窗 ①：🥇 初步攻略成就（靈魂真名揭曉） ====================
+  renderAchievementModal(charId, nextUnlockId = null) {
+    const modalRoot = document.getElementById('modal-root');
+    const char = CHARACTERS.find((c) => c.id === charId);
+    if (!modalRoot || !char) return;
+    const cs = this.state.characters[char.id];
+    const remain = Math.max(0, 15 - (cs?.eventCompleted || 0));
+    const st = this.getThresholdStats(char, cs);
+    this.pendingRouteUnlock = nextUnlockId ? { newCharId: nextUnlockId, fromCharId: charId } : null;
+    const nextLabel = nextUnlockId ? '✨ 繼續（查看新解鎖的房客）' : '✨ 收下成就';
+
+    modalRoot.innerHTML = `
+      <div class="modal-backdrop" data-action="ack-achievement">
+        <div class="modal-window route-unlock-modal achv-modal" style="--char-color: ${char.themeColor}">
+          <div class="modal-header">
+            <div>
+              <h2>🥇 初步成就：確立臨床診斷（靈魂真名）</h2>
+              <p>Phase I~II 已達 DSM-5-TR 最低法定診斷門檻（${escapeHtml(char.thresholdLabel || `${st.minReq} 項`)}）</p>
+            </div>
+            <button type="button" class="btn-close" data-action="ack-achievement" aria-label="關閉">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="route-unlock-body">
+              <img class="route-unlock-avatar" src="${resolveAssetUrl(`./assets/characters/${char.id}.png`)}" alt="${char.name}" />
+              <div class="route-unlock-info">
+                <span class="route-unlock-tag achv-tag">🥇 靈魂真名｜門檻達成 ${st.threshCount}/${st.minReq}</span>
+                <h3>${char.dsmTitle} <small>｜ ${char.dsmCode}</small></h3>
+                <p class="achv-en">${char.dsmTitleEn || ''}</p>
+                <div class="route-unlock-achv">
+                  在極端壓力的危機考驗下，${char.name} 核心防衛鬆動並已完全符合 DSM-5-TR 最低診斷門檻，正式揭曉診斷真名。
+                  <small>${remain > 0 ? `接下來進入 Phase III~IV（E09～E15，共 ${remain} 段深度事件），將進一步揭示剩餘進階準則、臨床亞型註記與精神科共病傾向！` : ''}</small>
+                </div>
+              </div>
+            </div>
+            <div class="route-unlock-actions">
+              <button type="button" class="btn-primary-large" data-action="ack-achievement">${nextLabel}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 關閉成就彈窗後，接著跳出新角色解鎖彈窗
+  acknowledgeAchievement() {
+    const pending = this.pendingRouteUnlock;
+    this.pendingRouteUnlock = null;
+    this.closeModals();
+    if (pending) {
+      audio.playChime(720, 0.12);
+      this.renderRouteUnlockModal(pending.newCharId, pending.fromCharId);
+    }
+  }
+
+  // ==================== 彈窗 ②：🔓 新角色已解鎖通知 ====================
+  renderRouteUnlockModal(newCharId, fromCharId) {
+    const modalRoot = document.getElementById('modal-root');
+    const newChar = CHARACTERS.find((c) => c.id === newCharId);
+    const fromChar = CHARACTERS.find((c) => c.id === fromCharId);
+    if (!modalRoot || !newChar || !fromChar) return;
+    const fromCs = this.state.characters[fromChar.id];
+    const remain = Math.max(0, 15 - (fromCs?.eventCompleted || 0));
+    const unlockedCount = (this.state.unlockedRoutes || []).length;
+    this.showToast(`🔓 新角色已解鎖：#${newChar.number} ${newChar.name}！可隨時切換攻略`);
+
+    modalRoot.innerHTML = `
+      <div class="modal-backdrop" data-action="close-modal">
+        <div class="modal-window route-unlock-modal" style="--char-color: ${newChar.themeColor}">
+          <div class="modal-header">
+            <div>
+              <h2>🔓 新角色已解鎖！</h2>
+              <p>公寓裡又有一扇門為你打開了（已開放 ${unlockedCount} / ${CHARACTERS.length} 位）。</p>
+            </div>
+            <button type="button" class="btn-close" data-action="close-modal" aria-label="關閉">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="route-unlock-body">
+              <img class="route-unlock-avatar" src="${resolveAssetUrl(`./assets/characters/${newChar.id}.png`)}" alt="${newChar.name}" />
+              <div class="route-unlock-info">
+                <span class="route-unlock-tag">✨ NEW ・ 可攻略房客</span>
+                <h3>#${newChar.number} ${newChar.name} <small>｜ ${newChar.occupation}</small></h3>
+                <p>${newChar.tagline || ''}</p>
+              </div>
+            </div>
+            <div class="route-unlock-actions">
+              <button type="button" class="btn-primary-large" data-action="switch-to-unlocked-char" data-char-id="${newChar.id}">
+                💖 前往認識 ${newChar.name}
+              </button>
+              ${
+                remain > 0
+                  ? `<button type="button" class="nav-btn" data-action="close-modal">📖 繼續陪 ${fromChar.name} 走下去</button>`
+                  : ''
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   handleChoiceSelect(choiceIndex) {
@@ -1011,25 +1603,75 @@ class EdgeOfLoveGame {
 
     // 重要：DSM 相關判斷與診斷依據僅在玩家「做出選擇後」才觸發與揭露！
     const criteriaIdsToUnlock = new Set();
+    const specifierIdsToUnlock = new Set();
+    const comorbidityIdsToUnlock = new Set();
+
     eventData.nodes.slice(0, nodeIndex + 1).forEach((n) => {
       if (n.unlockCriterion) criteriaIdsToUnlock.add(n.unlockCriterion);
+      (n.unlockCriteria || []).forEach((id) => criteriaIdsToUnlock.add(id));
+      if (n.unlockSpecifier) specifierIdsToUnlock.add(n.unlockSpecifier);
+      (n.unlockSpecifiers || []).forEach((id) => specifierIdsToUnlock.add(id));
+      if (n.unlockComorbidity) comorbidityIdsToUnlock.add(n.unlockComorbidity);
+      (n.unlockComorbidities || []).forEach((id) => comorbidityIdsToUnlock.add(id));
     });
-    if (choice.unlockCriterion) {
-      criteriaIdsToUnlock.add(choice.unlockCriterion);
-    }
-    if (eventData.criterionId) {
-      criteriaIdsToUnlock.add(eventData.criterionId);
-    }
+    if (choice.unlockCriterion) criteriaIdsToUnlock.add(choice.unlockCriterion);
+    (choice.unlockCriteria || []).forEach((id) => criteriaIdsToUnlock.add(id));
+    if (choice.unlockSpecifier) specifierIdsToUnlock.add(choice.unlockSpecifier);
+    (choice.unlockSpecifiers || []).forEach((id) => specifierIdsToUnlock.add(id));
+    if (choice.unlockComorbidity) comorbidityIdsToUnlock.add(choice.unlockComorbidity);
+    (choice.unlockComorbidities || []).forEach((id) => comorbidityIdsToUnlock.add(id));
+
+    if (eventData.criterionId) criteriaIdsToUnlock.add(eventData.criterionId);
+    (eventData.unlockCriteria || []).forEach((id) => criteriaIdsToUnlock.add(id));
+    (eventData.unlockSpecifiers || []).forEach((id) => specifierIdsToUnlock.add(id));
+    (eventData.unlockComorbidities || []).forEach((id) => comorbidityIdsToUnlock.add(id));
+
+    const replyFormatted = this.formatText(choice.reply);
+    const choiceTextFormatted = this.formatText(choice.text);
+    const logEntry = {
+      eventCode: eventData.code,
+      eventTitle: eventData.title,
+      choiceText: choiceTextFormatted,
+      reply: replyFormatted,
+      defenseMechanism: choice.defenseMechanism || null
+    };
 
     let criterionBasisObj = null;
     criteriaIdsToUnlock.forEach((cid) => {
-      this.unlockCriterion(charId, cid);
-      const foundCrit = char.criteria.find((cr) => cr.id === cid);
+      this.unlockCriterion(charId, cid, logEntry);
+      const foundCrit = (char.criteria || []).find((cr) => cr.id === cid);
       if (foundCrit) {
         criterionBasisObj = {
           id: foundCrit.id,
           title: foundCrit.title,
+          stage: foundCrit.stage || 'threshold',
           desc: this.maskUndiagnosedText(foundCrit.desc, charId)
+        };
+      }
+    });
+
+    let specifierBasisObj = null;
+    specifierIdsToUnlock.forEach((sid) => {
+      this.unlockClinicalItem(charId, 'specifier', sid, logEntry);
+      const foundSpec = (char.specifiers || []).find((sp) => sp.id === sid);
+      if (foundSpec) {
+        specifierBasisObj = {
+          id: foundSpec.id,
+          title: foundSpec.title,
+          desc: this.maskUndiagnosedText(foundSpec.desc, charId)
+        };
+      }
+    });
+
+    let comorbidityBasisObj = null;
+    comorbidityIdsToUnlock.forEach((cmid) => {
+      this.unlockClinicalItem(charId, 'comorbidity', cmid, logEntry);
+      const foundComo = (char.comorbidities || []).find((cm) => cm.id === cmid);
+      if (foundComo) {
+        comorbidityBasisObj = {
+          id: foundComo.id,
+          title: foundComo.title,
+          desc: this.maskUndiagnosedText(foundComo.desc, charId)
         };
       }
     });
@@ -1040,16 +1682,27 @@ class EdgeOfLoveGame {
       .map((n) => this.formatText(n.text))
       .join(' ');
 
-    const replyFormatted = this.formatText(choice.reply);
     const dsmJudgmentFormatted = this.maskUndiagnosedText(choice.psychNote, charId);
+    const isLastNode = nodeIndex + 1 >= (eventData.nodes || []).length;
 
     this.activeScene.expression = choice.nextExpression || 'neutral';
     this.activeScene.awaitingNextAfterChoice = true;
     this.activeScene.lastChoiceOutcome = {
-      choiceText: this.formatText(choice.text),
+      choiceText: choiceTextFormatted,
       reply: replyFormatted,
       psychNote: dsmJudgmentFormatted,
+      defenseMechanism: choice.defenseMechanism || null,
       criterionBasis: criterionBasisObj,
+      specifierBasis: specifierBasisObj,
+      comorbidityBasis: comorbidityBasisObj,
+      differentialContrast:
+        isLastNode && eventData.type === 'trio' ? eventData.differentialContrast || null : null,
+      studySummary: isLastNode ? eventData.studySummary || null : null,
+      tags: {
+        criteria: eventData.criterionTags || [],
+        specifiers: eventData.specifierTags || [],
+        comorbidities: eventData.comorbidityTags || []
+      },
       stats: effStats
     };
 
@@ -1061,10 +1714,13 @@ class EdgeOfLoveGame {
       code: eventData.code,
       title: eventData.title,
       context: sceneContextSummary,
-      choiceText: this.formatText(choice.text),
+      choiceText: choiceTextFormatted,
       reaction: replyFormatted,
+      defenseMechanism: choice.defenseMechanism || null,
       dsmJudgment: dsmJudgmentFormatted,
       criterionBasis: criterionBasisObj,
+      specifierBasis: specifierBasisObj,
+      comorbidityBasis: comorbidityBasisObj,
       stats: effStats,
       recordedAt: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })
     });
@@ -1093,7 +1749,45 @@ class EdgeOfLoveGame {
   bindGlobalEvents() {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        this.closeModals();
+        if (this.pendingRouteUnlock) {
+          this.acknowledgeAchievement();
+        } else {
+          this.closeModals();
+        }
+      }
+      if (e.key === 'Enter' || e.key === ' ') {
+        const pillar = document.activeElement?.closest('.photo-char-pillar');
+        if (pillar && pillar.dataset.charId) {
+          e.preventDefault();
+          this.setFirstCharSelection(pillar.dataset.charId);
+        }
+      }
+    });
+
+    document.addEventListener('mouseover', (e) => {
+      const pillar = e.target.closest('.photo-char-pillar');
+      if (pillar && pillar !== this._lastHoveredPillar) {
+        this._lastHoveredPillar = pillar;
+        const charId = pillar.dataset.charId;
+        const char = CHARACTERS.find((c) => c.id === charId);
+        const subtitleEl = document.getElementById('photo-frame-subtitle');
+        if (subtitleEl && char) {
+          subtitleEl.innerHTML = `✨ 探索中：<strong style="color:#fef08a; font-size:0.95rem;">${char.name}</strong>（${char.enName} ‧ ${char.occupation}）— 點選由他開啟第一頁故事`;
+        }
+        if (audio.enabled && typeof audio.playChime === 'function') {
+          audio.playChime(720, 0.02);
+        }
+      }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+      const pillar = e.target.closest('.photo-char-pillar');
+      if (pillar && pillar === this._lastHoveredPillar) {
+        this._lastHoveredPillar = null;
+        const subtitleEl = document.getElementById('photo-frame-subtitle');
+        if (subtitleEl) {
+          subtitleEl.innerHTML = '「指尖觸碰相片，選擇今晚最想先走進誰的故事？（未選擇時將由命運隨機挑選）」';
+        }
       }
     });
 
@@ -1109,6 +1803,26 @@ class EdgeOfLoveGame {
       switch (action) {
         case 'start-new-game':
           this.startNewGameFromForm();
+          break;
+        case 'retry-preload':
+          if (this.loadingState?.pendingGame) {
+            this.beginPreloadAndStart(this.loadingState.pendingGame);
+          }
+          break;
+        case 'force-enter-game':
+          if (this.loadingState?.pendingGame) {
+            this.finalizeNewGameStart(this.loadingState.pendingGame);
+          }
+          break;
+        case 'cancel-loading-to-cover':
+          this.loadingState = null;
+          this.render();
+          break;
+        case 'select-first-char':
+          this.setFirstCharSelection(target.dataset.charId);
+          break;
+        case 'clear-char-selection':
+          this.setFirstCharSelection(null);
           break;
         case 'toggle-mobile-nav':
           this.mobileNavOpen = !this.mobileNavOpen;
@@ -1148,6 +1862,7 @@ class EdgeOfLoveGame {
           this.continueStory();
           break;
         case 'story-daily':
+          if (!this.guardRoute(target.dataset.charId)) break;
           this.startDailyTalk(target.dataset.charId);
           break;
         case 'daily-choice':
@@ -1164,6 +1879,7 @@ class EdgeOfLoveGame {
           this.triggerSharedDisasterModal(target.dataset.disaster || 'quake');
           break;
         case 'launch-shared-disaster':
+          if (!this.guardRoute(target.dataset.charId)) break;
           this.launchSharedDisasterForChar(target.dataset.charId, target.dataset.disaster);
           break;
         case 'open-event-tree-modal':
@@ -1177,6 +1893,7 @@ class EdgeOfLoveGame {
         case 'select-story-char': {
           const cid = target.dataset.charId;
           if (cid && CHARACTERS.some((c) => c.id === cid)) {
+            if (!this.guardRoute(cid)) break;
             this.state.currentStoryChar = cid;
             this.meetCharacter(cid);
             this.autoSave();
@@ -1185,11 +1902,21 @@ class EdgeOfLoveGame {
           }
           break;
         }
+        case 'switch-to-unlocked-char': {
+          const cid = target.dataset.charId;
+          this.closeModals();
+          if (!cid || !this.guardRoute(cid)) break;
+          this.state.currentStoryChar = cid;
+          this.activeMainTab = 'locations';
+          this.startEvent(cid);
+          break;
+        }
         case 'start-event':
         case 'start-chapter':
           this.closeModals();
           {
             const cid = target.dataset.charId;
+            if (!this.guardRoute(cid)) break;
             const evNum = target.dataset.eventNum ? Number(target.dataset.eventNum) : null;
             const doneUpTo = this.state.characters[cid]?.eventCompleted || 0;
             this.state.currentStoryChar = cid;
@@ -1201,13 +1928,15 @@ class EdgeOfLoveGame {
           }
           break;
         case 'start-daily':
+          if (!this.guardRoute(target.dataset.charId)) break;
           this.startDailyTalk(target.dataset.charId);
           break;
         case 'show-ending': {
           const cid = target.dataset.charId;
+          if (!this.guardRoute(cid)) break;
           const cs = this.state.characters[cid];
           if (!this.isDiagnosed(cid) && cs.eventCompleted < 12) {
-            this.showToast('🔒 請先推進該角色的劇情事件至 E12 並達成【靈魂真名】成就，即可解鎖命定結局！');
+            this.showToast(`🔒 請先推進該角色的劇情事件至 ${this.getRevealCode(cid)} 並達成【靈魂真名】成就！`);
             return;
           }
           this.showEndingForCharacter(cid, target.dataset.endingKey || null);
@@ -1318,6 +2047,7 @@ class EdgeOfLoveGame {
             this.activeScene = null;
             this.activeMainTab = 'locations';
             this.activeLocationId = 'apartment';
+            this.selectedFirstCharId = null;
             this.closeModals();
             this.render();
             this.showToast('🔄 已重新開始遊戲，請設定主角資訊！');
@@ -1329,6 +2059,29 @@ class EdgeOfLoveGame {
           this.showToast(on ? '🔊 浪漫音效已開啟' : '🔇 音效已靜音');
           break;
         }
+        case 'toggle-study-mode': {
+          this.state.studyMode = !this.state.studyMode;
+          this.mobileNavOpen = false;
+          audio.playChime(this.state.studyMode ? 680 : 480, 0.08);
+          this.autoSave();
+          this.render();
+          this.showToast(
+            this.state.studyMode
+              ? '🎓 已開啟教學檢視模式：即時標註 DSM-5-TR 準則代碼、共病標籤與病理考點小結'
+              : '💖 已切回一般體驗模式：恢復未知線索遮罩，保留臨床探索驚喜'
+          );
+          break;
+        }
+        case 'open-evidence-modal':
+          this.renderEvidenceModal(
+            target.dataset.charId,
+            target.dataset.itemType || 'criterion',
+            target.dataset.itemId
+          );
+          break;
+        case 'ack-achievement':
+          this.acknowledgeAchievement();
+          break;
         case 'close-modal':
           this.closeModals();
           break;
@@ -1339,6 +2092,26 @@ class EdgeOfLoveGame {
   closeModals() {
     const modalRoot = document.getElementById('modal-root');
     if (modalRoot) modalRoot.innerHTML = '';
+  }
+
+  // 尚未開放的角色不可直接攻略：提示玩家先揭曉目前角色的人格疾患
+  guardRoute(charId) {
+    if (!charId || this.isRouteUnlocked(charId)) return true;
+    const char = CHARACTERS.find((c) => c.id === charId);
+    // 提示對象：優先指向目前主線；若目前主線已揭曉，改指向任一已開放但尚未揭曉的角色
+    const curId = this.state.currentStoryChar;
+    const hintId =
+      curId && this.isRouteUnlocked(curId) && !this.isDiagnosed(curId)
+        ? curId
+        : (this.state.unlockedRoutes || []).find((id) => !this.isDiagnosed(id));
+    const cur = CHARACTERS.find((c) => c.id === hintId);
+    audio.playChime(360, 0.08);
+    this.showToast(
+      `🔒 ${char?.name || '這位房客'}的路線尚未開放。${
+        cur ? `先推進 ${cur.name} 的故事至 ${this.getRevealCode(cur.id)} 揭曉靈魂真名，` : '揭曉任一位角色的靈魂真名後，'
+      }就能解鎖下一位房客！`
+    );
+    return false;
   }
 
   // 取得目前應顯示於全頁底下的場景背景 ID（若無特定場景時，預設就是雙層公寓 'apartment'）
@@ -1360,8 +2133,9 @@ class EdgeOfLoveGame {
   renderPageBackgroundLayer() {
     const sceneId = this.getCurrentBackgroundSceneId();
     const bgInfo = getSceneBackground(sceneId);
+    const bgUrl = resolveAssetUrl(bgInfo.imagePath);
     return `
-      <div class="page-scene-bg-layer" style="background-image: url('${bgInfo.imagePath}');">
+      <div class="page-scene-bg-layer" style="background-image: url('${bgUrl}');">
         <div class="page-scene-bg-vignette"></div>
       </div>
     `;
@@ -1395,9 +2169,9 @@ class EdgeOfLoveGame {
 
   getTotalAchievementsCount() {
     let unlocked = 0;
-    const total = CHARACTERS.length * 4;
+    const total = CHARACTERS.length * 2;
     CHARACTERS.forEach((c) => {
-      const achs = getCharacterAchievements(c, this.state.characters[c.id], this.isDiagnosed(c.id));
+      const achs = this.getAchievements(c);
       unlocked += achs.filter((a) => a.unlocked).length;
     });
     return { unlocked, total };
@@ -1409,6 +2183,14 @@ class EdgeOfLoveGame {
     if (!appRoot) return;
 
     const bgLayer = this.renderPageBackgroundLayer();
+
+    if (this.loadingState?.active) {
+      appRoot.innerHTML = `
+        ${bgLayer}
+        ${this.renderLoadingScreen()}
+      `;
+      return;
+    }
 
     if (!this.state.initialized) {
       appRoot.innerHTML = `
@@ -1526,6 +2308,13 @@ class EdgeOfLoveGame {
           >
             📖 診斷準則小工具
           </button>
+          <button
+            class="nav-btn ${this.state.studyMode ? 'btn-accent' : ''}"
+            data-action="toggle-study-mode"
+            title="切換心理病理學教學檢視模式：顯示準則代碼、共病標籤與考點小結"
+          >
+            🎓 教學模式：${this.state.studyMode ? 'ON' : 'OFF'}
+          </button>
           <button class="nav-btn" data-action="open-save-modal">
             💾 記憶存檔
           </button>
@@ -1540,7 +2329,174 @@ class EdgeOfLoveGame {
     `;
   }
 
+  renderLoadingScreen() {
+    const ls = this.loadingState || {};
+    const snap = ls.snapshot || {
+      totalCount: 31,
+      loadedCount: 0,
+      failedCount: 0,
+      loadedBytes: 0,
+      percent: 0,
+      currentLabel: '正在準備所有人物立繪與場景背景…',
+      done: false
+    };
+    const pending = ls.pendingGame;
+    const firstChar = pending?.firstChar;
+    const playerName = escapeHtml(pending?.fresh?.player?.name || '林予安');
+    const failedAssets = ls.failedAssets || [];
+    const hasFailed = failedAssets.length > 0;
+
+    return `
+      <section class="creator-screen loading-screen" aria-live="polite">
+        <div class="creator-card loading-card">
+          <div class="loading-sparkles" aria-hidden="true">
+            <span class="loading-spark s1">✦</span>
+            <span class="loading-spark s2">✧</span>
+            <span class="loading-spark s3">❀</span>
+            <span class="loading-spark s4">✦</span>
+          </div>
+
+          <div class="creator-header loading-header">
+            <span class="creator-badge">✦ 記憶預載中 ✦</span>
+            <h1>愛的邊緣 <small style="font-size:1.05rem; font-weight:400; display:block; margin-top:4px;">Edge of Love</small></h1>
+            <p>
+              ${playerName}，正在為你將全數人物雙層立繪與公寓場景保存至本機記憶，<br/>
+              確保稍後翻開故事的每一頁都能即時呈現、無須等待網路下載。
+            </p>
+          </div>
+
+          ${
+            firstChar && pending?.selectionMode === 'manual'
+              ? `
+                <div class="loading-partner-preview" style="--char-color: ${firstChar.themeColor}">
+                  <img
+                    class="loading-partner-avatar"
+                    src="${resolveAssetUrl(`./assets/characters/${firstChar.id}.png`)}"
+                    alt="${escapeHtml(firstChar.name)}"
+                  />
+                  <div class="loading-partner-meta">
+                    <span class="loading-partner-tag">✨ 指定開場對象</span>
+                    <strong>即將推開門遇見「${escapeHtml(firstChar.name)}」</strong>
+                    <small>共預載 12 位角色常態與情緒立繪 ＋ 7 處公寓場景</small>
+                  </div>
+                </div>
+              `
+              : `
+                <div class="loading-partner-preview is-mystery">
+                  <div class="loading-partner-mystery-icon" aria-hidden="true">🚪</div>
+                  <div class="loading-partner-meta">
+                    <span class="loading-partner-tag">🎲 命運隨機邂逅</span>
+                    <strong>門後的第一位房客正等待與你相遇</strong>
+                    <small>共預載 12 位角色常態與情緒立繪 ＋ 7 處公寓場景</small>
+                  </div>
+                </div>
+              `
+          }
+
+          <div class="loading-progress-panel">
+            <div class="loading-progress-meta">
+              <span class="loading-percent" id="loading-percent">${snap.percent}%</span>
+              <span class="loading-counts">
+                <span id="loading-count">${snap.loadedCount} / ${snap.totalCount} 張圖片</span>
+                <span class="loading-dot-sep">‧</span>
+                <span id="loading-bytes">${formatBytesMB(snap.loadedBytes)} MB</span>
+              </span>
+            </div>
+
+            <div class="loading-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${snap.percent}">
+              <div class="loading-progress-fill" id="loading-progress-fill" style="width: ${snap.percent}%;">
+                <div class="loading-progress-glint"></div>
+              </div>
+            </div>
+
+            <div class="loading-current-row">
+              <span class="loading-spinner ${snap.done && !hasFailed ? 'is-done' : ''}" aria-hidden="true"></span>
+              <span class="loading-current-item" id="loading-current-item">
+                ${
+                  hasFailed
+                    ? `⚠️ 有 ${failedAssets.length} 張圖片下載失敗`
+                    : snap.done
+                      ? '✨ 所有人物立繪與場景記憶已就緒，正在推開大門…'
+                      : `正在下載：${escapeHtml(snap.currentLabel)}`
+                }
+              </span>
+            </div>
+          </div>
+
+          ${
+            hasFailed
+              ? `
+                <div class="loading-error-box" id="loading-error-box">
+                  <p class="loading-error-title">⚠️ 部分圖檔因網路不穩未能完成下載（${failedAssets.length} 張）</p>
+                  <ul class="loading-error-list">
+                    ${failedAssets.map((item) => `<li>${escapeHtml(item.label)}</li>`).join('')}
+                  </ul>
+                  <div class="loading-error-actions">
+                    <button type="button" class="btn-primary-large" data-action="retry-preload">
+                      🔄 重新下載失敗的圖片（${failedAssets.length} 張）
+                    </button>
+                    <button type="button" class="nav-btn" data-action="force-enter-game">
+                      略過並進入遊戲
+                    </button>
+                    <button type="button" class="nav-btn" data-action="cancel-loading-to-cover">
+                      返回封面
+                    </button>
+                  </div>
+                </div>
+              `
+              : `
+                <p class="loading-atmosphere-tip">
+                  「雨聲漸歇，門縫裡漏出一線暖黃的燈光——所有圖檔載入完成後將自動開啟第一頁故事。」
+                </p>
+              `
+          }
+        </div>
+      </section>
+    `;
+  }
+
   renderCharacterCreator() {
+    const selectedChar = this.selectedFirstCharId
+      ? CHARACTERS.find((c) => c.id === this.selectedFirstCharId)
+      : null;
+
+    // 將 12 位角色分為後排（6位站姿沈穩/高挑）與前排（6位近景/活潑），形成富有公寓生活感的立體大合照
+    const backRowIds = ['shen_mo', 'han_xiao', 'gu_qingcheng', 'ji_yan', 'wen_yan', 'lin_jianwei'];
+    const frontRowIds = ['ruri', 'su_fei', 'xia_le', 'bai_xiaolu', 'lu_qinglan', 'you_ziqian'];
+
+    const renderPillar = (charId) => {
+      const c = CHARACTERS.find((item) => item.id === charId);
+      if (!c) return '';
+      const isSel = this.selectedFirstCharId === c.id;
+      return `
+        <div
+          class="photo-char-pillar ${isSel ? 'is-selected' : ''}"
+          data-action="select-first-char"
+          data-char-id="${c.id}"
+          tabindex="0"
+          role="button"
+          aria-pressed="${isSel ? 'true' : 'false'}"
+          aria-label="${c.name}（${c.occupation}）"
+        >
+          <div class="photo-char-img-wrapper">
+            <img src="${resolveAssetUrl(`./assets/characters/${c.id}.png`)}" alt="${c.name}" class="photo-char-img" loading="eager" />
+            <div class="photo-char-lighting"></div>
+            ${isSel ? '<span class="photo-selected-badge">✦ 首選</span>' : ''}
+          </div>
+          <div class="photo-char-namebar">
+            <span class="photo-char-name">${c.name}</span>
+          </div>
+          <div class="photo-char-hover-card">
+            <span class="hover-card-sparkle">✦</span>
+            <strong class="hover-card-name">${c.name}</strong>
+            <span class="hover-card-en">${c.enName}</span>
+            <span class="hover-card-role">${c.occupation}</span>
+            <span class="hover-card-action">${isSel ? '✦ 已選中為首發故事 ✦' : '點擊選擇由此開啟故事'}</span>
+          </div>
+        </div>
+      `;
+    };
+
     return `
       <section class="creator-screen">
         <div class="creator-card">
@@ -1555,6 +2511,64 @@ class EdgeOfLoveGame {
             </p>
           </div>
 
+          <!-- 公寓全體房客大合照相框 -->
+          <div class="apartment-group-photo-frame">
+            <div class="photo-frame-top-bar">
+              <span class="photo-frame-plaque">🏡 雙層公寓 ‧ 全體房客合影</span>
+              <span class="photo-frame-subtitle" id="photo-frame-subtitle">「指尖觸碰相片，選擇今晚最想先走進誰的故事？（未選擇時將由命運隨機挑選）」</span>
+            </div>
+
+            <div class="photo-stage-container">
+              <!-- 背景暖光與氛圍燈串 -->
+              <div class="photo-stage-ambient"></div>
+              <div class="photo-fairy-lights" aria-hidden="true">
+                <span class="fairy-bulb b1"></span>
+                <span class="fairy-bulb b2"></span>
+                <span class="fairy-bulb b3"></span>
+                <span class="fairy-bulb b4"></span>
+                <span class="fairy-bulb b5"></span>
+                <span class="fairy-bulb b6"></span>
+                <span class="fairy-bulb b7"></span>
+                <span class="fairy-bulb b8"></span>
+                <span class="fairy-bulb b9"></span>
+                <span class="fairy-bulb b10"></span>
+                <span class="fairy-bulb b11"></span>
+                <span class="fairy-bulb b12"></span>
+              </div>
+
+              <!-- 12 位房客合影舞台：後排與前排交錯層次 -->
+              <div class="photo-ensemble-layout">
+                <div class="photo-row photo-row-back">
+                  ${backRowIds.map(renderPillar).join('')}
+                </div>
+                <div class="photo-row photo-row-front">
+                  ${frontRowIds.map(renderPillar).join('')}
+                </div>
+              </div>
+            </div>
+
+            <!-- 選擇狀態提示列 -->
+            <div class="photo-selection-bar" id="photo-selection-bar">
+              <div class="selection-status-text">
+                <span class="status-icon">${selectedChar ? '✨' : '🎲'}</span>
+                <span class="status-desc" id="selection-status-desc">
+                  ${
+                    selectedChar
+                      ? `已指定故事起點：<strong class="selected-char-highlight">${selectedChar.name}</strong>（${selectedChar.occupation}）`
+                      : `目前狀態：<strong>未指定（隨機邂逅）</strong> — 點選合照中的房客可指定故事起點，或直接進入由命運隨機安排。`
+                  }
+                </span>
+              </div>
+              <div class="selection-actions" id="selection-actions">
+                ${
+                  selectedChar
+                    ? `<button type="button" class="btn-clear-selection" data-action="clear-char-selection" title="取消指定，改為隨機選擇">🎲 改為隨機選擇</button>`
+                    : ''
+                }
+              </div>
+            </div>
+          </div>
+
           <div class="creator-form">
             <div class="form-row">
               <label for="player-name-input">✦ 你的名字</label>
@@ -1564,8 +2578,12 @@ class EdgeOfLoveGame {
               <label for="player-pronoun-input">✦ 別人怎麼稱呼你（人稱代名詞）</label>
               <input id="player-pronoun-input" type="text" value="${this.state.player.pronoun || '她'}" maxlength="6" placeholder="她 / 他 / TA / 祂" />
             </div>
-            <button class="btn-primary-large" data-action="start-new-game">
-              📖 推開公寓木門，翻開第一頁故事
+            <button class="btn-primary-large" id="btn-start-game" data-action="start-new-game">
+              ${
+                selectedChar
+                  ? `📖 與「${selectedChar.name}」推開公寓木門，翻開第一頁故事`
+                  : `📖 推開公寓木門，翻開第一頁故事（隨機邂逅一位房客）`
+              }
             </button>
           </div>
 
@@ -1606,6 +2624,14 @@ class EdgeOfLoveGame {
     const { char, cs, nextEv } = status;
     const progressPct = Math.round(((cs.eventCompleted || 0) / 15) * 100);
     const partnerChar = nextEv.partnerId ? CHARACTERS.find((c) => c.id === nextEv.partnerId) : null;
+    const unlockedCount = (this.state.unlockedRoutes || []).length;
+    const revealNum = getDiagnosisRevealEvent(char.id);
+    const revealPct = Math.round((revealNum / 15) * 100);
+    const isDiag = this.isDiagnosed(char.id);
+    const remainToReveal = Math.max(0, revealNum - (cs.eventCompleted || 0));
+    const otherPlayable = CHARACTERS.filter(
+      (c) => c.id !== char.id && this.isRouteUnlocked(c.id) && !this.isStoryFinished(c.id)
+    );
 
     return `
       <section class="location-panel story-panel">
@@ -1617,13 +2643,25 @@ class EdgeOfLoveGame {
         </div>
 
         <article class="story-current-card" style="--char-color: ${char.themeColor}">
-          <img class="story-current-avatar" src="./assets/characters/${char.id}.png" alt="${char.name}" />
+          <img class="story-current-avatar" src="${resolveAssetUrl(`./assets/characters/${char.id}.png`)}" alt="${char.name}" />
           <div class="story-current-body">
-            <span class="story-current-tag">🧭 當前專注故事線（完整直達結局）</span>
+            <span class="story-current-tag">🧭 當前專注故事線</span>
             <h3>${char.name} <small style="font-size:0.9rem; font-weight:400; opacity:0.85;">｜ ${char.occupation}</small></h3>
             <p>${char.tagline || ''}</p>
-            <div class="story-progress"><div class="story-progress-bar" style="width:${progressPct}%"></div></div>
+            <div class="story-progress">
+              <div class="story-progress-bar" style="width:${progressPct}%"></div>
+              <span class="story-progress-milestone ${isDiag ? 'reached' : ''}" style="left:${revealPct}%" title="${this.getRevealCode(char.id)}：揭曉靈魂真名 ＋ 解鎖新角色">🥇</span>
+            </div>
             <small>目前進度：已完成 ${cs.eventCompleted || 0} / 15 段劇情 ｜ 下一篇章：<strong>${nextEv.title.replace(/（🥇.*?）|（👑.*?）/g, '')}</strong></small>
+            ${
+              isDiag
+                ? `<p class="story-hint story-hint-reveal">🥇 已讀懂 ${char.name} 的靈魂真名（初步攻略成就）。${
+                    otherPlayable.length
+                      ? `你可以繼續完整攻略${char.pronoun}，或在下方切換到其他已解鎖的房客。`
+                      : `繼續走下去，解鎖${char.pronoun}的成長背景與命定結局。`
+                  }</p>`
+                : `<p class="story-hint story-hint-reveal">🔍 再完成 <strong>${remainToReveal}</strong> 段劇情（至 ${this.getRevealCode(char.id)}），即可揭曉 ${char.name} 的人格疾患並<strong>解鎖下一位可攻略房客</strong>。</p>`
+            }
             ${
               nextEv.type === 'trio' && partnerChar
                 ? `<p class="story-hint">👥 接下來的三人同場情節中，房客「<strong>${partnerChar.name}</strong>」也將在場與你們互動（不會中斷 ${char.name} 的主線）。</p>`
@@ -1638,13 +2676,19 @@ class EdgeOfLoveGame {
         </article>
 
         <div class="story-roster">
-          <h4>已認識 ${metCount} / ${CHARACTERS.length} 位・已走完 ${doneCount} 位（點擊已認識的房客可隨時切換主線）</h4>
+          <h4>已開放攻略 ${unlockedCount} / ${CHARACTERS.length} 位・已走完 ${doneCount} 位（點擊已解鎖的房客可隨時切換主線；每揭曉一位的靈魂真名，就會再開放一位）</h4>
           <div class="story-roster-chips">
             ${CHARACTERS.map((c) => {
-              if (!this.isMet(c.id)) return `<span class="story-chip locked">🚪 ？？？</span>`;
               const ccs = this.state.characters[c.id];
-              const cls = c.id === char.id ? 'current' : this.isStoryFinished(c.id) ? 'done' : '';
-              return `<button type="button" class="story-chip ${cls}" data-action="select-story-char" data-char-id="${c.id}" style="cursor:pointer;">${c.name} ${ccs.eventCompleted || 0}/15</button>`;
+              if (!this.isRouteUnlocked(c.id)) {
+                return this.isMet(c.id)
+                  ? `<button type="button" class="story-chip locked" data-action="select-story-char" data-char-id="${c.id}" title="已在三人同場邂逅，尚未開放攻略">🔒 ${c.name}</button>`
+                  : `<span class="story-chip locked">🚪 ？？？</span>`;
+              }
+              const isNew = (ccs.eventCompleted || 0) === 0 && c.id !== char.id;
+              const cls = c.id === char.id ? 'current' : this.isStoryFinished(c.id) ? 'done' : isNew ? 'new' : '';
+              const mark = this.isDiagnosed(c.id) ? '🥇 ' : isNew ? '✨ ' : '';
+              return `<button type="button" class="story-chip ${cls}" data-action="select-story-char" data-char-id="${c.id}" style="cursor:pointer;">${mark}${c.name} ${ccs.eventCompleted || 0}/15${isNew ? ' <em class="chip-new">NEW</em>' : ''}</button>`;
             }).join('')}
           </div>
         </div>
@@ -1666,7 +2710,7 @@ class EdgeOfLoveGame {
           <div>
             <h2>💞 公寓・人物關係圖 ＆ 角色心靈成就檔案</h2>
             <p>
-              以主角 <strong>${this.state.player.name}</strong> 為核心，呈現與 12 位可攻略房客的關係連線、<strong>4 階段心靈成就徽章（目前已解鎖 ${achSummary.unlocked} / ${achSummary.total} 枚成就，揭曉 ${diagnosedCount} / 12 人臨床診斷）</strong>，以及每位角色的「🟢 現在背景」與探索完成後解鎖的「👑 成長背景與人格疾患養成故事」。
+              以主角 <strong>${this.state.player.name}</strong> 為核心，呈現與 12 位可攻略房客的關係連線、<strong>2 枚心靈成就徽章：🥇 初步攻略＋👑 完美攻略（目前已解鎖 ${achSummary.unlocked} / ${achSummary.total} 枚成就，揭曉 ${diagnosedCount} / 12 人臨床診斷）</strong>，以及每位角色的「🟢 現在背景」與探索完成後解鎖的「👑 成長背景與人格疾患養成故事」。
             </p>
           </div>
         </div>
@@ -1694,7 +2738,7 @@ class EdgeOfLoveGame {
       const cs = this.state.characters[char.id];
       const diag = this.getDiagnosisDisplay(char);
       const rel = this.getRelationshipStatusInfo(char, cs);
-      const achs = getCharacterAchievements(char, cs, diag.diagnosed);
+      const achs = this.getAchievements(char);
       return { char, cs, diag, rel, achs, x, y };
     });
 
@@ -1759,7 +2803,7 @@ class EdgeOfLoveGame {
                 title="點擊捲動至 ${char.name} 的詳細關係、背景與成就卡"
               >
                 <div class="rel-node-avatar-wrap">
-                  <img src="./assets/characters/${char.id}.png" alt="${char.name}" />
+                  <img src="${resolveAssetUrl(`./assets/characters/${char.id}.png`)}" alt="${char.name}" />
                   <span class="rel-node-num">#${char.number}</span>
                 </div>
                 <div class="rel-node-caption">
@@ -1837,7 +2881,7 @@ class EdgeOfLoveGame {
     const diag = this.getDiagnosisDisplay(char);
     const rel = this.getRelationshipStatusInfo(char, cs);
     const promptInfo = CHARACTER_PROMPTS[char.id];
-    const achs = getCharacterAchievements(char, cs, diag.diagnosed);
+    const achs = this.getAchievements(char);
     const nextEv = this.getNextEventForChar(char.id);
     const backstoryUnlocked = Boolean(cs.backstoryUnlocked || cs.eventCompleted >= 13);
 
@@ -1849,7 +2893,7 @@ class EdgeOfLoveGame {
       <article id="rel-char-card-${char.id}" class="char-card otome-gacha-card" style="--char-color: ${char.themeColor}">
         <div class="gacha-card-visual" data-action="start-event" data-char-id="${char.id}">
           <div class="gacha-arch-window">
-            <img src="${promptInfo?.imagePath || `./assets/characters/${char.id}.png`}" alt="${char.name}" class="gacha-char-img" loading="lazy" />
+            <img src="${resolveAssetUrl(promptInfo?.imagePath || `./assets/characters/${char.id}.png`)}" alt="${char.name}" class="gacha-char-img" loading="eager" />
             <div class="gacha-gradient-veil"></div>
             <span class="gacha-rarity-badge">${promptInfo?.rarity || 'SSR'}</span>
             <span class="gacha-clue-pill ${diag.diagnosed ? 'unlocked' : ''}">
@@ -1871,7 +2915,7 @@ class EdgeOfLoveGame {
             <span>當前關係：<strong>${rel.label}</strong></span>
           </div>
 
-          <!-- 角色專屬 4 枚心靈成就徽章列 -->
+          <!-- 角色專屬 2 枚心靈成就徽章列 -->
           <div class="char-achievements-row">
             ${achs
               .map(
@@ -1927,14 +2971,20 @@ class EdgeOfLoveGame {
           ${this.renderCharacterDiaryDrawer(char, cs, false)}
 
           <!-- 內嵌漸進式 DSM-5-TR 診斷與行為觀察線索抽屜 -->
+          ${(() => {
+            const st = this.getThresholdStats(char, cs);
+            const showClinical = diag.diagnosed || this.state.studyMode;
+            const unlockedSpecs = Array.isArray(cs.unlockedSpecifiers) ? cs.unlockedSpecifiers : [];
+            const unlockedComos = Array.isArray(cs.unlockedComorbidities) ? cs.unlockedComorbidities : [];
+            return `
           <details class="card-dsm-dossier" ${diag.diagnosed ? 'open' : ''}>
             <summary>
-              <span>🥇 臨床真相成就（線索 ${cs.unlockedCriteria.length}/${char.criteria.length}）</span>
-              <strong>${diag.diagnosed ? `✅ ${char.dsmTitle}` : '🔒 待達診斷標準'}</strong>
+              <span>🥇 臨床檔案（門檻 ${st.threshCount}/${st.minReq}・全數 ${st.totalUnlocked}/${st.total}）</span>
+              <strong>${diag.diagnosed ? `✅ ${char.dsmTitle}` : this.state.studyMode ? `🎓 ${char.dsmTitle}` : '🔒 待達法定門檻'}</strong>
             </summary>
             <div class="card-dsm-body">
               ${
-                diag.diagnosed
+                showClinical
                   ? `
                     <div class="card-dsm-unlocked-box">
                       <p><strong>【${char.dsmTitle} (${char.dsmTitleEn}, ${char.dsmCode})】</strong></p>
@@ -1944,29 +2994,62 @@ class EdgeOfLoveGame {
                   `
                   : `
                     <p class="card-dsm-locked-tip">
-                      🔒 尚未符合 DSM-5-TR 確診門檻（需推進事件並收集滿 ${char.criteria.length} 項核心行為特徵後正式揭曉）。
+                      🔒 尚未達法定門檻（推進至 ${this.getRevealCode(char.id)} 收集 ${escapeHtml(char.thresholdLabel || `${st.minReq} 項`)} 後確立診斷並解鎖下一位房客；E09～E15 續揭進階準則、亞型與共病）。
                     </p>
                   `
               }
               <ul class="card-criteria-mini-list">
                 ${char.criteria
                   .map((cr, idx) => {
-                    const isUnlocked = cs.unlockedCriteria.includes(cr.id);
+                    const isUnlocked = cs.unlockedCriteria.includes(cr.id) || this.state.studyMode;
+                    const stageLabel = cr.stage === 'advanced' ? 'Phase III~IV 進階' : 'Phase I~II 門檻';
                     return `
                       <li class="${isUnlocked ? 'unlocked' : 'locked'}">
-                        <strong>${isUnlocked ? `✅ ${cr.title}` : `🔒 待觀察行為特徵 #${idx + 1}`}</strong>
+                        <div class="card-crit-row-top">
+                          <strong>${isUnlocked ? `✅ ${cr.title}` : `🔒 待觀察特徵 #${idx + 1}`} <small class="stage-mini-tag">${stageLabel}</small></strong>
+                          ${
+                            isUnlocked
+                              ? `<button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="criterion" data-item-id="${cr.id}">🔍 行為佐證</button>`
+                              : ''
+                          }
+                        </div>
                         <span>${isUnlocked ? this.maskUndiagnosedText(cr.desc, char.id) : '推進與該角色的跨地點事件即可記錄此特徵'}</span>
                       </li>
                     `;
                   })
                   .join('')}
               </ul>
+              ${
+                (char.specifiers?.length || char.comorbidities?.length)
+                  ? `
+                    <div class="card-spec-como-box">
+                      ${(char.specifiers || [])
+                        .map((sp) => {
+                          const open = unlockedSpecs.includes(sp.id) || this.state.studyMode;
+                          return open
+                            ? `<button type="button" class="clinical-chip chip-spec" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="specifier" data-item-id="${sp.id}">🏷️ 亞型：${escapeHtml(sp.title)} 🔍</button>`
+                            : `<span class="clinical-chip chip-locked">🔒 亞型註記（E09~E15 解鎖）</span>`;
+                        })
+                        .join('')}
+                      ${(char.comorbidities || [])
+                        .map((cm) => {
+                          const open = unlockedComos.includes(cm.id) || this.state.studyMode;
+                          return open
+                            ? `<button type="button" class="clinical-chip chip-como" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="comorbidity" data-item-id="${cm.id}">🩺 共病：${escapeHtml(cm.title)} 🔍</button>`
+                            : `<span class="clinical-chip chip-locked">🔒 共病傾向（E09~E15 解鎖）</span>`;
+                        })
+                        .join('')}
+                    </div>
+                  `
+                  : ''
+              }
             </div>
-          </details>
+          </details>`;
+          })()}
 
           <div class="char-card-actions">
             <button class="btn-card-main" data-action="start-event" data-char-id="${char.id}">
-              ${cs.eventCompleted < 15 ? `💖 推進 ${nextEv.code}` : '✨ 重溫事件'}
+              ${!this.isRouteUnlocked(char.id) ? '🔒 尚未開放攻略' : cs.eventCompleted < 15 ? `💖 推進 ${nextEv.code}` : '✨ 重溫事件'}
             </button>
             <button class="btn-card-sub is-hidden-feature" hidden data-action="open-event-tree-modal" data-char-id="${char.id}" title="開啟 15 事件完整決策樹">
               🌳 決策樹(${cs.eventCompleted}/15)
@@ -1988,7 +3071,7 @@ class EdgeOfLoveGame {
     const char = CHARACTERS.find((c) => c.id === charId) || CHARACTERS[0];
     const cs = this.state.characters[char.id];
     const events = this.getEventsForChar(char.id);
-    const achs = getCharacterAchievements(char, cs, this.isDiagnosed(char.id));
+    const achs = this.getAchievements(char);
 
     modalRoot.innerHTML = `
       <div class="modal-backdrop" data-action="close-modal">
@@ -2229,6 +3312,28 @@ class EdgeOfLoveGame {
                 <span class="node-step">STEP ${nodeIndex + 1} / ${eventData.nodes.length}</span>
               </div>
 
+              ${
+                this.state.studyMode &&
+                ((eventData.criterionTags && eventData.criterionTags.length) ||
+                  (eventData.specifierTags && eventData.specifierTags.length) ||
+                  (eventData.comorbidityTags && eventData.comorbidityTags.length))
+                  ? `
+                    <div class="study-mode-tags-bar">
+                      <span class="study-bar-label">🎓 教學標註</span>
+                      ${(eventData.criterionTags || [])
+                        .map((t) => `<span class="study-tag-pill tag-crit">${escapeHtml(t)}</span>`)
+                        .join('')}
+                      ${(eventData.specifierTags || [])
+                        .map((t) => `<span class="study-tag-pill tag-spec">🏷️ ${escapeHtml(t)}</span>`)
+                        .join('')}
+                      ${(eventData.comorbidityTags || [])
+                        .map((t) => `<span class="study-tag-pill tag-como">🩺 ${escapeHtml(t)}</span>`)
+                        .join('')}
+                    </div>
+                  `
+                  : ''
+              }
+
               <div class="dialogue-text">
                 ${this.formatText(node.text).replaceAll('\n', '<br/><br/>')}
               </div>
@@ -2261,13 +3366,88 @@ class EdgeOfLoveGame {
                       </div>
 
                       <div class="dsm-panel-body">
+                        ${
+                          lastChoiceOutcome.defenseMechanism
+                            ? `<div class="defense-showcase-row"><span class="defense-showcase-badge">🛡️ 病理防衛展演：${escapeHtml(lastChoiceOutcome.defenseMechanism)}</span></div>`
+                            : ''
+                        }
                         <p class="dsm-psych-analysis">${lastChoiceOutcome.psychNote}</p>
                         ${
                           lastChoiceOutcome.criterionBasis
                             ? `
                               <div class="dsm-criterion-basis-box">
-                                <strong>📋 觀察依據【${lastChoiceOutcome.criterionBasis.title}】：</strong>
+                                <div class="dsm-basis-head">
+                                  <strong>📋 觀察依據【${lastChoiceOutcome.criterionBasis.title}】：</strong>
+                                  <button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="criterion" data-item-id="${lastChoiceOutcome.criterionBasis.id}">🔍 查看行為錨點</button>
+                                </div>
                                 <p>${lastChoiceOutcome.criterionBasis.desc}</p>
+                              </div>
+                            `
+                            : ''
+                        }
+                        ${
+                          lastChoiceOutcome.specifierBasis
+                            ? `
+                              <div class="dsm-criterion-basis-box basis-spec">
+                                <div class="dsm-basis-head">
+                                  <strong>🏷️ 臨床亞型註記【${lastChoiceOutcome.specifierBasis.title}】：</strong>
+                                  <button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="specifier" data-item-id="${lastChoiceOutcome.specifierBasis.id}">🔍 查看行為錨點</button>
+                                </div>
+                                <p>${lastChoiceOutcome.specifierBasis.desc}</p>
+                              </div>
+                            `
+                            : ''
+                        }
+                        ${
+                          lastChoiceOutcome.comorbidityBasis
+                            ? `
+                              <div class="dsm-criterion-basis-box basis-como">
+                                <div class="dsm-basis-head">
+                                  <strong>🩺 常見共病傾向【${lastChoiceOutcome.comorbidityBasis.title}】：</strong>
+                                  <button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="comorbidity" data-item-id="${lastChoiceOutcome.comorbidityBasis.id}">🔍 查看行為錨點</button>
+                                </div>
+                                <p>${lastChoiceOutcome.comorbidityBasis.desc}</p>
+                              </div>
+                            `
+                            : ''
+                        }
+                        ${
+                          lastChoiceOutcome.differentialContrast
+                            ? (() => {
+                                const dc = lastChoiceOutcome.differentialContrast;
+                                const pA = dc.partnerA || {};
+                                const pB = dc.partnerB || {};
+                                return `
+                              <div class="trio-differential-card">
+                                <div class="trio-diff-title">⚖️ 三人事件鑑別診斷對照</div>
+                                <div class="trio-diff-grid">
+                                  <div class="trio-diff-col">
+                                    <strong>${escapeHtml(pA.name || char.name)}${pA.disorder ? `｜${escapeHtml(pA.disorder)}` : ''}</strong>
+                                    <p><strong>核心動機：</strong>${escapeHtml(pA.motive || '')}</p>
+                                    ${pA.mechanism ? `<p style="margin-top:4px; color:#f5d0fe;"><strong>防衛機轉：</strong>${escapeHtml(pA.mechanism)}</p>` : ''}
+                                  </div>
+                                  <div class="trio-diff-col">
+                                    <strong>${escapeHtml(pB.name || partnerChar?.name || '')}${pB.disorder ? `｜${escapeHtml(pB.disorder)}` : ''}</strong>
+                                    <p><strong>核心動機：</strong>${escapeHtml(pB.motive || '')}</p>
+                                    ${pB.mechanism ? `<p style="margin-top:4px; color:#f5d0fe;"><strong>防衛機轉：</strong>${escapeHtml(pB.mechanism)}</p>` : ''}
+                                  </div>
+                                </div>
+                                ${
+                                  dc.summary
+                                    ? `<div class="trio-diff-takeaway"><strong>📌 臨床鑑別結論：</strong>${escapeHtml(dc.summary)}</div>`
+                                    : ''
+                                }
+                              </div>
+                            `;
+                              })()
+                            : ''
+                        }
+                        ${
+                          lastChoiceOutcome.studySummary && (this.state.studyMode || this.isDiagnosed(char.id) || eventNumber >= 8)
+                            ? `
+                              <div class="study-summary-card">
+                                <div class="study-summary-title">📚 本節病理學考點與共病小結</div>
+                                <p>${escapeHtml(lastChoiceOutcome.studySummary)}</p>
                               </div>
                             `
                             : ''
@@ -2475,6 +3655,26 @@ class EdgeOfLoveGame {
                 <strong>🥇 臨床診斷檔案：【${char.dsmTitle} (${char.dsmTitleEn}, ${char.dsmCode})】</strong>
                 <p style="margin-top:6px;">${char.clinicalOverview}</p>
                 <p style="margin-top:8px; color:#f5d0fe;">${char.differentialNote}</p>
+                ${
+                  (char.specifiers?.length || char.comorbidities?.length)
+                    ? `
+                      <div class="ending-spec-como-row">
+                        ${(char.specifiers || [])
+                          .map((sp) => `<span class="clinical-chip chip-spec">🏷️ 亞型註記：${escapeHtml(sp.title)} — ${escapeHtml(sp.desc)}</span>`)
+                          .join('')}
+                        ${(char.comorbidities || [])
+                          .map((cm) => `<span class="clinical-chip chip-como">🩺 共病傾向：${escapeHtml(cm.title)} — ${escapeHtml(cm.desc)}</span>`)
+                          .join('')}
+                      </div>
+                    `
+                    : ''
+                }
+                ${(() => {
+                  const e15 = this.getEventsForChar(char.id).find((e) => e.eventNumber === 15);
+                  return e15?.studySummary
+                    ? `<div class="study-summary-card" style="margin-top:12px;"><div class="study-summary-title">📚 本章病理學考點與共病總結</div><p>${escapeHtml(e15.studySummary)}</p></div>`
+                    : '';
+                })()}
                 <hr style="border-color:rgba(253,224,165,0.25); margin:10px 0;" />
                 <strong>👑 成長背景與人格疾患養成故事：${lore.growthBackstory.title}</strong>
                 <p style="margin-top:6px;">${lore.growthBackstory.story}</p>
@@ -2671,7 +3871,7 @@ class EdgeOfLoveGame {
                           data-action="select-dsm-widget-char"
                           data-char-id="${c.id}"
                         >
-                          <img src="./assets/characters/${c.id}.png" alt="${c.name}" />
+                          <img src="${resolveAssetUrl(`./assets/characters/${c.id}.png`)}" alt="${c.name}" />
                           <div class="dsm-pill-meta">
                             <strong>#${c.number} ${c.name} ${isCurScene ? '💬' : ''}</strong>
                             <small>${isDiag ? `🥇 ${c.dsmCode}` : `線索 ${cState.unlockedCriteria.length}/${c.criteria.length}`}</small>
@@ -2684,7 +3884,7 @@ class EdgeOfLoveGame {
                   <!-- 當前選中角色的診斷準則詳情 -->
                   <div class="dsm-selected-char-box" style="--char-color: ${char.themeColor}">
                     <div class="dsm-char-head">
-                      <img src="./assets/characters/${char.id}.png" alt="${char.name}" class="dsm-char-thumb" />
+                      <img src="${resolveAssetUrl(`./assets/characters/${char.id}.png`)}" alt="${char.name}" class="dsm-char-thumb" />
                       <div>
                         <div class="dsm-char-title-row">
                           <strong>#${char.number} ${char.name}</strong>
@@ -2696,40 +3896,105 @@ class EdgeOfLoveGame {
                           ${
                             diag.diagnosed
                               ? `<span role="button" tabindex="0" class="dsm-ref-link" data-action="open-dsm-ref" data-code="${char.dsmCode}">${char.dsmTitle} (${char.dsmTitleEn}) 🔗 查看準則</span>`
-                              : '🔒 真實人格疾患名稱將於集滿下方準則並完成 E12 後揭曉'
+                              : `🔒 真實人格疾患名稱將於推進劇情至 ${this.getRevealCode(char.id)} 後揭曉`
                           }
                         </p>
                       </div>
                     </div>
 
-                    <!-- 核心診斷準則核對清單 -->
-                    <div class="dsm-criteria-section-title">
-                      <span>📋 DSM-5-TR 核心診斷準則核對表</span>
-                      <small>做出劇情選擇後即可解鎖對應準則</small>
-                    </div>
+                    <!-- 階段性診斷門檻與進階項目進度 -->
+                    ${(() => {
+                      const st = this.getThresholdStats(char, cs);
+                      const pct = st.minReq ? Math.min(100, Math.round((st.threshCount / st.minReq) * 100)) : 100;
+                      const unlockedSpecs = Array.isArray(cs.unlockedSpecifiers) ? cs.unlockedSpecifiers : [];
+                      const unlockedComos = Array.isArray(cs.unlockedComorbidities) ? cs.unlockedComorbidities : [];
+                      return `
+                        <div class="dsm-threshold-progress">
+                          <div class="dsm-threshold-top">
+                            <span>📌 Phase I~II 法定最低門檻進度</span>
+                            <strong>${st.threshCount} / ${st.minReq} 項（${escapeHtml(char.thresholdLabel || '')}）</strong>
+                          </div>
+                          <div class="stat-track"><div class="stat-fill fill-security" style="width:${pct}%"></div></div>
+                        </div>
 
-                    <div class="dsm-criteria-checklist">
-                      ${char.criteria
-                        .map((cr, idx) => {
-                          const isUnlocked = cs.unlockedCriteria.includes(cr.id);
-                          return `
-                            <div class="dsm-crit-card ${isUnlocked ? 'unlocked' : 'locked'}">
-                              <div class="dsm-crit-top">
-                                <span class="dsm-crit-code">${cr.code}</span>
-                                <strong>${isUnlocked ? `✅ ${cr.title}` : `🔒 待觀察準則 #${idx + 1}（${cr.code}）`}</strong>
+                        <div class="dsm-criteria-section-title">
+                          <span>📋 DSM-5-TR 診斷準則核對表（點擊可開啟行為佐證對照簿）</span>
+                          <small>${this.state.studyMode ? '🎓 教學模式已全數標註' : 'E01～E08 累積門檻・E09～E15 續揭進階'}</small>
+                        </div>
+
+                        <div class="dsm-criteria-checklist">
+                          ${char.criteria
+                            .map((cr, idx) => {
+                              const isUnlocked = cs.unlockedCriteria.includes(cr.id) || this.state.studyMode;
+                              const isAdv = cr.stage === 'advanced';
+                              return `
+                                <div class="dsm-crit-card ${isUnlocked ? 'unlocked' : 'locked'} ${isAdv ? 'stage-advanced' : 'stage-threshold'}">
+                                  <div class="dsm-crit-top">
+                                    <span class="dsm-crit-code">${cr.code}</span>
+                                    <span class="dsm-stage-pill ${isAdv ? 'adv' : 'thresh'}">${isAdv ? 'Phase III~IV 進階' : 'Phase I~II 門檻'}</span>
+                                    <strong>${isUnlocked ? `✅ ${cr.title}` : `🔒 待觀察準則 #${idx + 1}（${cr.code}）`}</strong>
+                                  </div>
+                                  <p class="dsm-crit-desc">
+                                    ${
+                                      isUnlocked
+                                        ? this.maskUndiagnosedText(cr.desc, char.id)
+                                        : '尚未在互動中觀察到此項行為依據。推進與該角色的跨地點事件並做出選擇後即可記錄。'
+                                    }
+                                  </p>
+                                  ${
+                                    isUnlocked
+                                      ? `<div class="dsm-crit-actions"><button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="criterion" data-item-id="${cr.id}">🔍 查看行為佐證台詞</button></div>`
+                                      : ''
+                                  }
+                                </div>
+                              `;
+                            })
+                            .join('')}
+                        </div>
+
+                        ${
+                          (char.specifiers?.length || char.comorbidities?.length)
+                            ? `
+                              <div class="dsm-criteria-section-title" style="margin-top:14px;">
+                                <span>🏷️ 臨床亞型註記 ＆ 🩺 常見精神科共病傾向（Phase III~IV）</span>
                               </div>
-                              <p class="dsm-crit-desc">
-                                ${
-                                  isUnlocked
-                                    ? this.maskUndiagnosedText(cr.desc, char.id)
-                                    : '尚未在互動中觀察到此項行為依據。推進與該角色的跨地點事件並做出選擇後即可記錄。'
-                                }
-                              </p>
-                            </div>
-                          `;
-                        })
-                        .join('')}
-                    </div>
+                              <div class="dsm-criteria-checklist">
+                                ${(char.specifiers || [])
+                                  .map((sp) => {
+                                    const open = unlockedSpecs.includes(sp.id) || this.state.studyMode;
+                                    return `
+                                      <div class="dsm-crit-card ${open ? 'unlocked' : 'locked'} stage-specifier">
+                                        <div class="dsm-crit-top">
+                                          <span class="dsm-crit-code">亞型註記</span>
+                                          <strong>${open ? `🏷️ ${escapeHtml(sp.title)}` : '🔒 待揭示臨床亞型／特徵註記'}</strong>
+                                        </div>
+                                        <p class="dsm-crit-desc">${open ? this.maskUndiagnosedText(sp.desc, char.id) : '需於 Phase III~IV（E09～E15）深入關係衝突後解鎖。'}</p>
+                                        ${open ? `<div class="dsm-crit-actions"><button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="specifier" data-item-id="${sp.id}">🔍 查看行為佐證台詞</button></div>` : ''}
+                                      </div>
+                                    `;
+                                  })
+                                  .join('')}
+                                ${(char.comorbidities || [])
+                                  .map((cm) => {
+                                    const open = unlockedComos.includes(cm.id) || this.state.studyMode;
+                                    return `
+                                      <div class="dsm-crit-card ${open ? 'unlocked' : 'locked'} stage-comorbidity">
+                                        <div class="dsm-crit-top">
+                                          <span class="dsm-crit-code">常見共病</span>
+                                          <strong>${open ? `🩺 ${escapeHtml(cm.title)}` : '🔒 待觀察共病傾向'}</strong>
+                                        </div>
+                                        <p class="dsm-crit-desc">${open ? this.maskUndiagnosedText(cm.desc, char.id) : '需於 Phase III~IV（E09～E15）壓力失償場景中觀察。'}</p>
+                                        ${open ? `<div class="dsm-crit-actions"><button type="button" class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="comorbidity" data-item-id="${cm.id}">🔍 查看行為佐證台詞</button></div>` : ''}
+                                      </div>
+                                    `;
+                                  })
+                                  .join('')}
+                              </div>
+                            `
+                            : ''
+                        }
+                      `;
+                    })()}
 
                     <!-- 臨床概覽與鑑別診斷（已確診時完整顯示，未確診時顯示去標籤化觀察摘要） -->
                     <div class="dsm-clinical-notes-box">
