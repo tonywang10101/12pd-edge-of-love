@@ -54,7 +54,7 @@ export const CLUSTERS = {
   },
   B: {
     id: 'B',
-    name: 'Cluster B：戲劇化／情緒化／不穩定型 (Dramatic / Emotional / Erratic)',
+    name: 'Cluster B：戲劇化／情緒化／反覆無常型 (Dramatic / Emotional / Erratic)',
     color: '#f43f5e',
     desc: '包含反社會型、邊緣型、做作型、自戀型。情感濃烈、戲劇化、衝動或人際關係劇烈擺盪（DSM-5-TR 中位數盛行率約 4.5%）。'
   },
@@ -66,9 +66,9 @@ export const CLUSTERS = {
   },
   OTHER: {
     id: 'OTHER',
-    name: 'Other PD：生理病況改變與其他特定型',
+    name: 'Other PD：身體病況改變與其他特定型',
     color: '#f59e0b',
-    desc: '包含「另一身體病況引起之人格改變 (F07.0)」與「其他特定之人格障礙症：被動攻擊／混合特徵 (F60.89)」。'
+    desc: '包含「另一身體病況引起的人格改變 (F07.0)」、「其他特定的人格障礙症 (F60.89)」與「非特定的人格障礙症 (F60.9)」。'
   }
 };
 
@@ -96,8 +96,8 @@ export const CHARACTERS = [
     ecgType: 'vigilant',
     tagline: '「你對我這麼好，背後到底受誰指使？……別笑，我是認真的。」',
     shortBio: '住在公寓頂樓加蓋的獨立調查記者。拉上三層遮光窗簾，門鎖裝了兩道電子警報。他聰明敏銳、觀察入微，卻深信所有不請自來的善意都是精心設計的陷阱。',
-    clinicalOverview: '核心特徵為對他人普遍的不信任和猜疑，把別人的動機都解釋為充滿惡意（Criterion A）。常在沒有充分根據下懷疑別人正在利用、傷害或欺騙自己，對無心的評論讀出隱藏的貶抑或威脅，極度記仇，並在親密關係中反覆質疑伴侶的忠誠度。',
-    differentialNote: '【臨床鑑別】與「思覺失調型」不同，妄想型沒有魔幻思考或奇特知覺；與「畏避型」也不同——畏避型不敢敞開心房是因為怕被嘲笑羞辱，妄想型則是怕吐露的秘密被當成攻擊自己的武器。',
+    clinicalOverview: '核心特徵為一種對他人廣泛的不信任及懷疑，以致他人的動機被解讀為惡意的（準則 A）。沒有充分根據地懷疑別人在利用、傷害或欺騙他或她，在他人善意的言語或舉動中解讀出貶抑或威脅，持續地心懷怨恨，並在親密關係中對配偶或性伴侶的忠貞有反覆且不合理的懷疑。',
+    differentialNote: '【臨床鑑別】與「思覺失調型」不同，妄想型沒有奇幻的思考或不尋常的知覺經驗；與「畏避型」也不同——畏避型不敢敞開心房是因為害怕被批評、不認同或被拒絕，妄想型則是不願意向他人傾訴，無根據地害怕這些資訊會被惡意地用來對付自己。',
     strategyHint: '切忌過度熱情的讚美（他會覺得你在諷刺或有所圖謀）或善意的謊言。保持高度透明、守時、給他掌控距離的權利，才能建立安全感。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
@@ -117,8 +117,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01',
-        title: '無根據懷疑他人剝削或欺騙',
-        desc: '在沒有充分依據下，懷疑他人正在剝削、傷害或欺騙自己（視善意室友為「被房東安插的監視者」）。',
+        title: '沒有充分根據地懷疑別人在利用、傷害或欺騙他或她',
+        desc: '沒有充分根據地懷疑別人在利用(exploiting)、傷害或欺騙(deceiving)他或她（視善意室友為「被房東安插的監視者」）。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：茶杯裡的指紋與錄音筆',
@@ -131,8 +131,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E02 / E05',
-        title: '對朋友與夥伴忠誠度的無理懷疑',
-        desc: '被對朋友或同事之忠誠度與可信度的無理懷疑所盤據，反覆設定資訊一致性測試。',
+        title: '對朋友或共事者的忠誠度或可信度充滿不合理的懷疑',
+        desc: '對朋友或共事者的忠誠度或可信度充滿不合理的懷疑，反覆設定資訊一致性測試。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: '夜間巡邏與忠誠度口徑測試',
@@ -145,8 +145,8 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'threshold',
         targetEvent: 'E03',
-        title: '畏懼資訊被惡意利用而不願傾訴',
-        desc: '因不當地害怕私密資訊會被用來對付自己，拒絕吐露心事與個人脆弱。',
+        title: '不願意向他人傾訴（無根據害怕資訊被惡意用來對付自己）',
+        desc: '不願意向他人傾訴，原因是無根據地害怕這些資訊會被惡意地用來對付他或她。',
         behavioralAnchor: {
           eventCode: 'E03',
           eventTitle: '加密鐵盒與拒絕傾訴',
@@ -159,8 +159,8 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'threshold',
         targetEvent: 'E06 / E08',
-        title: '從善意言語或事件解讀出威脅',
-        desc: '從他人善意的評論或中性事件中，解讀出隱藏的貶低、試探或威脅意涵。',
+        title: '在他人善意的言語或舉動中解讀出貶抑或威脅',
+        desc: '在他人善意的言語或舉動中解讀出貶抑、試探或威脅。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '停電備用鑰匙的善意誤讀',
@@ -173,13 +173,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'advanced',
         targetEvent: 'E10',
-        title: '持續懷恨與不原諒輕視',
-        desc: '持續懷恨在心——對過去感知到的侮辱、傷害或輕視長期不予原諒，將其永久寫入防備檔案。',
+        title: '持續地心懷怨恨（無法寬恕侮辱、傷害或輕蔑）',
+        desc: '持續地心懷怨恨(grudges)（如：無法寬恕侮辱、傷害或輕蔑），將其永久寫入防備檔案。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '發黃報紙裡的舊背叛清單',
           quote: '「三年前他那句『你太敏感』我一輩子都不會忘，帳本上記著的每一筆都還沒結清。」',
-          behavior: '即使事過境遷多年，仍將昔日搭檔一句無心的輕視牢記於心並視同敵對宣戰。'
+          behavior: '即使事過境遷多年，仍將昔日搭檔一句無心的輕蔑牢記於心並視同敵對宣戰。'
         }
       },
       {
@@ -187,13 +187,13 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'advanced',
         targetEvent: 'E11',
-        title: '感知名譽受攻擊並迅速憤怒反擊',
-        desc: '認為自己的人格或名譽受到攻擊（他人未必察覺），並迅速以尖銳的憤怒或投射性指責反擊。',
+        title: '察覺到對個性或名譽的攻擊而迅速憤怒回應或反擊',
+        desc: '察覺到對他或她個性或名譽的攻擊，該攻擊對他人而言是不明顯的，而個案會迅速地憤怒回應或反擊。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '媒體澄清稿與名譽防禦爆發',
           quote: '「你說我偏執？這就是你用來貼我標籤、毀掉我記者專業可信度的手段吧！」',
-          behavior: '僅因討論報導用語的客觀建議，立刻感到專業尊嚴被貶低並以先發制人的怒火反咬。'
+          behavior: '僅因討論報導用語的客觀建議，立刻感到專業尊嚴被貶抑並以先發制人的怒火反咬。'
         }
       },
       {
@@ -201,8 +201,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'advanced',
         targetEvent: 'E12 / E14',
-        title: '對親密伴侶忠貞的反覆無端懷疑',
-        desc: '在缺乏正當理由下，對配偶或伴侶的忠貞抱持反覆猜疑，試圖檢查行蹤與通訊紀錄。',
+        title: '對配偶或性伴侶的忠貞有反覆且不合理的懷疑',
+        desc: '對配偶或性伴侶的忠貞有反覆且不合理的懷疑，試圖檢查行蹤與通訊紀錄。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：天台門鎖與未讀訊息時間戳',
@@ -264,7 +264,7 @@ export const CHARACTERS = [
     ecgType: 'flat_calm',
     tagline: '「齒輪比人類好懂。人類需要回應，但星空不需要。」',
     shortBio: '總是在凌晨獨自待在天台調校赤道儀的女孩。表情淡漠如靜水，不參加聚會、不滑社群軟體，對他人的稱讚或批評毫不在意，卻能精準聽出機械鐘錶裡千分之一秒的誤差。',
-    clinicalOverview: '核心特徵為對社會關係普遍疏離，且在人際情境中情緒表達範圍極度受限（Criterion A）。既不渴望也不享受親密關係，幾乎總是選擇獨處活動，對與他人發生性經驗或感官享樂幾乎沒有興趣，對外界讚美或批評顯得漠不關心。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現社會關係的疏離及在人際場合中感情表達的侷限（準則 A）。不欲求也不享受親近關係（包括身為家庭的一員），幾乎總是選擇單獨的活動，若有也很少對與他人有性經驗感興趣，若有也很少有活動使其感到樂趣，對他人的讚美或批評顯得漠不關心。',
     differentialNote: '【臨床鑑別】與「畏避型」最大的差異在於：畏避型內心非常渴望人際連結但因怕被拒絕而不敢靠近；孤僻型則是本質上缺乏對親密社交與感官刺激的需求，十分享受獨處。',
     strategyHint: '不要強行拉她去熱鬧場合，也不要逼問「妳到底在想什麼」。學會與她在同一個空間裡安靜地各自做自己的事（Parallel Play），是走進她世界的唯一方式。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -285,8 +285,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01 / E04',
-        title: '既不渴望也不享受親密關係',
-        desc: '對建立親密情感或家庭連結缺乏內在需求與愉悅感，寧可維持安靜的平行空間。',
+        title: '不欲求也不享受親近關係，包括身為家庭的一員',
+        desc: '不欲求也不享受親近關係（包括身為家庭的一員），寧可維持安靜的平行空間。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：赤道儀的平行距離',
@@ -299,8 +299,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E02 / E03',
-        title: '幾乎總是選擇獨自進行的活動',
-        desc: '主動且一貫地挑選無需人際協作的活動（如凌晨觀星、獨自修復機械鐘錶）。',
+        title: '幾乎總是選擇單獨的活動',
+        desc: '幾乎總是選擇單獨的活動，主動且一貫地挑選無需人際協作的作業（如凌晨觀星、獨自修復機械鐘錶）。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: '古董懷錶的零點五秒誤差',
@@ -314,7 +314,7 @@ export const CHARACTERS = [
         stage: 'threshold',
         targetEvent: 'E06',
         title: '對他人的讚美或批評顯得漠不關心',
-        desc: '不論他人熱烈稱讚或尖銳批評，內心與外顯反應都維持平靜無波。',
+        desc: '對他人的讚美或批評顯得漠不關心，不論熱烈稱讚或尖銳批評皆維持平靜無波。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '天台星圖評鑑後的平靜反應',
@@ -327,8 +327,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'threshold',
         targetEvent: 'E05 / E08',
-        title: '情緒冷淡、疏離或情感表達平淡',
-        desc: '面部表情與語氣起伏極少，極罕回應微笑或熱絡的社交暗示。',
+        title: '顯現出情感的冷淡、疏離或平板的情感性',
+        desc: '顯現出情感的冷淡、疏離或平板的情感性(affectivity)，表情與語氣起伏極少。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '天台停電狂風中的零振幅語調',
@@ -341,8 +341,8 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'advanced',
         targetEvent: 'E10',
-        title: '對與他人發生性經驗幾乎沒有興趣',
-        desc: '對肉體親密、性吸引力或情慾互動極度低需求或毫無渴望（非出於壓抑或恐懼）。',
+        title: '若有也很少對與他人有性經驗感興趣',
+        desc: '若有也很少對與他人有性經驗感興趣（非出於壓抑或恐懼）。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '體溫與物理邊界的坦誠對話',
@@ -355,8 +355,8 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'advanced',
         targetEvent: 'E11 / E12',
-        title: '對很少活動感到愉悅（低享樂能力）',
-        desc: '對大多數娛樂、美食、慶祝或感官刺激幾乎無法經驗到快樂或興奮感。',
+        title: '若有也很少有活動使其感到樂趣',
+        desc: '若有也很少有活動使其感到樂趣，對大多數娛樂、美食或感官刺激幾乎無法經驗到快樂。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '無味甜點與感官低喚起測試',
@@ -369,8 +369,8 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'advanced',
         targetEvent: 'E12 / E13',
-        title: '除了一等親外缺乏親近朋友或知己',
-        desc: '生命歷程中長期沒有知心好友，亦無維繫深交朋友圈的習慣。',
+        title: '除一等親外，缺乏親近朋友或知己',
+        desc: '除一等親外，缺乏親近朋友或知己，亦無維繫深交朋友圈的習慣。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：空白的緊急聯絡人欄位',
@@ -432,8 +432,8 @@ export const CHARACTERS = [
     ecgType: 'mystic_wave',
     tagline: '「剛才路燈閃了三次，烏鴉往西邊飛……這是宇宙要我今天別相信人類的訊號。」',
     shortBio: '穿著不對稱刺繡披肩與叮噹作響的銀飾，說話像詩句又像謎語。她相信自己的意念會影響天氣，總覺得街上的招牌在對她傳遞暗號。雖然渴望靈魂共鳴，卻在人群中感到強烈的異質與不安。',
-    clinicalOverview: '核心特徵為社交與人際缺損（對親密關係極度不自在），伴隨認知或知覺扭曲及行為古怪（Criterion A）。常見關係意念（Ideas of reference）、奇特信念或魔幻思考（第六感、心電感應、魔法儀式）、不尋常知覺經驗、言談過度抽象或隱喻，以及不會隨熟識度而減輕的社交焦慮。',
-    differentialNote: '【臨床鑑別】雖有關係意念與奇特知覺，但未達思覺失調症（Schizophrenia）的持續性妄想或幻覺程度；其社交焦慮源自偏執恐懼（怕外在惡意能量），而非畏避型的自我貶低。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現社會與人際缺損，顯示出對親近關係的強烈不適和能力降低，伴隨著認知或感知扭曲和行為古怪（準則 A）。常見關係意念（ideas of reference）、古怪的信念或奇幻的思考（「第六感」、心電感應、迷信）、不尋常的知覺經驗（包括身體錯覺）、古怪的思考和語言，以及不會因熟悉而減少且與偏執害怕有關的過度社交焦慮。',
+    differentialNote: '【臨床鑑別】雖有關係意念與不尋常的知覺經驗，但未達思覺失調症的持續性妄想或幻覺程度；其過度社交焦慮與偏執的（paranoid）害怕有關，與畏避型對自己的負面評價較無關。',
     strategyHint: '不要嘲笑她的占卜與小儀式（繞過特定路磚三次），但當她因偏執恐懼而焦慮時，溫柔地幫她與現實世界建立安全的定錨。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
@@ -453,8 +453,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01',
-        title: '關係觀念（非關係妄想）',
-        desc: '覺得無關的外在事件或巧合與自己具有特殊預兆關聯（如門牌號、路燈閃爍頻率）。',
+        title: '關係意念（排除關係妄想）',
+        desc: '關係意念（ideas of reference）（排除關係妄想），覺得無關的外在事件或巧合與自己具有特殊預兆關聯。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：307 號房的星軌共振',
@@ -467,13 +467,13 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E02 / E03',
-        title: '影響行為的古怪信念與魔幻思考',
-        desc: '深信超越文化常規的超自然因果、心電感應、塔羅或鹽陣結界並據此行動。',
+        title: '古怪的信念或奇幻的思考影響其行為且與次文化常模不一致',
+        desc: '深信超越次文化常規的迷信、千里眼、心電感應（telepathy）或「第六感」並據此行動。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: '門檻鹽陣與乙太絲線測試',
           quote: '「跨門檻前要先踩兩下鹽線，不然昨晚的負面乙太會沿著鞋底爬上你的袖口。」',
-          behavior: '日常作息與防禦完全受個人化的神秘儀式與魔幻因果規則所引導。'
+          behavior: '日常作息與防禦完全受個人化的神秘儀式與奇幻的思考規則所引導。'
         }
       },
       {
@@ -481,13 +481,13 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'threshold',
         targetEvent: 'E06 / E07',
-        title: '不尋常的知覺經驗與身體錯覺',
-        desc: '經驗到微弱低語、空間能量波紋或指尖電流感等身體知覺錯覺（未達明顯幻覺）。',
+        title: '不尋常的知覺經驗，包括身體錯覺',
+        desc: '不尋常的知覺經驗，包括身體錯覺（bodily illusions），如微弱低語或指尖電流感。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '指尖微電流與牆縫低語',
           quote: '「你有聽見牆壁水管裡那種類似紫羅蘭色的嗡嗡聲嗎？每次下雨它就會順著手指爬上來。」',
-          behavior: '生動描述非實體刺激的知覺異常與共感體覺錯覺。'
+          behavior: '生動描述非實體刺激的知覺異常與身體錯覺經驗。'
         }
       },
       {
@@ -495,8 +495,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'threshold',
         targetEvent: 'E04 / E01',
-        title: '行為或外表古怪、奇特與特異',
-        desc: '穿著混搭、飾品符號與談吐儀態奇特出格，顯著偏離主流社交習慣。',
+        title: '行為或外表古怪、乖僻或奇特',
+        desc: '行為或外表古怪、乖僻或奇特，顯著偏離主流社交習慣。',
         behavioralAnchor: {
           eventCode: 'E04',
           eventTitle: '畫室暗角中的星空徽章與銅鈴儀式',
@@ -509,8 +509,8 @@ export const CHARACTERS = [
         code: '準則 A9',
         stage: 'threshold',
         targetEvent: 'E05 / E08',
-        title: '不隨熟悉度減退之猜疑性社交焦慮',
-        desc: '過度社交焦慮不因熟識而緩解，且根植於對他人動機的類妄想猜疑，而非負面自我評價。',
+        title: '過度的社交焦慮不會因熟悉而減少（與偏執的害怕有關）',
+        desc: '過度的社交焦慮不會因熟悉而減少，且此傾向與偏執的（paranoid）害怕有關，與對自己的負面評價較無關。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '暴雨通訊中斷夜的能量防衛崩潰',
@@ -523,11 +523,11 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'advanced',
         targetEvent: 'E10 / E12',
-        title: '古怪思考與隱喻離題言談',
-        desc: '說話充滿過於抽象的星象隱喻、含糊跳躍或迂迴修辭，使聽者難以直接掌握重點。',
+        title: '古怪的思考和語言（含糊、迂迴、隱喻、過度引申或刻板）',
+        desc: '古怪的思考和語言[如，含糊的、迂迴的（circumstantial）、隱喻的（metaphorical）、過度引申的（overelaborate）或刻板的]。',
         behavioralAnchor: {
           eventCode: 'E10',
-          eventTitle: '過度精細的暗號信札',
+          eventTitle: '過度引申的暗號信札',
           quote: '「昨天那片雲像極了倒置的水銀天平，所以我才把晚餐的勺子轉向西南方。」',
           behavior: '對簡單生活事件採用高度跳躍與私人符號化的言語組織方式。'
         }
@@ -537,13 +537,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'advanced',
         targetEvent: 'E11',
-        title: '猜疑或類妄想的想法',
-        desc: '壓力升高時出現被追蹤、訊號被竊取或他人心懷祕密議程的類妄想念頭。',
+        title: '猜疑或偏執的意念',
+        desc: '猜疑或偏執的意念，壓力升高時出現被追蹤、訊號被竊取或他人心懷祕密議程的念頭。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '地下室舊檔案盒裡的陰謀假設',
           quote: '「管理員把信箱鎖換成銀色，是不是因為我們這個樓層被劃進了觀測實驗區？」',
-          behavior: '在未知事件刺激下浮現強烈類妄想推論，但被接納時願意退後審視。'
+          behavior: '在未知事件刺激下浮現強烈偏執推論，但被接納時願意退後審視。'
         }
       },
       {
@@ -551,13 +551,13 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'advanced',
         targetEvent: 'E12 / E13',
-        title: '情感不適切或表現受限',
-        desc: '情緒表達與談話氣氛不協調（如敘述恐懼或失落時露出空洞或奇異的微笑）。',
+        title: '不適當或狹隘的情感',
+        desc: '不適當或狹隘的情感，情緒表達與談話氣氛不協調（如敘述失落時露出空洞的微笑）。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：面對真實孤寂時的抽離微笑',
           quote: '「小時候沒有人坐在我旁邊吃飯……（唇角卻忽然輕輕上揚，眼神失焦）因為星星比較安靜呀。」',
-          behavior: '表層表情與內在創傷敘事顯現明顯解離式落差，呈現情感不適切。'
+          behavior: '表層表情與內在創傷敘事顯現明顯解離式落差，呈現不適當的情感。'
         }
       },
       {
@@ -565,7 +565,7 @@ export const CHARACTERS = [
         code: '準則 A8',
         stage: 'advanced',
         targetEvent: 'E14',
-        title: '除一等親外缺乏親密朋友或知己',
+        title: '除一等親外，缺乏親近朋友或知己',
         desc: '因言行古怪與猜疑退縮，長期以來除了親屬外極少建立同儕友誼。',
         behavioralAnchor: {
           eventCode: 'E14',
@@ -580,7 +580,7 @@ export const CHARACTERS = [
         id: 'F21-SPEC1',
         code: '臨床亞型 / 鑑別註記',
         targetEvent: 'E12 / E13',
-        title: '未達精神病性門檻之雙重帳本（與思覺失調症鑑別）',
+        title: '未達精神病症門檻之雙重帳本（與思覺失調症鑑別）',
         desc: '雖有顯著奇特信念與知覺錯覺，但不存在持續性幻覺與僵固妄想；透過「魔幻符號＝安全感隱喻」可進行現實核對與部分轉化。',
         behavioralAnchor: {
           eventCode: 'E12',
@@ -595,8 +595,8 @@ export const CHARACTERS = [
         id: 'F21-COM1',
         code: '常見臨床共病',
         targetEvent: 'E11 / E14',
-        title: '壓力誘發短暫精神病性插曲風險 ＆ 重鬱症／GAD',
-        desc: '面對極端感官過載或人際背叛時，認知解構加劇可能觸發短暫精神病性反應，且常伴隨長期孤立衍生的憂鬱情緒與廣泛性焦慮。',
+        title: '壓力誘發短暫精神病症插曲風險 ＆ 重鬱症／GAD',
+        desc: '面對極端感官過載或人際背叛時，認知解構加劇可能觸發短暫精神病症反應，且常伴隨長期孤立衍生的憂鬱情緒與廣泛性焦慮。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '感官過載夜的暫時性解構邊緣',
@@ -630,8 +630,8 @@ export const CHARACTERS = [
     ecgType: 'thrill_seeker',
     tagline: '「規則是寫給不敢贏的人看的。怎麼，你想當我的獵物，還是我的共犯？」',
     shortBio: '嘴角總掛著漫不經心的迷人壞笑，能在三分鐘內看穿任何人的弱點並投其所好。他極度厭惡無聊，熱衷遊走法律與道德邊緣的刺激遊戲。在他眼裡，人際關係只分「有趣的工具」與「無聊的廢物」——直到遇見看穿他把戲的你。',
-    clinicalOverview: '核心特徵為漠視並侵犯他人權利（Criterion A）。具表面魅力（Superficial charm）與能言善道，實則常說謊或操弄他人以獲取利益或樂趣，衝動、不顧自身與他人安全、缺乏責任感，且對傷害他人毫無悔意（常合理化為「弱肉強食」）。',
-    differentialNote: '【臨床鑑別】與「自戀型」或「做作型」不同：做作型與邊緣型的操弄是為了獲取關愛與照顧，而反社會型的操弄是為了獲取利益、權力或感官刺激，且缺乏罪惡感。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現漠視且侵犯他人權益（自 15 歲開始），且至少年滿 18 歲並在 15 歲前即有行為規範障礙症的證據。常為個人私利或樂趣而詐欺（反覆說謊、使用綽號、哄騙他人），衝動或無法做長遠打算，易怒和具攻擊性，魯莽不在意自己及他人的安危，一貫地不負責任，且不知悔恨。',
+    differentialNote: '【臨床鑑別】與「自戀型」或「做作型」不同：做作型與邊緣型的操弄是為了獲取關愛與照顧，而反社會型的操弄是為了個人私利或樂趣，且不知悔恨（無動於衷或合理化對他人造成的傷害、虐待或偷竊）。',
     strategyHint: '絕對不能當乖乖聽話的獵物（邊界值過低會直接進入被榨乾拋棄的結局）。你必須識破他的謊言、立下不可侵犯的底線，才能讓他對你產生真正的敬意與執著。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
@@ -644,20 +644,20 @@ export const CHARACTERS = [
       accessory: 'shaker'
     },
     minThreshold: 4,
-    thresholdLabel: '最低法定門檻：3 / 7 項成人準則 ＋ 15 歲前品行障礙史（E01～E08）',
+    thresholdLabel: '最低法定門檻：3 / 7 項成人準則 ＋ 年滿 18 歲 ＋ 15 歲前行為規範障礙症證據（E01～E08）',
     criteria: [
       {
         id: 'F60.2-A2',
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E01 / E02',
-        title: '欺騙與工具性操弄（反覆說謊／設局）',
-        desc: '反覆說謊、使用假話術或為個人利益或樂趣而操弄欺騙他人，視真誠為可利用的弱點。',
+        title: '為個人私利或樂趣而詐欺（反覆說謊／使用綽號／哄騙他人）',
+        desc: '為個人私利或樂趣而詐欺，如：反覆說謊、使用綽號（aliases）、哄騙他人。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：威士忌冰球裡的合約背面',
           quote: '「合約背面那行小字？哈哈，簽名之前沒看清楚的傢伙，本來就該為自己的天真買單吧。」',
-          behavior: '熟練運用模糊條款、吹牛話術與資訊不對等來測試並套利他人。'
+          behavior: '熟練運用模糊條款、綽號掩護與資訊不對等來哄騙並套利他人。'
         }
       },
       {
@@ -665,13 +665,13 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'threshold',
         targetEvent: 'E03 / E06',
-        title: '衝動性與無法事先計畫',
-        desc: '對無聊容忍度極低，行事不計長期後果，憑一時興起大幅改動計畫或做出高賭注行動。',
+        title: '衝動或無法做長遠打算',
+        desc: '衝動或無法做長遠打算，行事不計長期後果，憑一時興起大幅改動計畫或做出高賭注行動。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '午夜十二點的臨時起意',
           quote: '「計畫表？現在引擎已經發動了，明天早上會不會出事，明天再說。」',
-          behavior: '厭惡可預測的平靜生活，在沒有安全評估下說走就走以換取多巴胺刺激。'
+          behavior: '厭惡可預測的平靜生活，在沒有長遠評估下說走就走以換取感官刺激。'
         }
       },
       {
@@ -679,8 +679,8 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'threshold',
         targetEvent: 'E04 / E05',
-        title: '魯莽漠視自己或他人的安全',
-        desc: '故意忽略物理風險或法律安全紅線（如磨損煞車下山道飆車、暴力試探），從失控邊緣獲取快感。',
+        title: '魯莽不在意自己及他人的安危',
+        desc: '魯莽不在意自己及他人的安危，故意忽略物理風險或安全紅線（如磨損煞車下山道飆車、暴力試探）。',
         behavioralAnchor: {
           eventCode: 'E05',
           eventTitle: '第二章：時速兩百公里的無聊深淵',
@@ -690,16 +690,16 @@ export const CHARACTERS = [
       },
       {
         id: 'F60.2-CD',
-        code: '必要前置（15 歲前 CD 史）',
+        code: '準則 C（15 歲前病史）',
         stage: 'threshold',
         targetEvent: 'E07 / E08',
-        title: '15 歲前品行障礙症（Conduct Disorder）發病證據',
-        desc: 'DSM-5-TR 法定強制要件：必須追溯至 15 歲前已出現逃學、縱火、竊盜、霸凌打架或嚴重破壞規範之病史。',
+        title: '在 15 歲前即有行為規範障礙症（Conduct Disorder）的證據',
+        desc: 'DSM-5-TR 法定要件（準則 B 至少年滿 18 歲、準則 C 在 15 歲前即有行為規範障礙症的證據、準則 D 非僅存於思覺失調症或雙相情緒障礙症病程中）。',
         behavioralAnchor: {
           eventCode: 'E07',
           eventTitle: '舊檔案裡的少年管訓與廢棄倉庫火光',
           quote: '「十四歲那年被退學進少輔院之前，我就懂一個道理——規則是寫給綿羊看的，火柴才講道理。」',
-          behavior: '主動或受迫揭露 15 歲前逃學、暴力衝突與縱火破壊規範的少年品行障礙紀實。'
+          behavior: '主動或受迫揭露 15 歲前逃學、暴力衝突與縱火破壞規範的少年行為規範障礙症紀實。'
         }
       },
       {
@@ -707,13 +707,13 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'advanced',
         targetEvent: 'E10 / E12',
-        title: '缺乏悔意與合理化傷害',
-        desc: '對傷害、欺騙或剝削他人表現出麻木冷酷，常以「輸家活該」或「現實規則本如此」開脫。',
+        title: '不知悔恨（無動於衷或合理化傷害、虐待或偷竊）',
+        desc: '不知悔恨（remorse），如：無動於衷（indifferent）或合理化對他人造成的傷害、虐待或偷竊。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '欠債合夥人登門對質現場',
           quote: '「我又沒拿刀逼他簽本票，願賭服輸而已。他哭給誰看？弱者才需要罪惡感這種東西。」',
-          behavior: '親眼目睹受害者崩潰卻毫無內疚，把人際剝削冷酷合理化為達爾文式優勝劣敗。'
+          behavior: '親眼目睹受害者崩潰卻無動於衷，將對他人造成的傷害與欺瞞冷酷合理化。'
         }
       },
       {
@@ -721,8 +721,8 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'advanced',
         targetEvent: 'E09 / E11',
-        title: '易怒與攻擊性衝動',
-        desc: '利益受阻或遭挑釁時，快速切換為冷血威懾或肢體衝突攻擊性，對秩序權威展現低耐受。',
+        title: '易怒和具攻擊性，反覆與人鬥毆或施暴',
+        desc: '易怒（irritability）和具攻擊性（aggressiveness），反覆與人鬥毆或施暴。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '地下拳館與挑釁失控瞬間',
@@ -735,8 +735,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'advanced',
         targetEvent: 'E13',
-        title: '不遵守社會規範與法律紅線',
-        desc: '反覆游走灰色地下金融、非法賭局與足以遭逮捕或制裁的違規邊緣而不當一回事。',
+        title: '無法遵從社會規範像是守法，經常遊走於法律邊緣',
+        desc: '無法遵從社會規範像是守法，經常遊走於法律邊緣。',
         behavioralAnchor: {
           eventCode: 'E13',
           eventTitle: '深夜暗帳與地下牌局清點',
@@ -749,8 +749,8 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'advanced',
         targetEvent: 'E14',
-        title: '一貫地不負責任（財務／職責跳票）',
-        desc: '長期無法維持單一正職承諾或按期履行穩定社會義務，對他人依賴視為束縛。',
+        title: '一貫地不負責任（無法維持工作或亂開空頭支票）',
+        desc: '一貫地不負責任，如：無法維持工作或亂開空頭支票。',
         behavioralAnchor: {
           eventCode: 'E14',
           eventTitle: '破曉吧台上的最後誠實告白',
@@ -812,7 +812,7 @@ export const CHARACTERS = [
     ecgType: 'erratic_spike',
     tagline: '「只要你慢五分鐘回我，我就覺得你已經不愛我了……求你別丟下我，不然我們一起毀掉好不好？」',
     shortBio: '像一團燃燒的玫瑰火焰。初見面就能對你傾訴最深沉的秘密，把你當成拯救她的唯一神明；但只要你因為工作改期或語氣稍微平淡，她就會瞬間墜入被拋棄的冰窖，用尖銳的怒火或自我破壞來測試你是否真的在乎。背包裡總是放著一隻舊布偶兔。',
-    clinicalOverview: '核心特徵為人際關係、自我形象、情感的不穩定以及明顯的衝動性（Criterion A）。瘋狂努力避免真實或想像中的被拋棄；人際關係在「極端理想化」與「極端貶抑」間擺盪；自我認同混亂；慢性空虛感；甚至在關係即將穩定時故意搞砸（Self-sabotage）。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現不穩定之人際關係、自我形象和情感，以及顯著的衝動性（impulsivity）。瘋狂地努力逃避真實或想像中的被拋棄；不穩定且強烈的人際關係模式（在理想化與貶抑兩極之間轉換）；認同障礙；慢性空虛感；甚至在關係即將穩定時故意搞砸（Self-sabotage）。',
     differentialNote: '【臨床鑑別】邊緣型與「依賴型」都極度害怕被拋棄：但依賴型面對分離會變得更加順從討好，而邊緣型則會以空虛、暴怒與激烈要求來反應。',
     strategyHint: '不能無底線順從她的情緒勒索（會陷入毀滅性共依存），更不能冷暴力消失。需要「肯定她的感受（Validation）＋溫柔而堅定的界線（Boundary）」。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -833,8 +833,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01 / E04',
-        title: '瘋狂努力避免真實或想像的被遺棄',
-        desc: '對分離、延遲或微小距離極度警覺，僅遲回幾分鐘訊息便引發瀕死般的遺棄恐慌與奪命追問。',
+        title: '瘋狂地努力逃避真實或想像中的被拋棄',
+        desc: '瘋狂地努力逃避真實或想像中的被拋棄（不包括自殺或自殘行為）；僅遲回幾分鐘訊息便引發瀕死般的恐慌與追問。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：神明與惡魔的十二分鐘鐘擺',
@@ -847,8 +847,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E02 / E05',
-        title: '人際理想化與極端貶低擺盪（Splitting）',
-        desc: '人際認知呈現「全好神明」或「全壞惡魔」二元分裂，一旦期待落空便瞬間從深愛翻轉為惡毒詛咒。',
+        title: '不穩定且強烈的人際關係模式（理想化與貶抑兩極轉換）',
+        desc: '不穩定且強烈的人際關係模式，特徵為在理想化（idealization）與貶抑（devaluation）兩極之間轉換。',
         behavioralAnchor: {
           eventCode: 'E05',
           eventTitle: '第二章：從拯救者墜為冷血背叛者',
@@ -861,8 +861,8 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'threshold',
         targetEvent: 'E03 / E06',
-        title: '心情反應性所致之情感不穩定',
-        desc: '情緒對人際微細線索極端敏感，可在數小時內由欣喜若狂急墜至深度絕望、暴怒與焦慮崩潰。',
+        title: '情感不穩定呈現於顯著的心情反應',
+        desc: '情感不穩定呈現於顯著的心情反應（如：強烈陣發的不安、易怒或焦慮，常持續幾個小時，很少超過幾天）。',
         behavioralAnchor: {
           eventCode: 'E03',
           eventTitle: '布偶兔鈕扣鬆脫後的情緒海嘯',
@@ -875,8 +875,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'threshold',
         targetEvent: 'E06 / E07',
-        title: '長期的空虛感',
-        desc: '內心長期存在無法被填滿的黑洞感，常試圖透過強烈痛覺、高濃度顏料或緊抱安撫物對抗虛無。',
+        title: '慢性空虛感（feeling of emptiness）',
+        desc: '慢性空虛感（feeling of emptiness），常試圖透過強烈痛覺、高濃度顏料或緊抱安撫物對抗虛無。',
         behavioralAnchor: {
           eventCode: 'E07',
           eventTitle: '深夜調色盤與吞噬感黑洞',
@@ -889,8 +889,8 @@ export const CHARACTERS = [
         code: '準則 A8',
         stage: 'threshold',
         targetEvent: 'E08',
-        title: '不適切、強烈的憤怒或難以控制怒氣',
-        desc: '感知被忽視時爆發遠超比例的尖銳怒火與毀物衝動，事後又陷入極度的自我厭惡與恐慌。',
+        title: '不適當且強烈的憤怒或對憤怒難以控制',
+        desc: '不適當且強烈的憤怒或對憤怒難以控制（如：時常發脾氣、總是發怒、反覆肢體衝突）。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '地震停電夜的畫具崩塌與失控暴怒',
@@ -903,13 +903,13 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'advanced',
         targetEvent: 'E10',
-        title: '認同障礙（自我形象顯著持續不穩定）',
-        desc: '缺乏連貫的核心自我感，時而覺得自己是天才神祇、時而確信自己是「只配被丟掉的垃圾」。',
+        title: '認同障礙：顯著和持續不穩定的自我形象或自我感知',
+        desc: '缺乏連貫的核心自我形象或自我感知，時而覺得自己是天才神祇、時而確信自己是「只配被丟掉的垃圾」。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '鏡像碎裂前的身分迷航',
           quote: '「沒人看著我的時候，我連自己叫蘇緋還是只是個空殼都分不清楚……我到底是什麼人？」',
-          behavior: '自我價值與自我定義劇烈依附他人目光，缺乏穩固的內在核心認同。'
+          behavior: '自我形象與自我感知劇烈依附他人目光，缺乏穩固的內在核心認同。'
         }
       },
       {
@@ -917,13 +917,13 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'advanced',
         targetEvent: 'E11',
-        title: '兩個以上潛在自我傷害領域的衝動性',
-        desc: '承受情緒壓力時透過報復性消費畫材、通宵不眠不食或危險衝動來快速轉移內在痛楚。',
+        title: '至少兩方面潛在自我傷害的衝動行為',
+        desc: '至少兩方面潛在自我傷害的衝動行為（如過度花費、性虐待、物質濫用、危險駕駛或嗜食；不包括自殺或自殘行為）。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '刷爆卡的顏料堆與危險夜行',
           quote: '「反正帳單付不出來也沒差！不趁現在把整個畫廊買下來、去頂樓吹冷風，我會窒息！」',
-          behavior: '呈現財務揮霍與自我耗損性不計後果的跨領域衝動發作。'
+          behavior: '呈現過度花費與自我耗損性不計後果的跨領域衝動行為。'
         }
       },
       {
@@ -931,13 +931,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'advanced',
         targetEvent: 'E12 / E13',
-        title: '反覆自殺姿態、威脅或自殘衝動',
-        desc: '在瀕臨失落與被拋棄絕望中，將自殘傷痛或極端試探當成「喚回關注或止痛」的絕望訊號（教學安全呈現）。',
+        title: '反覆的自殺行為、姿態、威脅或自殘行為',
+        desc: '反覆的自殺行為、姿態（gestures）、威脅或自殘行為（教學安全呈現）。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：松節油與成功前夕的自我毀滅試探',
           quote: '「如果我把手劃傷，你是不是就會永遠記住我、不敢轉身離開這扇門？」',
-          behavior: '在關係即將穩定美好時因害怕最終仍會失去，浮現自傷試探衝動（臨床須安全介入與界線保護）。'
+          behavior: '在關係即將穩定美好時因害怕最終仍會失去，浮現自殘試探衝動（臨床須安全介入與界線保護）。'
         }
       },
       {
@@ -945,8 +945,8 @@ export const CHARACTERS = [
         code: '準則 A9',
         stage: 'advanced',
         targetEvent: 'E13 / E14',
-        title: '短暫壓力相關類妄想想法或嚴重解離',
-        desc: '處於極高遺棄威脅或創傷觸發下，出現時間空白感、體外漂浮感等嚴重解離症狀或短暫被背叛懷疑。',
+        title: '短暫及與壓力相關的偏執意念或嚴重解離症狀',
+        desc: '短暫及與壓力相關的偏執意念或嚴重解離症狀，如時間空白感、體外漂浮感或短暫被背叛猜疑。',
         behavioralAnchor: {
           eventCode: 'E13',
           eventTitle: '畫室白牆前的十五分鐘解離空白',
@@ -981,7 +981,7 @@ export const CHARACTERS = [
           eventCode: 'E10',
           eventTitle: '童年被關暗房的回憶閃回',
           quote: '「不是突然躁起來……只要門鎖咔噠一響，我腦袋裡就只剩下八歲那年等不到爸媽回來的黑夜。」',
-          behavior: '揭露人際觸發型劇變背後的長期童年遺棄創傷結構，明確區辨 BPD/C-PTSD 與純雙相情感疾患。'
+          behavior: '揭露人際觸發型劇變背後的長期童年拋棄創傷結構，明確區辨 BPD/C-PTSD 與純雙相情緒障礙症。'
         }
       }
     ]
@@ -995,7 +995,7 @@ export const CHARACTERS = [
     occupation: '實驗劇場首席演員／時尚美妝 KOL',
     cluster: 'B',
     dsmCode: 'F60.4',
-    dsmTitle: '做作型（戲劇化）人格障礙症',
+    dsmTitle: '做作型人格障礙症',
     dsmTitleEn: 'Histrionic Personality Disorder',
     sex: 'male',
     genderLabel: '順性別男性／華麗中性美學',
@@ -1008,7 +1008,7 @@ export const CHARACTERS = [
     ecgType: 'dramatic_stage',
     tagline: '「親愛的！沒看到我今天換了新香水嗎？快看著我，別看別處！」',
     shortBio: '只要走進房間，全場的燈光彷彿都必須打在他身上。他熱情、愛放電、逢人就抱著喊「我最親愛的靈魂摯友」，說話充滿驚嘆號卻說不出具體細節。一旦大家的話題不在他身上，他就會假裝暈眩或製造戲劇化事件把目光搶回來。',
-    clinicalOverview: '核心特徵為過度情緒化與尋求他人注意（Criterion A）。不是目光焦點時會強烈不安；常有不恰當的挑逗行為；情緒轉換極快且流於表面；高度依賴外貌吸引注意；說話偏印象派而缺乏細節；常誤以為關係比實際上更親密，卻害怕真正的深層情感親密。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現過度情緒化與尋求他人的注意。當他或她不是注意的焦點時會感到不適；時常以不恰當的性誘惑或性挑逗行為與他人互動；展現快速轉變和膚淺的情緒；利用自己外觀來吸引他人注意；說話風格過度概念化並缺乏細節；自認為人際關係比實際更為親密。',
     differentialNote: '【臨床鑑別】與「自戀型」都渴望關注：但自戀型要求別人崇拜其「優越與完美」，而做作型只要能成為焦點，即使展現脆弱、依賴或出糗也在所不惜。',
     strategyHint: '不要只當台下鼓掌的觀眾。當他用誇張的表演或挑逗掩飾不安時，溫和地邀請他卸下舞台妝容，肯定那個「不需要發光也值得被愛」的他。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -1029,8 +1029,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01 / E04',
-        title: '非注意力焦點時感到明顯不自在',
-        desc: '一旦他人注意力移開自己（即使僅數分鐘），便感到被忽視的失溫與焦躁，急切製造事件重奪舞台。',
+        title: '當他或她不是注意的焦點時會感到不適',
+        desc: '當他或她不是注意的焦點時會感到不適，急切製造事件把全場目光拉回自己身上。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：聚光燈轉移後的三分鐘失溫',
@@ -1043,13 +1043,13 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'threshold',
         targetEvent: 'E02',
-        title: '持續使用外表與打扮吸引注意',
-        desc: '花費龐大心力以驚豔裝扮、妝容與吸睛單品來換取他人的注視與讚歎，以此確認自身存在價值。',
+        title: '利用自己外觀來吸引他人注意',
+        desc: '利用自己外觀來吸引他人注意，花費龐大心力以驚豔裝扮與妝容確認自身存在價值。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: '卸妝前必拍的三百張精修與造型',
           quote: '「如果不穿得像隨時要走紅毯一樣出門，大家走在街上還會看我第二眼嗎？」',
-          behavior: '高度投資外貌作為維繫人際連結與情緒穩定的核心媒介。'
+          behavior: '高度投資外觀作為維繫人際連結與情緒穩定的核心媒介。'
         }
       },
       {
@@ -1057,8 +1057,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E03 / E05',
-        title: '不適切的性誘惑或挑逗互動行為',
-        desc: '在不分關係親疏與場合適當性的狀況下，習慣使用親密曖昧肢體接觸或挑逗言詞測試吸引力。',
+        title: '時常以不恰當的性誘惑或性挑逗行為與他人互動',
+        desc: '時常以不恰當的性誘惑（seductive）或性挑逗（provocative）行為與他人互動。',
         behavioralAnchor: {
           eventCode: 'E05',
           eventTitle: '排練場邊的貼耳低語與曖昧試探',
@@ -1071,13 +1071,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'threshold',
         targetEvent: 'E06 / E07',
-        title: '言談過度印象化且缺乏具體細節',
-        desc: '詞藻華麗誇張、充滿情緒形容詞，卻在被問及具體時間、事件或事實細節時顯得含糊空洞。',
+        title: '說話風格過度概念化並缺乏細節',
+        desc: '說話風格過度概念化（impressionistic）並缺乏細節，充滿情緒形容詞卻難以舉證具體事實。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '不准用形容詞的午餐挑戰',
           quote: '「那個導演簡直神級夢幻、美到讓人窒息……呃？你問他到底導過哪一齣戲？就是很有感覺啊！」',
-          behavior: '剝去浮誇修辭後無法具體舉證實質內容，語言風格高度印象派。'
+          behavior: '剝去浮誇修辭後無法具體舉證實質內容，說話風格過度概念化。'
         }
       },
       {
@@ -1085,13 +1085,13 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'threshold',
         targetEvent: 'E08',
-        title: '自我戲劇化、舞台化與誇大情緒表達',
-        desc: '將日常挫折演繹為生死戲碼般的誇張演出，情緒張力宛如在無形觀眾面前登台飆戲。',
+        title: '情緒表達顯露自我誇示、戲劇化和過度誇張',
+        desc: '情緒表達顯露自我誇示（self-dramatization）、戲劇化（theatricality）和過度誇張。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '台風停電夜的舞台聚光失序崩潰',
           quote: '「燈全滅了就沒人看得見我了——我感覺自己就像被扔進地下室的過氣道具！」',
-          behavior: '面對黑暗停電環境，將尋常不便演繹成被世界拋棄的戲劇化悲劇場面。'
+          behavior: '面對黑暗停電環境，將尋常不便演繹成自我誇示與戲劇化的悲劇場面。'
         }
       },
       {
@@ -1099,13 +1099,13 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'advanced',
         targetEvent: 'E10 / E12',
-        title: '情緒表達快速變換且顯得膚淺',
-        desc: '激烈落淚與破涕為笑之間切換迅速，外在戲劇強度遠大於持續的深層情感體驗。',
+        title: '展現快速轉變和膚淺的情緒',
+        desc: '展現快速轉變和膚淺（shallow）的情緒，激烈落淚與破涕為笑之間切換迅速。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '三秒鐘從啜泣切換為補妝鏡前微笑',
           quote: '「嗚……為什麼沒人理解我——啊等一下，剛那滴眼淚滑下來時燈光角度好像還滿好看的？」',
-          behavior: '情緒高漲後極快跳脫至外在形象評估，顯現情緒轉換快且深度淺表的特質。'
+          behavior: '情緒高漲後極快跳脫至外在形象評估，顯現快速轉變和膚淺的情緒特質。'
         }
       },
       {
@@ -1113,8 +1113,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'advanced',
         targetEvent: 'E11 / E13',
-        title: '易受暗示（極易被他人評論或氣氛左右）',
-        desc: '立場與信念強烈隨當下最具魅力或最具權威之旁觀者的評論而迅速擺盪改向。',
+        title: '易受暗示（如：易被他人或情境所影響）',
+        desc: '易受暗示（如：易被他人或情境所影響），信念隨當下最具權威之旁觀者評論而迅速擺盪。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '新銳劇評家一句隨口點評引發的自我全盤推翻',
@@ -1127,8 +1127,8 @@ export const CHARACTERS = [
         code: '準則 A8',
         stage: 'advanced',
         targetEvent: 'E14',
-        title: '高估人際關係實際親密程度',
-        desc: '將泛泛之交或初識沒多久的對象迅速冠以「摯友」、「靈魂伴侶」等過度親密標籤。',
+        title: '自認為人際關係比實際更為親密',
+        desc: '自認為人際關係比實際更為親密，將泛泛之交或初識對象迅速冠以「摯友」、「靈魂伴侶」標籤。',
         behavioralAnchor: {
           eventCode: 'E14',
           eventTitle: '素顏謝幕前對「永遠靈魂伴侶」的界線練習',
@@ -1142,7 +1142,7 @@ export const CHARACTERS = [
         id: 'F60.4-SPEC1',
         code: '臨床亞型 / 鑑別註記',
         targetEvent: 'E12 / E14',
-        title: '舞台化補償尋求關注型（與自戀型 NPD 鑑別）',
+        title: '戲劇化補償尋求關注型（與自戀型 NPD 鑑別）',
         desc: '自戀型（NPD）渴望「優越崇拜」且羞於示弱；做作型（HPD）渴望「被看見與陪伴」而不惜透過示弱、可愛或戲劇性演出換取焦點。',
         behavioralAnchor: {
           eventCode: 'E12',
@@ -1190,7 +1190,7 @@ export const CHARACTERS = [
     ecgType: 'proud_pulse',
     tagline: '「能站在我身邊的人，本身就是一種特權。別讓我發現你跟那群庸才一樣平庸。」',
     shortBio: '站在頂層落地窗前的女王。她才華橫溢、氣場凌人，認為世上99%的人都配不上她的時間。她之所以注意到你，是因為你展現了少見的洞察力（鏡映效應）。然而在她高傲無瑕的盔甲下，任何一絲被批評或失敗的跡象，都會讓她陷入滅頂的羞恥與空洞。',
-    clinicalOverview: '核心特徵為誇大感、需要被讚美以及缺乏同理心（Criterion A）。深信自己「特別」且只能被頂尖的人理解；理所當然的特權感；具備「認知同理心」（懂別人在想什麼）卻缺乏「情感同理心」（將他人的脆弱視為軟弱）；高傲背後其實是極度脆弱、害怕暴露缺陷的自尊。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現誇大（grandiosity）[在幻想或行為模式中]，需要過度的讚賞、缺乏同理心（不願意辨識或確認他人的情感與需求）。相信自己是「特殊的」及獨特的，認為自己享有特權，且常顯現自大、傲慢的行為或態度。',
     differentialNote: '【臨床鑑別】與「強迫型」都追求完美：強迫型總是自我批判覺得自己還不夠好，而自戀型則深信自己已經達到完美，並把錯誤歸咎於他人不懂欣賞。',
     strategyHint: '當眾否定她會引發「自戀暴怒（Narcissistic Rage）」，一味當應聲蟲則會被她看不起。在私密空間裡接住她對失敗的恐懼，讓她知道「不完美也不會失去價值」。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -1211,8 +1211,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01',
-        title: '誇大的自我重要感',
-        desc: '高估自身成就與才華標準，深信唯有自己足以定義建築與審美的最高規準。',
+        title: '對自我重要性有誇大的認知',
+        desc: '對自我重要性（self-importance）有誇大的認知（如：誇大成就與才能，在沒有相稱情況下期待被認為優越）。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：頂層玻璃塔的鏡映與十五分鐘',
@@ -1225,8 +1225,8 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'threshold',
         targetEvent: 'E02 / E04',
-        title: '深信自身「特別」且只能被菁英理解',
-        desc: '認定自己的思想境界高於凡俗，拒絕和被歸類為「平庸者」的人平等互動（鏡映選擇性）。',
+        title: '相信自己是「特殊的」及獨特的，僅能被特殊或居高位者理解',
+        desc: '相信他或她是「特殊的」及獨特的，僅能被其他特殊或居高位者（或機構）所理解，或應與之相關聯。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: '對普通滷肉飯與俗套評論的菁英劃界',
@@ -1239,8 +1239,8 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'threshold',
         targetEvent: 'E03 / E05',
-        title: '需要過度的讚賞與完美鏡映',
-        desc: '極度仰賴外界持續仰慕與專業肯定來維持膨脹自尊，微小的不讚賞即被視為侮辱或否定。',
+        title: '需要過度的讚賞',
+        desc: '需要過度的讚賞，極度仰賴外界持續仰慕與專業肯定來維持膨脹自尊，微小的不讚賞即被視為冒犯。',
         behavioralAnchor: {
           eventCode: 'E05',
           eventTitle: '第二章：皇冠裂開的羞恥夜與白手套',
@@ -1253,13 +1253,13 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'threshold',
         targetEvent: 'E06 / E07',
-        title: '缺乏情感同理心',
-        desc: '雖能理性看穿別人的動機（認知同理），卻拒絕辨識或承接他人的痛苦（視軟弱為無能之錯）。',
+        title: '缺乏同理心：不願意辨識或確認他人的情感與需求',
+        desc: '缺乏同理心：不願意辨識或確認他人的情感與需求（視別人的脆弱為無能之錯）。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '設計圖修改與助理的眼淚',
           quote: '「眼淚能讓線條自己修正嗎？連這點壓力都扛不住的人，本來就不該坐在我的事務所裡。」',
-          behavior: '面對下屬崩潰落淚，完全無法經驗情感共鳴，僅從績效與強弱角度冷酷評斷。'
+          behavior: '面對下屬崩潰落淚，拒絕辨識或確認其情感與需求，僅從績效與強弱角度冷酷評斷。'
         }
       },
       {
@@ -1267,13 +1267,13 @@ export const CHARACTERS = [
         code: '準則 A9',
         stage: 'threshold',
         targetEvent: 'E08',
-        title: '傲慢、自大、輕蔑的行為態度',
-        desc: '在威脅與壓力情境下以居高臨下的命令口吻、貶低他人與拒不妥協來掩護失控焦慮。',
+        title: '顯現自大、傲慢的行為或態度',
+        desc: '顯現自大、傲慢的行為或態度，在威脅與壓力情境下以居高臨下的命令口吻與貶抑他人掩護焦慮。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '強颱滲水檢修夜的高塔自尊保衛戰',
           quote: '「我的結構計算怎麼可能有誤？一定是這棟老舊公寓的施工團隊連基本規範都沒讀懂！」',
-          behavior: '面臨作品瑕疵危機時拒絕承認任何責任，以傲慢輕蔑將失誤全盤外歸因。'
+          behavior: '面臨作品瑕疵危機時拒絕承認任何責任，以自大傲慢將失誤全盤外歸因。'
         }
       },
       {
@@ -1281,13 +1281,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'advanced',
         targetEvent: 'E10',
-        title: '特權感（合理期待特別禮遇與順從）',
-        desc: '視自己的便利與行程優先於他人的基本邊界，當別人不配合其預期時視為冒犯特權。',
+        title: '認為自己享有特權（期待特殊待遇或自動順從）',
+        desc: '認為自己享有特權（如：不合理的期待自己有特殊待遇或別人會自動的順從他或她的期待）。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '深夜臨時改圖的理所當然要求',
           quote: '「凌晨三點叫你上來看草圖是你的榮幸。別人想進我這間書房還得排三個月的隊。」',
-          behavior: '將個人需求當成不可質疑的皇室敕令，理直氣壯要求伴侶或夥伴無條件讓步。'
+          behavior: '將個人需求當成不可質疑的皇室敕令，理直氣壯要求伴侶或夥伴自動順從。'
         }
       },
       {
@@ -1295,11 +1295,11 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'advanced',
         targetEvent: 'E11 / E12',
-        title: '人際剝削（工具化利用他人成就自我）',
-        desc: '不自覺將身邊親近之人視為延伸自我的道具，藉此承接榮耀或替自己承擔麻煩代價。',
+        title: '在人際上顯得剝削性（佔別人便宜以達到自己的目的）',
+        desc: '在人際上顯得剝削性（如：佔別人便宜以達到自己的目的），將身邊親近之人視為延伸自我的道具。',
         behavioralAnchor: {
           eventCode: 'E11',
-          eventTitle: '匿名掛名風波中的人際工具化抉擇',
+          eventTitle: '匿名掛名風波中的人際剝削抉擇',
           quote: '「那個概念最初確實是你的靈感，但寫在我的大作總署名底下，才不會浪費它的價值，不是嗎？」',
           behavior: '把功勞順理成章收歸己有，並合理化為替對方「提升價值」。'
         }
@@ -1309,13 +1309,13 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'advanced',
         targetEvent: 'E12 / E13',
-        title: '專注於無限成功、權力與完美幻想',
-        desc: '深陷建構不朽名望、絕對權力與毫無瑕疵「理想伴侶關係」的宏大幻想中無法著陸。',
+        title: '專注於無止境的成功、權力、顯赫、美貌或理想愛情等幻想中',
+        desc: '專注（preoccupied）於無止境的成功、權力、顯赫（brilliance）、美貌或理想愛情等幻想中無法著陸。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：只為一人保留的氣泡玻璃',
           quote: '「我一生都在蓋絕不留一絲氣泡、能寫進建築史教科書的水晶殿堂——感情原本也該如此零瑕疵。」',
-          behavior: '對事業與愛情皆懷抱「非史詩級完美即一文不值」的絕對幻想。'
+          behavior: '對事業與理想愛情皆懷抱「非史詩級完美即一文不值」的絕對幻想。'
         }
       },
       {
@@ -1323,8 +1323,8 @@ export const CHARACTERS = [
         code: '準則 A8',
         stage: 'advanced',
         targetEvent: 'E14',
-        title: '深層妒忌或認定他人妒忌自己',
-        desc: '嘴上宣稱批評者只是妒忌自己才華，實則在看到更年輕自由的新秀時湧起難以言說的妒意。',
+        title: '時常妒忌別人或且認為別人嫉妒他或她',
+        desc: '時常妒忌別人或且認為別人嫉妒他或她——嘴上宣稱批評者嫉妒自己才華，實則對他人的自在湧起羨妒。',
         behavioralAnchor: {
           eventCode: 'E14',
           eventTitle: '新秀獲獎夜的裂紋坦白',
@@ -1375,7 +1375,7 @@ export const CHARACTERS = [
     occupation: '大學古籍修復師／文學譯者',
     cluster: 'C',
     dsmCode: 'F60.6',
-    dsmTitle: '畏避型（逃避型）人格障礙症',
+    dsmTitle: '畏避型人格障礙症',
     dsmTitleEn: 'Avoidant Personality Disorder',
     sex: 'male',
     genderLabel: '順性別男性 (Cis Male)',
@@ -1388,7 +1388,7 @@ export const CHARACTERS = [
     ecgType: 'anxious_flutter',
     tagline: '「對不起，我剛才是不是說錯話了？如果你覺得我很無聊，隨時離開也沒關係的……」',
     shortBio: '總是坐在古籍修復室最角落的青年，聲音輕得像怕驚動灰塵。他翻譯過最動人的情詩，內心比誰都渴望溫暖的擁抱，卻因為深信自己「笨拙、無趣、次人一等」，只要你微微皺眉，他就會立刻縮回殼裡，認定你一定在心裡嘲笑他。',
-    clinicalOverview: '核心特徵為社交抑制、覺得自己不夠好，以及對負面評價極度敏感（Criterion A）。除非確定被喜歡否則不敢與人來往；在親密關係中因怕被羞辱或嘲笑而高度保留；全神貫注於觀察他人是否批評或拒絕自己，將中性表情解讀為否定。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現避免社交活動、感到信心不足（inadequacy）、對負面評價特別敏感。除非確信受到歡迎，否則不願與人交涉；因害怕丟臉或被嘲諷而克制親密關係；在社交場合專注於被批評或被拒絕。',
     differentialNote: '【臨床鑑別】與「孤僻型」最大的不同是：畏避型內心深切渴望愛與歸屬感，並為自己的孤單感到痛苦；孤僻型則對人際連結無感。',
     strategyHint: '給他百分之百明確、不曖昧的肯定，千萬不要開貶損式的玩笑或強迫他在眾人面前表現。循序漸進的安全感是打開他心門的鑰匙。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -1409,8 +1409,8 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'threshold',
         targetEvent: 'E01 / E04',
-        title: '專注於被批評、嘲笑或排斥的可能性',
-        desc: '在社交情境中像雷達般掃描微小負面線索，將別人不經意的皺眉或沉默直接判讀為厭惡與批評。',
+        title: '在社交場合專注於被批評或被拒絕',
+        desc: '在社交場合專注於被批評或被拒絕，將別人不經意的皺眉或沉默直接判讀為厭惡與否定。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：看一眼皺眉就逃跑的譯者',
@@ -1423,8 +1423,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E02 / E05',
-        title: '除非確定被喜歡，否則不願與人交往',
-        desc: '內心渴望連結卻必須反覆取得百分之百無條件接納的擔保，否則拒絕踏出建立關係的一步。',
+        title: '除非確信受到歡迎，否則不願與人交涉',
+        desc: '除非確信受到歡迎，否則不願與人交涉，必須反覆取得百分之百接納的擔保才敢踏出一步。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: '朗讀譯詩前的反覆自我確認',
@@ -1437,13 +1437,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'threshold',
         targetEvent: 'E03 / E06',
-        title: '因自覺能力不足而在新人際情境受到抑制',
-        desc: '在陌生互動或群體場合中極度緊張緘默，認定自己的發言註定顯得貧乏可笑。',
+        title: '因為感到信心不足而在新的人際情境中顯得壓抑',
+        desc: '因為感到信心不足（inadequacy）而在新的人際情境中顯得壓抑，認定自己的發言註定顯得貧乏可笑。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '打烊前書店的結巴與退縮',
           quote: '「這種讀書分享會我還是躲在書架後面就好……我開口只會把氣氛弄得很尷尬。」',
-          behavior: '在新社交情境中啟動強烈行為抑制，寧願隱形也不敢展現真實觀點。'
+          behavior: '在新社交情境中啟動強烈行為壓抑，寧願隱形也不敢展現真實觀點。'
         }
       },
       {
@@ -1451,8 +1451,8 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'threshold',
         targetEvent: 'E07 / E08',
-        title: '自認社交笨拙、無趣且低人一等',
-        desc: '核心自我圖式深度羞愧化，堅信他人越接近自己就越會發現自己的「空洞與貧瘠」。',
+        title: '自認社交笨拙、缺乏吸引力或不如人',
+        desc: '自認社交笨拙、缺乏吸引力或不如人，堅信他人越接近自己就越會發現自己的不足。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '強震滲水危機中的自責躲避',
@@ -1465,8 +1465,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'advanced',
         targetEvent: 'E10',
-        title: '害怕批評否定而逃避人際接觸職業活動',
-        desc: '為了迴避任何被公開品頭論足的風險，主動放棄演講、新書座談與升遷協作機會。',
+        title: '因為害怕被批評、不認同或被拒絕，避免涉及顯著人際接觸的工作場合',
+        desc: '因為害怕被批評、不認同或被拒絕，避免涉及顯著人際接觸的工作場合，主動放棄演講與座談機會。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '新書譯本座談會邀約前的退縮棄權',
@@ -1479,13 +1479,13 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'advanced',
         targetEvent: 'E11 / E12',
-        title: '因怕羞辱或嘲笑而在親密關係中表現拘謹',
-        desc: '即使關係已十分靠近，仍不敢卸下心理武裝自由表達渴望與愛意，深怕露出破綻遭人取笑。',
+        title: '因害怕丟臉或被嘲諷而克制親密關係',
+        desc: '因害怕丟臉或被嘲諷而克制親密關係，即使關係已靠近仍不敢自由表達渴望與愛意。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：寫在譯本扉頁裡的躊躇告白',
           quote: '「把喜歡說出口的話……萬一在你眼裡顯得很滑稽怎麼辦？寫成譯註還比較不會弄丟體面。」',
-          behavior: '於安全親密階段依然以迂迴書寫與高度拘謹保護脆弱核心。'
+          behavior: '於安全親密階段依然以迂迴書寫與高度克制保護脆弱核心。'
         }
       },
       {
@@ -1493,8 +1493,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'advanced',
         targetEvent: 'E13 / E14',
-        title: '因怕困窘而異常不願冒個人風險或嘗新',
-        desc: '寧可守在狹小但熟悉的古籍修復角落，也不願嘗試可能出糗或失敗的任何新生活挑戰。',
+        title: '因為害怕尷尬，通常不願意冒個人風險或從事任何新活動',
+        desc: '因為害怕尷尬，通常不願意冒個人風險或從事任何新活動，寧可守在狹小但熟悉的角落。',
         behavioralAnchor: {
           eventCode: 'E13',
           eventTitle: '跨出舒適圈邀約前的僵直猶豫',
@@ -1556,7 +1556,7 @@ export const CHARACTERS = [
     ecgType: 'clinging_beat',
     tagline: '「今天要穿白色還是米色？要帶傘嗎？我都聽你的，只要你別丟下我一個人就好……」',
     shortBio: '眼神像受驚的小鹿般溫順柔軟，總是跟在你身後半步。她烤得出全社區最美味的戚風蛋糕，卻連菜單定價、今天穿什麼衣服都不敢自己決定。為了留住你的照顧，她願意幫你做任何苦差事，甚至故意表現得笨手笨腳——因為她深怕自己一旦變得獨立，你就不再需要她了。',
-    clinicalOverview: '核心特徵為普遍且過度需要被人照顧，導致順從、黏人行為及害怕分離（Criterion A）。沒有他人大量建議與保證就無法做日常決定；需要他人為自己的人生負起主要責任；因怕失去支持而不敢表達反對意見；甚至害怕表現得太能幹會導致被遺棄。',
+    clinicalOverview: '核心特徵為一種廣泛的模式和過度地需要被關心造成順服性和依附性（clinging）的行為及害怕分離。若沒有他人的過度建議或再三保證就困難於做出日常生活的決定；需要他人為主要生活領域承擔責任；因害怕失去支持或認可而困難於表達不同意；甚至害怕表現得能幹會導致被拋棄。',
     differentialNote: '【臨床鑑別】依賴型與邊緣型都害怕被拋棄，但依賴型面對分離威脅時會變得更加溫順討好、甚至急迫尋找下一個照顧者，而非像邊緣型那樣爆發憤怒。',
     strategyHint: '【最大攻略陷阱】如果你覺得她很可愛就「幫她決定所有事」，好感度雖然會暴增，但邊界值會歸零並鎖死在「病態共依存結局」！你必須溫柔地把選擇權還給她，並保證「就算妳學會獨立，我也依然愛妳」。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -1577,8 +1577,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01 / E02',
-        title: '缺乏他人建議與保證時難以做日常決定',
-        desc: '即使選甜點口味、點餐或帶不帶雨傘等小事，沒有權威或依附對象反覆保證便陷入癱瘓性猶豫。',
+        title: '若沒有他人的過度建議或再三保證，困難於做出日常生活的決定',
+        desc: '若沒有他人的過度建議或再三保證，困難於做出日常生活的決定，點餐或選口味都陷入猶豫。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：連草莓或藍莓都不敢選的女孩',
@@ -1591,8 +1591,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E05',
-        title: '需由他人承擔生活重要領域的責任',
-        desc: '把工作去留、財務管理與人際去向等重大人生決策全盤交託給照顧者拍板。',
+        title: '需要他人為他或她大多數的主要生活領域承擔責任',
+        desc: '需要他人為他或她大多數的主要生活領域承擔責任（工作去留、財務管理與生涯去向等）。',
         behavioralAnchor: {
           eventCode: 'E05',
           eventTitle: '甜點屋續約與生涯去向的空白支票',
@@ -1605,8 +1605,8 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'threshold',
         targetEvent: 'E03 / E04',
-        title: '因怕失去支持而難以表達不同意見',
-        desc: '明知自己不喜歡或受到不合理對待，仍恐懼一旦說「不」就會遭對方嫌棄遺棄而微笑吞忍。',
+        title: '因為害怕失去支持或認可而困難於對他人表達不同意',
+        desc: '因為害怕失去支持或認可而困難於對他人表達不同意（註：不應包括現實中對於他人報復的害怕）。',
         behavioralAnchor: {
           eventCode: 'E03',
           eventTitle: '面對奧客退換貨與不合理要求時的微笑退讓',
@@ -1619,8 +1619,8 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'threshold',
         targetEvent: 'E06 / E07',
-        title: '為獲照顧支持不惜做到極端、自願做不快之事',
-        desc: '為了交換留下來被照料的承諾，主動包攬令人疲憊、卑微甚至損害自身界線的雜務與犧牲。',
+        title: '用過多的精力於獲取他人的撫慰或支持，甚至自願去做一些不愉快的事',
+        desc: '用過多的精力於獲取他人的撫慰（nurturance）或支持，甚至自願去做一些不愉快的事。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '凌晨趕工代班的討好犧牲',
@@ -1633,8 +1633,8 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'threshold',
         targetEvent: 'E08',
-        title: '獨處時感到極度不適或無助（怕無法照顧自己）',
-        desc: '一旦被迫單獨面對空間或問題，立刻湧起深不見底的無助感與生存危機慌亂。',
+        title: '因誇張地害怕沒有能力照顧自己，單獨一人時感到不適或無助',
+        desc: '因誇張地害怕沒有能力照顧他或她自己，單獨一人時感到不適或無助。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '停電孤立夜的恐慌啜泣與緊抓衣角',
@@ -1647,13 +1647,13 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'advanced',
         targetEvent: 'E10 / E12',
-        title: '因缺乏自信而難以獨自發起計畫（能力恐懼）',
-        desc: '表面看似缺乏能力，實則潛意識害怕一旦表現得獨立勝任（Competent），照顧者就會「不再需要照顧自己而離去」。',
+        title: '困難於為自己實施新計劃或執行事務（在判斷或處事缺乏自信）',
+        desc: '困難於為他或她自己實施新計劃或執行事務（因為在判斷或處事缺乏自信而非缺乏動機、精力）。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：故意烤焦的最後一盤蛋糕',
           quote: '「其實我看過食譜十遍了，可是如果我真的烤出完美的蛋糕……你是不是就會覺得小鹿已經不需要你了？」',
-          behavior: '在終於能獨當一面完成作品前夕刻意出錯退行，展露「能力恐懼」核心動力。'
+          behavior: '在終於能獨當一面完成作品前夕刻意出錯退行，展露對展現能力的恐懼。'
         }
       },
       {
@@ -1661,8 +1661,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'advanced',
         targetEvent: 'E11 / E13',
-        title: '關係結束時急切尋找下一位照顧來源',
-        desc: '無法承受任何空窗期，一旦感到現有依附動搖或失去聯絡，立刻本能尋找新的依賴替代對象。',
+        title: '當一段親密關係結束時急於尋找另一段關係作為關心或支持的來源',
+        desc: '當一段親密關係結束時急於尋找另一段關係作為關心或支持的來源，無法承受空窗期。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '短暫失聯危機中的緊急替代依附衝動',
@@ -1675,8 +1675,8 @@ export const CHARACTERS = [
         code: '準則 A8',
         stage: 'advanced',
         targetEvent: 'E14',
-        title: '不切實際盤據於「被留下來自己照顧自己」的恐懼',
-        desc: '即便事實上已具備生活技能與工作收入，仍被不合現實比例的孤立棄置災難想像所盤據。',
+        title: '不切實際地專注於害怕被獨自留下而需自己照顧自己',
+        desc: '不切實際地專注於害怕被獨自留下而需自己照顧他或她自己，即便已具備生活技能與工作收入。',
         behavioralAnchor: {
           eventCode: 'E14',
           eventTitle: '獨立開張前的災難化獨居想像',
@@ -1691,7 +1691,7 @@ export const CHARACTERS = [
         code: '臨床亞型 / 動力鑑別',
         targetEvent: 'E10 / E12',
         title: '病態順從與能力恐懼（與 F60.3 BPD ＆ F60.89 被動攻擊鑑別）',
-        desc: '面對遺棄威脅時：邊緣型（蘇緋）以暴怒、要求與自我破壞反擊；被動攻擊型（游子謙）表面答應暗中拖延報復；依賴型（白小鹿）則變得更加卑微順從與示弱無助。',
+        desc: '面對被拋棄威脅時：邊緣型（蘇緋）以暴怒、要求與自我破壞反擊；被動攻擊特徵（游子謙）表面答應暗中拖延報復；依賴型（白小鹿）則變得更加卑微順從與示弱無助。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '順從退行背後的分離恐懼剖析',
@@ -1738,7 +1738,7 @@ export const CHARACTERS = [
     ecgType: 'metronome',
     tagline: '「約會遲到兩分鐘，代表你對這段關係的優先序排列有誤。這是我的修正清單，請過目。」',
     shortBio: '襯衫扣子永遠扣到最頂端，連喝水時間都寫在甘特圖裡的男人。他為了把報告寫到「絕對完美」而反覆重寫到錯過截稿日；拒絕讓別人幫忙洗碗，因為「別人擺放碗盤的角度不對」。在感情裡，他總是反覆排練到確定每一句話都完美無瑕才敢開口，結果往往錯過了擁抱的時機。',
-    clinicalOverview: '核心特徵為全神貫注於秩序、完美主義以及精神與人際的控制，因而犧牲彈性、開放性與效率（Criterion A）。過度專注於規則與清單以致迷失活動主旨；完美主義妨礙任務完成；過度投入工作排斥休閒；道德標準僵化；不願授權他人；情感表達極度克制拘謹。',
+    clinicalOverview: '核心特徵為一種廣泛的模式呈現專注於秩序（orderliness）、完美主義及心智和人際的控制，而犧牲彈性、直率和效率。過度專注細節、規則、清單、秩序、組織或行程表，反而失去活動主要目的；過度要求完美而妨礙任務的完成；過度熱衷於工作和生產力而排除休閒活動及友誼；對道德、倫理或價值觀過度嚴謹、一絲不苟、缺乏彈性；除非別人完全照自己的意思來做，不願分派任務或工作給他人。',
     differentialNote: '【臨床鑑別】強迫型人格障礙症（OCPD）與強迫症（OCD）不同：OCPD 沒有真正的強迫思考與儀式行為（如反覆洗手防細菌），而是將僵化的秩序與控制視為正確的生活原則（自我協調 ego-syntonic）。',
     strategyHint: '不要故意弄亂他的東西來「治療」他，那只會讓他失控憤怒。在他因為計畫被打亂而陷入自我批判時，陪他體驗一次「即使不照清單走，世界也不會崩塌」的溫暖。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -1759,8 +1759,8 @@ export const CHARACTERS = [
         code: '準則 A1',
         stage: 'threshold',
         targetEvent: 'E01 / E02',
-        title: '專注於細節、規則與清單而失去重點',
-        desc: '過度執著於流程表格、甘特圖、擺放角度與時間順序，往往反而忽略事件真正的情感目的與實用效率。',
+        title: '過度專注細節、規則、清單、秩序、組織或行程表，反而失去活動主要目的',
+        desc: '過度專注細節、規則、清單、秩序、組織或行程表，反而失去活動主要目的（如忘記約會真正的心意）。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：遺失的待辦清單與遲到的兩分鐘',
@@ -1773,8 +1773,8 @@ export const CHARACTERS = [
         code: '準則 A2',
         stage: 'threshold',
         targetEvent: 'E05 / E07',
-        title: '妨礙任務完成的極端完美主義',
-        desc: '設下超乎現實的嚴格準則，因微小措辭或排版不完美而反覆作廢重來，經常拖延甚至無法交出成果。',
+        title: '過度要求完美而妨礙任務的完成',
+        desc: '過度要求完美而妨礙任務的完成（如：因無法符合他或她過度嚴苛的準則而無法完成計劃）。',
         behavioralAnchor: {
           eventCode: 'E07',
           eventTitle: '深夜報告第十二遍重寫的自我卡關',
@@ -1787,8 +1787,8 @@ export const CHARACTERS = [
         code: '準則 A3',
         stage: 'threshold',
         targetEvent: 'E03 / E06',
-        title: '過度投入工作生產力，排除休閒與友誼',
-        desc: '非出於經濟迫切，將週末與休假仍塞滿待辦任務與進修進度，把單純放空享受視為道德罪惡。',
+        title: '過度熱衷於工作和生產力而排除休閒活動及友誼',
+        desc: '過度熱衷於工作和生產力而排除休閒活動及友誼（註：非由明顯的經濟需求作解釋）。',
         behavioralAnchor: {
           eventCode: 'E03',
           eventTitle: '連野餐都帶著法醫案例分析書的休假',
@@ -1801,11 +1801,11 @@ export const CHARACTERS = [
         code: '準則 A8',
         stage: 'threshold',
         targetEvent: 'E04 / E08',
-        title: '表現出高度僵化與頑固',
-        desc: '認定自己的邏輯與系統是唯一客觀真理，面對突發變故與他人彈性建議時執意硬扛不肯退讓。',
+        title: '表現死板、頑固',
+        desc: '表現死板、頑固，認定自己的邏輯與系統是唯一客觀真理，面對突發變故與彈性建議時執意不肯退讓。',
         behavioralAnchor: {
           eventCode: 'E08',
-          eventTitle: '樓層停水斷電危機裡的 SOP 僵化衝突',
+          eventTitle: '樓層停水斷電危機裡的 SOP 死板衝突',
           quote: '「緊急撤離程序書寫明必須依樓層編號清點物資——為什麼大家都不照清單排隊，只顧著亂衝？」',
           behavior: '混亂危機中仍執拗要求嚴格執行既定規範與順序，對他人情緒混亂極度不耐。'
         }
@@ -1815,13 +1815,13 @@ export const CHARACTERS = [
         code: '準則 A6',
         stage: 'advanced',
         targetEvent: 'E10 / E12',
-        title: '不願將任務授權或與他人協作（除非完全照做）',
-        desc: '寧願自己熬夜扛下全部事務也不交給別人分擔，深信他人無法按自己精準到毫米的標準完成。',
+        title: '除非別人完全照自己的意思來做，不願分派任務或工作給他人',
+        desc: '除非別人完全照自己的意思來做，不願分派任務或工作給他人，寧願熬夜扛下全部事務。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '檔案架重整時的全面接管與拒絕協助',
           quote: '「標籤貼歪一公釐我之後就會找不到——別碰，放著讓我自己一個人整理到天亮就好。」',
-          behavior: '奪回別人善意幫忙的工具，展現「若非照我的方式做便一概不可信」的微觀控制。'
+          behavior: '奪回別人善意幫忙的工具，展現「若非照我的意思來做便不可信」的微觀控制。'
         }
       },
       {
@@ -1829,8 +1829,8 @@ export const CHARACTERS = [
         code: '準則 A4',
         stage: 'advanced',
         targetEvent: 'E11',
-        title: '對道德、倫理與原則過度謹慎且缺乏彈性',
-        desc: '自我要求與批判極為嚴苛，將微小生活瑕疵或情感猶豫放大成嚴重的品格失格（非宗教或文化常規所致）。',
+        title: '對道德、倫理或價值觀過度嚴謹、一絲不苟、缺乏彈性',
+        desc: '對道德、倫理或價值觀過度嚴謹、一絲不苟、缺乏彈性（註：非由文化上或宗教上的觀點作解釋）。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '為一句失言寫下的三十條自我檢討備忘',
@@ -1843,13 +1843,13 @@ export const CHARACTERS = [
         code: '準則 A5',
         stage: 'advanced',
         targetEvent: 'E13',
-        title: '無法丟棄磨損或無價值的舊物（無情感價值亦然）',
-        desc: '堆積過期收據、舊零件與作廢筆記本，理由並非懷舊紀念，而是「未來某天比對資料時說不定需要查證」。',
+        title: '即使已無情感價值也無法拋棄破舊或無價值的物品',
+        desc: '即使已無情感價值也無法拋棄破舊或無價值的物品，理由是「未來某天說不定需要查證」。',
         behavioralAnchor: {
           eventCode: 'E13',
           eventTitle: '儲藏室裡十年不丟的發票與壞零件箱',
           quote: '「這張八年前的超商發票跟壞掉的節拍器螺絲萬一未來需要核對購入日或規格呢？現在丟掉太冒險了。」',
-          behavior: '以功能性防萬一為由囤積毫無使用價值與情感溫度的廢棄紙件物品。'
+          behavior: '以功能性防萬一為由無法拋棄破舊與無情感價值的物品。'
         }
       },
       {
@@ -1857,8 +1857,8 @@ export const CHARACTERS = [
         code: '準則 A7',
         stage: 'advanced',
         targetEvent: 'E14',
-        title: '對自己與他人採取極度節儉吝嗇的風險防禦',
-        desc: '即使經濟寬裕仍嚴苛控制消費，視金錢為必須全力囤積以防範未知災難的安全庫存。',
+        title: '對自己與他人採一種吝於花費的方式；金錢為未來災難而儲存',
+        desc: '對自己與他人採一種吝於花費的方式；金錢被視為一種為未來災難所儲存的東西。',
         behavioralAnchor: {
           eventCode: 'E14',
           eventTitle: '紀念日花束與預算危機防備備忘錄',
@@ -1909,7 +1909,7 @@ export const CHARACTERS = [
     occupation: '前神經外科主治醫師／現職「金繼」陶藝家',
     cluster: 'OTHER',
     dsmCode: 'F07.0',
-    dsmTitle: '另一身體病況引起之人格改變',
+    dsmTitle: '另一身體病況引起的人格改變',
     dsmTitleEn: 'Personality Change Due to Another Medical Condition',
     sex: 'female',
     genderLabel: '順性別女性 (Cis Female)',
@@ -1921,8 +1921,8 @@ export const CHARACTERS = [
     themeColor: '#f59e0b',
     ecgType: 'irregular_rebirth',
     tagline: '「大家都懷念車禍前那個冷靜完美的外科醫師陸晴嵐……只有你問我，現在的我快不快樂。」',
-    shortBio: '兩年前一場嚴重車禍造成右側額葉受損。康復後的她雖然保住了記憶，性格卻判若兩人——從原本端莊內斂、情緒不露聲色的菁英醫師，變得直率衝動、笑點奇特、眼淚與大笑說來就來（情緒易變與去抑制型）。以前的伴侶與同事紛紛離她而去，感嘆「她不再是以前的她了」，她於是用黃金修補碎裂的陶器（金繼），也修補自己。',
-    clinicalOverview: '核心特徵為由另一身體病況（如額葉創傷、腦血管疾病、癲癇等）直接病理生理後果所導致的持續性人格改變（Criterion A & B）。常見亞型包含情緒易變型（Labile）、去抑制型（Disinhibited，衝動與不合時宜的詼諧）、冷漠型（Apathetic）等，常被周遭人認為「不像以前的自己」。',
+    shortBio: '兩年前一場嚴重車禍造成右側額葉受損。康復後的她雖然保住了記憶，性格卻判若兩人——從原本端莊內斂、情緒不露聲色的菁英醫師，變得直率衝動、笑點奇特、眼淚與大笑說來就來（易變型與去抑制型）。以前的伴侶與同事紛紛離她而去，感嘆「她不再是以前的她了」，她於是用黃金修補碎裂的陶器（金繼），也修補自己。',
+    clinicalOverview: '核心特徵為一種持續的人格困擾呈現出異於個人先前人格特徵模式的改變（準則 A），且根據過去史、身體檢查或實驗室檢查等證據顯示，這種人格困擾是另一身體病況的病理生理後果（準則 B）。常見亞型包含易變型（Labile type：情感反覆）、去抑制型（Disinhibited type：衝動控制不佳）、冷漠型（Apathetic type）等，常被周遭人認為「不像以前的自己」。',
     differentialNote: '【臨床鑑別】不同於自青少年時期即穩定存在的原發性人格障礙，F07.0 具有明確的生理病因與病前／病後的人格斷裂，當事人除了適應新性格，還必須面對他人對「舊自我」的哀悼與否定。',
     strategyHint: '千萬不要拿她車禍前的榮耀或舊照片來比較。接納她的直接、衝動與偶爾的情緒潰堤，愛上「此刻重生的她」。',
     initialStats: { affection: 8, security: 8, boundary: 42 },
@@ -1936,15 +1936,15 @@ export const CHARACTERS = [
       accessory: 'kintsugi'
     },
     minThreshold: 5,
-    thresholdLabel: '最低法定門檻：5 / 5 項診斷要件 A～E（E01～E08）',
+    thresholdLabel: '最低法定門檻：5 / 5 項診斷要件 A～E ＋ 註明亞型（E01～E08）',
     criteria: [
       {
         id: 'F07.0-A',
         code: '準則 A',
         stage: 'threshold',
         targetEvent: 'E01 / E05',
-        title: '持續且顯著的既有人格特質改變',
-        desc: '個體長期表現出與病前截然不同的人格模式——昔日極端克制冷靜的神外名醫變得直率愛哭且不按牌理出牌。',
+        title: '一種持續的人格困擾呈現出異於個人先前人格特徵模式的改變',
+        desc: '一種持續的人格困擾呈現出異於個人先前人格特徵模式的改變（註：在兒童，包括正常發展的顯著偏離或平時行為模式的重大改變，持續至少 1 年）。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：金繼陶碗與額角的疤痕',
@@ -1957,8 +1957,8 @@ export const CHARACTERS = [
         code: '準則 B',
         stage: 'threshold',
         targetEvent: 'E02 / E08',
-        title: '身體病況之直接病理生理證據（右額葉外傷）',
-        desc: '病史、神經影像學與臨床檢查明確證實右側前額葉／眼眶面皮質創傷導致抑制與情緒調節環路受損。',
+        title: '證據顯示此人格困擾是另一身體病況的病理生理後果',
+        desc: '根據過去史、身體檢查或實驗室檢查等證據顯示，這種人格困擾是另一身體病況的病理生理後果（右側眶額葉腦傷）。',
         behavioralAnchor: {
           eventCode: 'E02',
           eventTitle: 'MRI 影像片與額角金繼傷痕對照',
@@ -1971,13 +1971,13 @@ export const CHARACTERS = [
         code: '準則 C',
         stage: 'threshold',
         targetEvent: 'E03 / E06',
-        title: '排除原發性精神疾患之更好解釋',
-        desc: '人格變化出現於成年期車禍之後，而非始於成年早期之原發 BPD／雙相躁鬱或物質誘發疾患。',
+        title: '這種人格干擾無法以另一精神疾病做更好的解釋',
+        desc: '這種人格干擾無法以另一精神疾病做更好的解釋（包括另一身體病況引起的另一種精神疾病）。',
         behavioralAnchor: {
           eventCode: 'E03',
           eventTitle: '三十一歲以前的零病史病程回顧',
           quote: '「三十一歲以前的我從來沒有情緒失控過，既沒發過躁也沒混亂依附——時間線就切在三年前那場車禍當晚。」',
-          behavior: '釐清發病時間錨點明確落於腦創傷事件後，藉此排除原發性 B 群人格疾患或雙相疾患。'
+          behavior: '釐清發病時間錨點明確落於腦創傷事件後，藉此排除原發性 B 群人格障礙症或雙相情緒障礙症。'
         }
       },
       {
@@ -1985,8 +1985,8 @@ export const CHARACTERS = [
         code: '準則 D',
         stage: 'threshold',
         targetEvent: 'E07',
-        title: '非僅出現於急性譫妄之病程中',
-        desc: '確認其認知清晰、時地人定向感完整且覺醒度穩定，並非急性意識混濁或譫妄狀態下的暫時表現。',
+        title: '這種人格困擾不僅存在於譫妄的病程中',
+        desc: '這種人格困擾不僅存在於譫妄的病程中，時地人定向感完整且覺醒度穩定。',
         behavioralAnchor: {
           eventCode: 'E07',
           eventTitle: '清醒定向評估下的金漆專注作業',
@@ -1999,8 +1999,8 @@ export const CHARACTERS = [
         code: '準則 E',
         stage: 'threshold',
         targetEvent: 'E04 / E08',
-        title: '造成顯著臨床苦惱與職業／社交功能損害',
-        desc: '因言行去抑制與突發情緒波動被迫離開手術台，並在親密社交中承受他人異樣眼光與自我挫折。',
+        title: '引起臨床上顯著苦惱或社交、職業及其他重要領域功能減損',
+        desc: '這種人格困擾引起臨床上顯著苦惱或社交、職業或其他重要領域功能減損（如無法再執手術刀與人際挫折）。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '暴雨停電夜的情緒潰堤與功能失落痛楚',
@@ -2010,11 +2010,11 @@ export const CHARACTERS = [
       },
       {
         id: 'F07.0-SUB-DIS',
-        code: '亞型準則：去抑制型 (Disinhibited)',
+        code: '亞型：去抑制型 (Disinhibited type)',
         stage: 'advanced',
         targetEvent: 'E09 / E11',
-        title: '去抑制型表現（直率、詼諧 Facetiousness ＆ 低衝動煞車）',
-        desc: '額葉前扣帶／眶額迴損害典型特徵：想到什麼直接脫口而出、合宜與不合宜的黑色幽默（Facetiousness）及花市衝動消費。',
+        title: '去抑制型（主要特徵是衝動控制不佳）',
+        desc: '主要特徵是衝動控制不佳（如脫口而出的直率與詼諧感、花市衝動消費，或魯莽性行為等）。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '花市裡的衝動購物與直球黑色幽默',
@@ -2024,25 +2024,25 @@ export const CHARACTERS = [
       },
       {
         id: 'F07.0-SUB-LAB',
-        code: '亞型準則：情緒易變型 (Labile)',
+        code: '亞型：易變型 (Labile type)',
         stage: 'advanced',
         targetEvent: 'E10 / E12',
-        title: '情緒易變型表現（急驟且明顯的情感波動）',
-        desc: '看電影片段、聽見一首曲子或見舊相簿即在幾秒內潸然淚下或大笑，情感波幅遠超過自身意識想要的控制。',
+        title: '易變型（主要特徵是情感反覆）',
+        desc: '主要特徵是情感反覆——看電影片段、聽見一首曲子或見舊相簿即在幾秒內潸然淚下或大笑。',
         behavioralAnchor: {
           eventCode: 'E10',
           eventTitle: '舊相簿前的瞬間落淚與自嘲笑聲',
           quote: '「你看我連眼淚都要自己擦不及——三秒前才在哭，看到那隻歪掉的貓又想笑了，真是失禮的大腦。」',
-          behavior: '展演典型器官性情緒失禁／高度易變（Affective Lability），但內在感知依然真摯清醒。'
+          behavior: '展演典型情感反覆（Affective Lability），但內在感知依然真摯清醒。'
         }
       },
       {
         id: 'F07.0-COMB',
-        code: '整合議題',
+        code: '合併型整合議題',
         stage: 'advanced',
         targetEvent: 'E13 / E14',
-        title: '合併亞型確認 ＆ 舊自我哀悼之金繼重生',
-        desc: '確認同時具「情緒易變＋去抑制」之合併型（Combined Type），並協助個案哀悼失去的「完美舊我」完成心理整合。',
+        title: '合併型（Combined type）確認 ＆ 舊自我哀悼之金繼重生',
+        desc: '在臨床表現上有一種以上的特點——同時具有「易變型＋去抑制型」特點，並協助個案哀悼「完美舊我」完成整合。',
         behavioralAnchor: {
           eventCode: 'E12',
           eventTitle: '第三章：名為《新生》的金繼雙杯',
@@ -2054,10 +2054,10 @@ export const CHARACTERS = [
     specifiers: [
       {
         id: 'F07.0-SPEC1',
-        code: 'DSM-5-TR 亞型註記',
+        code: 'DSM-5-TR 亞型＆編碼註',
         targetEvent: 'E11 / E12',
-        title: '合併型：情緒易變型（Labile）＋ 去抑制型（Disinhibited）',
-        desc: '依 DSM-5-TR F07.0 規定指明具體臨床表型：同時顯著呈現眶額葉受損之「去抑制衝動／詼諧感」與情感閥值降低之「快速易變哭笑反應」，而非原發性躁期。',
+        title: '合併型：易變型（Labile type）＋ 去抑制型（Disinhibited type）',
+        desc: '依 DSM-5-TR「註明是否有」呈現一種以上特點，並依編碼註將身體病況分開編碼並羅列在 F07.0 之前（如：額葉外傷性腦損傷；F07.0 腦傷引起的人格改變）。',
         behavioralAnchor: {
           eventCode: 'E11',
           eventTitle: '臨床評估下的雙重亞型對照',
@@ -2091,8 +2091,8 @@ export const CHARACTERS = [
     occupation: '咖啡廳店長／自由平面設計師',
     cluster: 'OTHER',
     dsmCode: 'F60.89',
-    dsmTitle: '其他特定之人格障礙症（被動攻擊／混合特徵）',
-    dsmTitleEn: 'Other Specified PD (Passive-Aggressive / Mixed Features)',
+    dsmTitle: '其他特定的人格障礙症（混合型人格特質／被動攻擊特徵）',
+    dsmTitleEn: 'Other Specified Personality Disorder (Mixed / Passive-Aggressive Features)',
     sex: 'male',
     genderLabel: '順性別男性 (Cis Male)',
     pronoun: '他',
@@ -2104,8 +2104,8 @@ export const CHARACTERS = [
     ecgType: 'masked_wave',
     tagline: '「好啊，都聽你的，我完全沒意見喔～（微笑把你的濃縮咖啡換成無咖啡因）」',
     shortBio: '公寓裡人緣最好、永遠笑臉迎人的溫柔店長。他從來不跟任何人吵架，對所有要求都微笑說「好啊、沒問題、我都配合你」；但只要是他心裡不情願的事，他就會「不小心」忘記、「剛好」淋濕文件、用最溫柔的語氣說出最酸的抱怨。因為他從小被教育「生氣是不被允許的」。',
-    clinicalOverview: '對應 DSM-5-TR 第 734 與 778 頁之「其他特定之人格障礙症（Other Specified PD, F60.89）」，包含被動攻擊型（Passive-Aggressive）與混合型人格特徵。表面順從合作，實則透過拖延、故意遺忘、沒效率、冷嘲熱諷與消極抵抗來表達對他人的敵意與對控制的抗拒。',
-    differentialNote: '【臨床鑑別】與「依賴型」的順從不同：依賴型的順從是真心害怕失去依靠，而被動攻擊型的順從則是帶著隱性憤怒的防衛面具，背後藏著對自主權的渴望與對正面衝突的恐懼。',
+    clinicalOverview: '對應 DSM-5-TR「其他特定的人格障礙症（Other Specified Personality Disorder, F60.89）」：呈現人格障礙症症狀表現，造成臨床上顯著苦惱或社交、職業或其他重要領域功能減損，但不完全符合人格障礙症診斷類別中任何障礙症的完整診斷準則，臨床醫師選擇傳達特定原因並接續在診斷後記錄（如「混合型人格特質」／被動攻擊特徵）。',
+    differentialNote: '【臨床鑑別】與「依賴型」的順從不同：依賴型的順從是真心害怕失去依靠，而被動攻擊特徵的順從則是帶著隱性憤怒的防衛面具，背後藏著對自主權的渴望與對正面衝突的恐懼。',
     strategyHint: '不要相信他嘴上的「隨便、都可以」，也不要因為他「不小心搞砸」而對他破口大罵（這只會讓他更確信你是暴君）。溫和地戳破他的微笑面具，告訴他：「在我面前，你可以直接生氣、可以直接拒絕。」',
     initialStats: { affection: 8, security: 8, boundary: 42 },
     avatar: {
@@ -2118,15 +2118,15 @@ export const CHARACTERS = [
       accessory: 'coffee_pot'
     },
     minThreshold: 4,
-    thresholdLabel: '最低法定門檻：一般 PD 準則 A～D ＋ 特定特徵註明（E01～E08）',
+    thresholdLabel: '最低法定門檻：一般人格障礙症準則 ＋ 特定原因註記（E01～E08）',
     criteria: [
       {
         id: 'F60.89-GA',
         code: '一般準則 A',
         stage: 'threshold',
         targetEvent: 'E01 / E02',
-        title: '持久偏離文化預期（微笑面具下包裹反抗）',
-        desc: '內在經驗與行為持續顯著偏離所屬文化期待（表現在情感表達抑制、人際隱性抵抗與衝突迴避控制）。',
+        title: '內在經驗與行為持久模式明顯偏離文化期待',
+        desc: '內在經驗與行為的持久模式明顯偏離所處文化期待（表現在情感抑制與人際隱性抵抗等兩種或更多面向）。',
         behavioralAnchor: {
           eventCode: 'E01',
           eventTitle: '第一章：微笑著淋濕的企劃書',
@@ -2139,8 +2139,8 @@ export const CHARACTERS = [
         code: '一般準則 B',
         stage: 'threshold',
         targetEvent: 'E03 / E05',
-        title: '跨職場與親密情境之僵化、廣泛適應不良',
-        desc: '無論面對咖啡廳奧客、合夥人或親近對象，皆無法直接說「不」，一致僵化重複被動抵抗循環。',
+        title: '持久模式缺乏彈性且普遍存在於個人及社交情境中',
+        desc: '這種持久模式缺乏彈性且普遍存在於個人及社交情境中——無論面對顧客或親近對象皆無法直接說「不」。',
         behavioralAnchor: {
           eventCode: 'E05',
           eventTitle: '第二章：加了鹽巴的特調咖啡',
@@ -2153,22 +2153,22 @@ export const CHARACTERS = [
         code: '一般準則 C',
         stage: 'threshold',
         targetEvent: 'E04 / E06',
-        title: '引發顯著人際挫敗、無力感與功能損害',
-        desc: '使親密伴侶與同事長期處於猜忌與困惑自責之中，自己則在不斷壓抑委屈與內耗裡筋疲力盡。',
+        title: '引起臨床上顯著苦惱或社交、職業及其他重要功能減損',
+        desc: '這種持久模式引起臨床上顯著苦惱或社交、職業及其他重要功能減損，在猜忌與壓抑內耗裡筋疲力盡。',
         behavioralAnchor: {
           eventCode: 'E06',
           eventTitle: '真心話反話翻譯機的無聲消耗',
           quote: '「每次我說『隨便』其實心裡都快氣炸了……可看你們又猜不到又開始內疚，我自己也覺得好累好髒。」',
-          behavior: '證實此溝通僵局對關係品質與個體主觀幸福感造成重大且持續的損害。'
+          behavior: '證實此溝通僵局對關係品質與個體主觀幸福感造成重大且持續的減損。'
         }
       },
       {
         id: 'F60.89-GD',
-        code: '一般準則 D ＋ 特定註明',
+        code: '一般準則 D～F ＋ 特定原因',
         stage: 'threshold',
         targetEvent: 'E07 / E08',
-        title: '成年早期長期穩定 ＋ 註明「被動攻擊／混合特徵」',
-        desc: '回溯至青少年／成年早期長期穩定，不完全符合任一單一正式 PD 準則，依 DSM-5-TR 註明「被動攻擊型（以遺忘、拖延、低效消極抵抗）」特徵。',
+        title: '模式穩定起始自成年期早期 ＋ 記錄「混合型人格特質／被動攻擊特徵」',
+        desc: '起始可追溯至青春期或成年期早期、排除其他精神疾病與物質／身體病況（準則 D～F），不完全符合任一特定人格障礙症準則，接續記錄特定原因（如混合型人格特質／被動攻擊特徵）。',
         behavioralAnchor: {
           eventCode: 'E08',
           eventTitle: '暴雨危機中的微笑失靈與消極怠工揭露',
@@ -2224,8 +2224,8 @@ export const CHARACTERS = [
         id: 'F60.89-SPEC1',
         code: '臨床註明 / 鑑別要點',
         targetEvent: 'E12 / E14',
-        title: '被動攻擊（負性主義）＋ 畏避衝突混合型特徵（與依賴型鑑別）',
-        desc: '對應 DSM-5-TR「其他特定之人格障礙症」臨床註記規範；與依賴型（白小鹿）「因無助順從討好」不同，子謙的順從是掩飾隱性憤怒與維護自主權的面具。',
+        title: '混合型人格特質（被動攻擊 × 畏避衝突依附）（與依賴型鑑別）',
+        desc: '對應 DSM-5-TR「其他特定的人格障礙症」臨床記錄規範（如「混合型人格特質」）；與依賴型（白小鹿）「因無助順從討好」不同，子謙的順從是掩飾隱性憤怒與維護自主權的面具。',
         behavioralAnchor: {
           eventCode: 'E14',
           eventTitle: '微笑面具下的自主宣告練習',

@@ -140,7 +140,7 @@ class EdgeOfLoveGame {
       },
       roamCycle: 0,
       metCharacters: [],
-      unlockedRoutes: [], // 已開放可攻略（可切換主線）的角色；每揭曉一位角色的人格疾患即再開放一位
+      unlockedRoutes: [], // 已開放可攻略（可切換主線）的角色；每揭曉一位角色的人格障礙症即再開放一位
       currentStoryChar: null,
       storyStack: [],
       characters: charState
@@ -558,7 +558,7 @@ class EdgeOfLoveGame {
     return (this.state.characters[charId]?.eventCompleted || 0) >= 15;
   }
 
-  // ==================== 路線解鎖：每揭曉一位角色的人格疾患（初步攻略），即開放一位新角色 ====================
+  // ==================== 路線解鎖：每揭曉一位角色的人格障礙症（初步攻略），即開放一位新角色 ====================
   isRouteUnlocked(charId, st = this.state) {
     return (st.unlockedRoutes || []).includes(charId);
   }
@@ -581,7 +581,7 @@ class EdgeOfLoveGame {
     return candidates[Math.floor(Math.random() * candidates.length)].id;
   }
 
-  // 確保開放名額 = 1（起始角色）＋ 已揭曉人格疾患的角色數；回傳本次新開放的角色 ID 列表
+  // 確保開放名額 = 1（起始角色）＋ 已揭曉人格障礙症的角色數；回傳本次新開放的角色 ID 列表
   ensureRouteUnlocks(st = this.state, fromCharId = null) {
     if (!Array.isArray(st.unlockedRoutes)) st.unlockedRoutes = [];
     if (!Array.isArray(st.metCharacters)) st.metCharacters = [];
@@ -601,7 +601,7 @@ class EdgeOfLoveGame {
     return newly;
   }
 
-  // 故事走訪：預設持續走目前角色的故事；揭曉人格疾患後玩家可隨時切換到新開放的角色
+  // 故事走訪：預設持續走目前角色的故事；揭曉人格障礙症後玩家可隨時切換到新開放的角色
   resolveStoryStep() {
     const st = this.state;
     st.storyStack = [];
@@ -668,13 +668,13 @@ class EdgeOfLoveGame {
       .replace(/思覺失調型人格障礙症|思覺失調型人格|思覺失調型個體|思覺失調型/g, '此類奇特知覺特質者')
       .replace(/反社會型人格障礙症|反社會型人格|反社會型個體|反社會型/g, '此類尋求刺激與博弈特質者')
       .replace(/邊緣型人格障礙症|邊緣型人格|邊緣型個體|邊緣型/g, '此類強烈依附波動特質者')
-      .replace(/做作型（戲劇化）人格障礙症|做作型人格|做作型個體|做作型|戲劇化人格/g, '此類渴望聚光燈特質者')
+      .replace(/做作型（戲劇化）人格障礙症|做作型人格障礙症|做作型人格|做作型個體|做作型|戲劇化人格/g, '此類渴望聚光燈特質者')
       .replace(/自戀型人格障礙症|自戀型人格|自戀型個體|自戀型/g, '此類高自尊防衛特質者')
-      .replace(/畏避型（逃避型）人格障礙症|畏避型人格|畏避型個體|畏避型|逃避型/g, '此類害怕負面評價特質者')
+      .replace(/畏避型（逃避型）人格障礙症|畏避型人格障礙症|畏避型人格|畏避型個體|畏避型|逃避型/g, '此類害怕負面評價特質者')
       .replace(/依賴型人格障礙症|依賴型人格|依賴型個體|依賴型/g, '此類高度尋求依靠特質者')
       .replace(/強迫型人格障礙症|強迫型人格|強迫型個體|強迫型/g, '此類追求絕對秩序特質者')
-      .replace(/另一身體病況引起之人格改變/g, '生理創傷後之性情轉變')
-      .replace(/其他特定之人格障礙症|被動攻擊型|被動攻擊/g, '此類隱性抗拒特質者')
+      .replace(/另一身體病況引起的?人格改變/g, '生理創傷後之性情轉變')
+      .replace(/其他特定的?人格障礙症|非特定的?人格障礙症|被動攻擊型|被動攻擊/g, '此類隱性抗拒特質者')
       .replace(/\(F60\.\d+\)|（F60\.\d+）|F60\.\d+|F21|F07\.0/g, '（心靈觀察紀錄）');
   }
 
@@ -1426,12 +1426,12 @@ class EdgeOfLoveGame {
       newlyUnlockedRoutes = this.ensureRouteUnlocks(this.state, charId);
     }
 
-    // 若完成 E13，正式解鎖「成長背景與人格疾患養成故事」
+    // 若完成 E13，正式解鎖「成長背景與人格障礙症養成故事」
     if (eventNumber >= 13 || eventData.unlockBackstoryOnComplete) {
       if (!cs.backstoryUnlocked) {
         cs.backstoryUnlocked = true;
         audio.playUnlockDSM();
-        this.showToast(`📜 已解鎖 ${char.name} 的成長背景與人格疾患養成故事！`);
+        this.showToast(`📜 已解鎖 ${char.name} 的成長背景與人格障礙症養成故事！`);
       }
     }
 
@@ -2094,7 +2094,7 @@ class EdgeOfLoveGame {
     if (modalRoot) modalRoot.innerHTML = '';
   }
 
-  // 尚未開放的角色不可直接攻略：提示玩家先揭曉目前角色的人格疾患
+  // 尚未開放的角色不可直接攻略：提示玩家先揭曉目前角色的人格障礙症
   guardRoute(charId) {
     if (!charId || this.isRouteUnlocked(charId)) return true;
     const char = CHARACTERS.find((c) => c.id === charId);
@@ -2304,7 +2304,7 @@ class EdgeOfLoveGame {
           <button
             class="nav-btn ${this.dsmWidgetOpen ? 'btn-accent' : 'btn-gold'}"
             data-action="toggle-dsm-widget"
-            title="隨時從畫面右側叫出 DSM-5-TR 人格疾患診斷準則隨身小工具"
+            title="隨時從畫面右側叫出 DSM-5-TR 人格障礙症診斷準則隨身小工具"
           >
             📖 診斷準則小工具
           </button>
@@ -2588,7 +2588,7 @@ class EdgeOfLoveGame {
           </div>
 
           <div class="home-ethics-note">
-            <strong>💡 溫馨備註</strong>：本遊戲旨在透過故事帶領大家認識與理解「人格疾患」，並不希望標籤化或污名化各種心理病理診斷；同時提醒，遊戲情境純屬虛構，在真實世界的臨床與專業實務中，並不建議在真實個案診斷關係中與個案談戀愛。
+            <strong>💡 溫馨備註</strong>：本遊戲旨在透過故事帶領大家認識與理解「人格障礙症」，並不希望標籤化或污名化各種心理病理診斷；同時提醒，遊戲情境純屬虛構，在真實世界的臨床與專業實務中，並不建議在真實個案診斷關係中與個案談戀愛。
           </div>
         </div>
       </section>
@@ -2660,7 +2660,7 @@ class EdgeOfLoveGame {
                       ? `你可以繼續完整攻略${char.pronoun}，或在下方切換到其他已解鎖的房客。`
                       : `繼續走下去，解鎖${char.pronoun}的成長背景與命定結局。`
                   }</p>`
-                : `<p class="story-hint story-hint-reveal">🔍 再完成 <strong>${remainToReveal}</strong> 段劇情（至 ${this.getRevealCode(char.id)}），即可揭曉 ${char.name} 的人格疾患並<strong>解鎖下一位可攻略房客</strong>。</p>`
+                : `<p class="story-hint story-hint-reveal">🔍 再完成 <strong>${remainToReveal}</strong> 段劇情（至 ${this.getRevealCode(char.id)}），即可揭曉 ${char.name} 的人格障礙症並<strong>解鎖下一位可攻略房客</strong>。</p>`
             }
             ${
               nextEv.type === 'trio' && partnerChar
@@ -2694,7 +2694,7 @@ class EdgeOfLoveGame {
         </div>
 
         <div class="home-ethics-note">
-          <strong>💡 溫馨備註</strong>：本遊戲旨在透過故事帶領大家認識與理解「人格疾患」，並不希望標籤化或污名化各種心理病理診斷；同時提醒，遊戲情境純屬虛構，在真實世界的臨床與專業實務中，並不建議在真實個案診斷關係中與個案談戀愛。
+          <strong>💡 溫馨備註</strong>：本遊戲旨在透過故事帶領大家認識與理解「人格障礙症」，並不希望標籤化或污名化各種心理病理診斷；同時提醒，遊戲情境純屬虛構，在真實世界的臨床與專業實務中，並不建議在真實個案診斷關係中與個案談戀愛。
         </div>
       </section>
     `;
@@ -2710,7 +2710,7 @@ class EdgeOfLoveGame {
           <div>
             <h2>💞 公寓・人物關係圖 ＆ 角色心靈成就檔案</h2>
             <p>
-              以主角 <strong>${this.state.player.name}</strong> 為核心，呈現與 12 位可攻略房客的關係連線、<strong>2 枚心靈成就徽章：🥇 初步攻略＋👑 完美攻略（目前已解鎖 ${achSummary.unlocked} / ${achSummary.total} 枚成就，揭曉 ${diagnosedCount} / 12 人臨床診斷）</strong>，以及每位角色的「🟢 現在背景」與探索完成後解鎖的「👑 成長背景與人格疾患養成故事」。
+              以主角 <strong>${this.state.player.name}</strong> 為核心，呈現與 12 位可攻略房客的關係連線、<strong>2 枚心靈成就徽章：🥇 初步攻略＋👑 完美攻略（目前已解鎖 ${achSummary.unlocked} / ${achSummary.total} 枚成就，揭曉 ${diagnosedCount} / 12 人臨床診斷）</strong>，以及每位角色的「🟢 現在背景」與探索完成後解鎖的「👑 成長背景與人格障礙症養成故事」。
             </p>
           </div>
         </div>
@@ -2839,7 +2839,7 @@ class EdgeOfLoveGame {
         <div class="panel-header roster-header">
           <div>
             <h2>✨ 12 位可攻略房客名冊（現在背景 ＆ 成長養成故事 ＆ 專屬成就）</h2>
-            <p>直接顯示每位角色的「🟢 現在背景」與跨地點動態行蹤；當推進完第 13 個事件後，將解鎖「👑 成長背景與人格疾患養成故事」。</p>
+            <p>直接顯示每位角色的「🟢 現在背景」與跨地點動態行蹤；當推進完第 13 個事件後，將解鎖「👑 成長背景與人格障礙症養成故事」。</p>
           </div>
 
           <div class="cluster-filters">
@@ -2941,9 +2941,9 @@ class EdgeOfLoveGame {
             <small class="char-roam-locations">📍 出沒地點：${scheduleNames}</small>
           </div>
 
-          <!-- 2. 探索完解鎖：成長背景與人格疾患養成故事 -->
+          <!-- 2. 探索完解鎖：成長背景與人格障礙症養成故事 -->
           <div class="char-lore-box growth-bg-box ${backstoryUnlocked ? 'unlocked' : 'locked'}">
-            <strong>${backstoryUnlocked ? `👑 成長背景＆人格疾患養成故事：${lore.growthBackstory.title}` : '🔒 成長背景＆人格疾患養成故事（待探索完解鎖）'}</strong>
+            <strong>${backstoryUnlocked ? `👑 成長背景＆人格障礙症養成故事：${lore.growthBackstory.title}` : '🔒 成長背景＆人格障礙症養成故事（待探索完解鎖）'}</strong>
             ${
               backstoryUnlocked
                 ? `<p>${lore.growthBackstory.story}</p>`
@@ -3244,7 +3244,7 @@ class EdgeOfLoveGame {
           </div>
           <div class="vn-top-buttons is-hidden-feature" hidden>
             <button class="nav-btn btn-gold" data-action="toggle-dsm-widget" data-char-id="${char.id}">
-              📖 叫出人格疾患準則
+              📖 叫出人格障礙症準則
             </button>
             <button class="nav-btn" data-action="open-event-tree-modal" data-char-id="${char.id}">
               🌳 15 事件樹
@@ -3676,7 +3676,7 @@ class EdgeOfLoveGame {
                     : '';
                 })()}
                 <hr style="border-color:rgba(253,224,165,0.25); margin:10px 0;" />
-                <strong>👑 成長背景與人格疾患養成故事：${lore.growthBackstory.title}</strong>
+                <strong>👑 成長背景與人格障礙症養成故事：${lore.growthBackstory.title}</strong>
                 <p style="margin-top:6px;">${lore.growthBackstory.story}</p>
               </div>
 
@@ -3712,7 +3712,7 @@ class EdgeOfLoveGame {
     `;
   }
 
-  // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格疾患診斷準則手冊 ====================
+  // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格障礙症診斷準則手冊 ====================
   scrollToDsmRef(code) {
     if (!code) return;
     setTimeout(() => {
@@ -3726,7 +3726,26 @@ class EdgeOfLoveGame {
   }
 
   renderDsmReferenceTab() {
-    const list = CHARACTERS.map((c) => ({ code: c.dsmCode, title: c.dsmTitle, en: c.dsmTitleEn, cluster: c.cluster }));
+    const list = [
+      {
+        code: 'GENERAL',
+        chipCode: '通則',
+        title: DSM_REFERENCE.GENERAL.title,
+        en: DSM_REFERENCE.GENERAL.en
+      },
+      ...CHARACTERS.map((c) => ({
+        code: c.dsmCode,
+        chipCode: c.dsmCode,
+        title: DSM_REFERENCE[c.dsmCode]?.title || c.dsmTitle,
+        en: DSM_REFERENCE[c.dsmCode]?.en || c.dsmTitleEn
+      })),
+      {
+        code: 'F60.9',
+        chipCode: 'F60.9',
+        title: DSM_REFERENCE['F60.9'].title,
+        en: DSM_REFERENCE['F60.9'].en
+      }
+    ];
     const seen = new Set();
     const uniq = list.filter((d) => (seen.has(d.code) ? false : seen.add(d.code)));
     return `
@@ -3735,7 +3754,7 @@ class EdgeOfLoveGame {
         <div class="dsm-ref-chips">
           ${uniq
             .map(
-              (d) => `<button class="dsm-ref-chip" data-action="jump-dsm-ref" data-code="${d.code}"><strong>${d.code}</strong><span>${d.title}</span></button>`
+              (d) => `<button class="dsm-ref-chip" data-action="jump-dsm-ref" data-code="${d.code}"><strong>${d.chipCode}</strong><span>${d.title}</span></button>`
             )
             .join('')}
         </div>
@@ -3746,17 +3765,27 @@ class EdgeOfLoveGame {
           if (!ref) return '';
           return `
             <div class="dsm-ref-block" id="dsm-ref-${d.code}">
-              <h4>${d.title} <small>${d.code}</small></h4>
+              <h4>${d.title} ${d.code === 'GENERAL' ? '' : `<small>${d.code}</small>`}</h4>
               <p class="dsm-ref-en">${d.en}</p>
               <p>${ref.intro}</p>
               <p class="dsm-ref-lead"><strong>${ref.lead}</strong></p>
-              <ul class="dsm-ref-list">${ref.criteria.map((c) => `<li>${c}</li>`).join('')}</ul>
+              <ul class="dsm-ref-list">${ref.criteria.map((c) => `<li>${c.replace(/\n/g, '<br>')}</li>`).join('')}</ul>
+              ${
+                ref.extraCriteria?.length
+                  ? `<ul class="dsm-ref-list">${ref.extraCriteria.map((c) => `<li>${c}</li>`).join('')}</ul>`
+                  : ''
+              }
+              ${
+                ref.subtypes?.length
+                  ? `<p class="dsm-ref-lead"><strong>${ref.subtypesLead || '註明是否有：'}</strong></p><ul class="dsm-ref-list">${ref.subtypes.map((s) => `<li>${s}</li>`).join('')}</ul>`
+                  : ''
+              }
               ${ref.note ? `<p class="dsm-ref-note">📝 ${ref.note}</p>` : ''}
               <button class="dsm-ref-top" data-action="jump-dsm-ref" data-code="${uniq[0].code}">↑ 回到第一項</button>
             </div>`;
         })
         .join('')}
-      <p class="dsm-ref-disclaimer">※ 以上為 DSM-5-TR 準則的中文意譯整理，僅供遊戲內學習參考，不能用於真實診斷。</p>
+      <p class="dsm-ref-disclaimer">※ 以上採自 DSM-5-TR 診斷準則中文版，僅供遊戲內學習參考，不能用於真實診斷。</p>
     `;
   }
 
@@ -3777,10 +3806,10 @@ class EdgeOfLoveGame {
         <button
           class="dsm-side-launcher-tab"
           data-action="toggle-dsm-widget"
-          title="點擊展開／收合 DSM-5-TR 人格疾患準則隨身小工具"
+          title="點擊展開／收合 DSM-5-TR 人格障礙症準則隨身小工具"
         >
           <span class="launcher-icon">📖</span>
-          <span class="launcher-text">人格疾患準則</span>
+          <span class="launcher-text">人格障礙症準則</span>
           <span class="launcher-badge">${totalUnlockedClues}/${totalClues}</span>
         </button>
 
@@ -3788,8 +3817,8 @@ class EdgeOfLoveGame {
         <div class="dsm-side-drawer">
           <div class="dsm-drawer-header">
             <div>
-              <h3>📖 DSM-5-TR 人格疾患準則小工具</h3>
-              <p>隨時對照 12 種人格疾患診斷準則與目前已觀察到的行為線索</p>
+              <h3>📖 DSM-5-TR 人格障礙症準則小工具</h3>
+              <p>隨時對照一般準則與 12 種人格障礙症診斷準則</p>
             </div>
             <button class="btn-close" data-action="close-dsm-widget" title="收合小工具">✕</button>
           </div>
@@ -3827,20 +3856,23 @@ class EdgeOfLoveGame {
                 ? `
                   <div class="dsm-general-guide">
                     <div class="dsm-guide-card">
-                      <h4>📌 一般人格障礙症通用診斷準則 (General PD Criteria)</h4>
+                      <h4>📌 一般人格障礙症（General Personality Disorder）</h4>
                       <ul class="dsm-guide-list">
-                        <li><strong>準則 A（核心偏離）</strong>：內在經驗與行為模式顯著偏離其文化預期，且表現在以下<strong>至少兩個領域</strong>：
+                        <li><strong>A.</strong> 一種內在經驗與行為的持久模式(enduring pattern)，明顯偏離其個體所處文化的期待，表現於下列<strong>兩種（或更多）面向</strong>：
                           <ol>
-                            <li><strong>認知 (Cognition)</strong>：對自己、他人及事件的知覺與解讀方式。</li>
-                            <li><strong>情感 (Affectivity)</strong>：情緒反應的範圍、強度、易變性及適切性。</li>
-                            <li><strong>人際功能 (Interpersonal functioning)</strong>：與他人建立親密與界線的模式。</li>
-                            <li><strong>衝動控制 (Impulse control)</strong>：對行為衝動的調節能力。</li>
+                            <li>認知[如：對自己、他人或事件的察覺(perceiving)與解讀(interpreting)方式]。</li>
+                            <li>情感[如：情緒反應的範圍、強度、易變度(lability)和合宜度]。</li>
+                            <li>人際功能。</li>
+                            <li>衝動控制。</li>
                           </ol>
                         </li>
-                        <li><strong>準則 B（僵化與廣泛性）</strong>：此持久模式在廣泛的個人與社交情境中皆缺乏彈性且普遍存在。</li>
-                        <li><strong>準則 C（臨床苦惱或損害）</strong>：引起具臨床意義的苦惱，或損害社交、職業及其他重要功能領域。</li>
-                        <li><strong>準則 D（長期穩定）</strong>：模式穩定且歷時長久，其發病至少可追溯至青少年期或成年早期。</li>
+                        <li><strong>B.</strong> 這種持久模式缺乏彈性且普遍存在於個人及社交情境中。</li>
+                        <li><strong>C.</strong> 這種持久模式引起臨床上顯著苦惱或社交、職業及其他重要功能減損。</li>
+                        <li><strong>D.</strong> 此模式穩定且持續時間長，其起始最早可追溯至青春期或成年期早期。</li>
+                        <li><strong>E.</strong> 這種持久模式無法以另一精神疾病的表現或結果做更好的解釋。</li>
+                        <li><strong>F.</strong> 這種持久模式無法歸因於某物質的生理作用（如：濫用藥物、醫療用藥）或另一身體病況（如頭部外傷）。</li>
                       </ul>
+                      <p class="dsm-ref-note">筆記：A、B、C群人格障礙症都沒有註記或亞型</p>
                     </div>
 
                     <div class="dsm-guide-card">
@@ -3896,7 +3928,7 @@ class EdgeOfLoveGame {
                           ${
                             diag.diagnosed
                               ? `<span role="button" tabindex="0" class="dsm-ref-link" data-action="open-dsm-ref" data-code="${char.dsmCode}">${char.dsmTitle} (${char.dsmTitleEn}) 🔗 查看準則</span>`
-                              : `🔒 真實人格疾患名稱將於推進劇情至 ${this.getRevealCode(char.id)} 後揭曉`
+                              : `🔒 真實人格障礙症名稱將於推進劇情至 ${this.getRevealCode(char.id)} 後揭曉`
                           }
                         </p>
                       </div>
