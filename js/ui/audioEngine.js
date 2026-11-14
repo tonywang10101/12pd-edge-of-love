@@ -1,12 +1,60 @@
-// 《愛的邊緣》Web Audio API 合成音效引擎（無須外部音檔，純程序化心電圖與環境音效）
+// Shared low-volume background music and Web Audio interaction effects.
 
 class AudioEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.music = null;
+    this.unlocked = false;
+    this.visible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
+    this.fadeTimer = null;
+    try { this.enabled = localStorage.getItem('edge_of_love_audio_enabled') !== 'false'; } catch (_) {}
+  }
+
+  unlock() {
+    this.unlocked = true;
+    this.init();
+  }
+
+  setVisible(visible) {
+    this.visible = visible;
+    if (!visible) this.pause();
+    else if (this.unlocked) this.init();
+  }
+
+  startMusic() {
+    if (!this.enabled || !this.unlocked || !this.visible || typeof Audio === 'undefined') return;
+    if (!this.music) {
+      this.music = new Audio(new URL('../../assets/audio/apartment-at-dusk.mp3', import.meta.url).href);
+      this.music.id = 'background-music';
+      this.music.hidden = true;
+      this.music.setAttribute?.('aria-hidden', 'true');
+      document.body?.appendChild(this.music);
+      this.music.loop = true;
+      this.music.preload = 'none';
+      this.music.volume = 0;
+    }
+    if (!this.music.paused) return;
+    this.music.volume = 0;
+    this.music.play().then(() => {
+      if (!this.enabled || !this.visible) { this.pause(); return; }
+      clearInterval(this.fadeTimer);
+      this.fadeTimer = setInterval(() => {
+        this.music.volume = Math.min(.16, this.music.volume + .008);
+        if (this.music.volume >= .16) { clearInterval(this.fadeTimer); this.fadeTimer = null; }
+      }, 40);
+    }).catch(() => { /* Retry on the next gesture if playback was blocked. */ });
+  }
+
+  pause() {
+    clearInterval(this.fadeTimer);
+    this.fadeTimer = null;
+    if (this.music) { this.music.pause(); this.music.volume = 0; }
+    if (this.ctx?.state === 'running') this.ctx.suspend().catch(() => {});
   }
 
   init() {
+    if (!this.enabled || !this.visible) return;
     if (!this.ctx && typeof window !== 'undefined') {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (AudioCtx) {
@@ -14,21 +62,21 @@ class AudioEngine {
       }
     }
     if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
+    this.startMusic();
   }
 
   toggle() {
     this.enabled = !this.enabled;
-    if (this.enabled) {
-      this.init();
-      this.playChime(523.25, 0.12);
-    }
+    try { localStorage.setItem('edge_of_love_audio_enabled', String(this.enabled)); } catch (_) {}
+    if (this.enabled) this.unlock();
+    else this.pause();
     return this.enabled;
   }
 
-  playChime(freq = 440, duration = 0.15, type = 'sine', volume = 0.08) {
-    if (!this.enabled) return;
+  playChime(freq = 440, duration = 0.15, type = 'sine', volume = 0.035) {
+    if (!this.enabled || !this.visible) return;
     try {
       this.init();
       if (!this.ctx) return;

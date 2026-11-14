@@ -1,12 +1,16 @@
 // 《愛的邊緣》角色立繪與情緒特效渲染器
 
-import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=24';
-import { resolveAssetUrl } from './assetPreloader.js?v=24';
+import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=32';
+import { resolveAssetUrl } from './assetPreloader.js?v=31';
 
 export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrait') {
   const promptData = CHARACTER_PROMPTS[char.id];
-  const isIntenseEmotion =
-    expression === 'triggered' || expression === 'vulnerable' || expression === 'anxious';
+  const moods = ['neutral','smile','warm','soft','pensive','guarded','playful','bold','flustered','triggered','vulnerable','anxious','hurt'];
+  expression = moods.includes(expression) ? expression : 'neutral';
+  // Han's alternate portrait is playful; it must not portray distress as flirtation.
+  const isIntenseEmotion = char.id === 'han_xiao'
+    ? ['playful','bold','flustered'].includes(expression)
+    : ['triggered','vulnerable','anxious','hurt'].includes(expression);
   const baseImg = promptData ? promptData.imagePath : `./assets/characters/${char.id}.png`;
   const emotionalImg =
     promptData?.emotionalImagePath || `./assets/characters/${char.id}_emotional.png`;
@@ -18,7 +22,7 @@ export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrai
 
   if (isMini) {
     return `
-      <div class="otome-mini-card ${exprClass}">
+      <div class="otome-mini-card ${exprClass}" data-expression="${expression}" data-portrait-variant="${isIntenseEmotion ? 'emotional' : 'base'}">
         <img src="${imgSrc}" alt="${char.name}" class="otome-char-img" loading="eager" />
         <span class="otome-rarity-mini rarity-${rarity.toLowerCase()}">${rarity}</span>
         <div class="otome-shimmer-overlay"></div>
@@ -27,7 +31,7 @@ export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrai
   }
 
   return `
-    <div class="otome-portrait-card ${exprClass}">
+    <div class="otome-portrait-card ${exprClass}" data-expression="${expression}" data-portrait-variant="${isIntenseEmotion ? 'emotional' : 'base'}">
       <!-- 拱門金框與珠光暈染 -->
       <div class="otome-arch-frame">
         <img src="${imgSrc}" alt="${char.name}" class="otome-char-img-full" />

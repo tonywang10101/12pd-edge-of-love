@@ -2,8 +2,8 @@
 // 在玩家點擊「開始」時確保所有角色常態/情緒立繪與場景背景皆已完整下載並解碼至本地記憶體，
 // 並透過 blob: Object URL 確保切換場景或情緒時零網路延遲、不重複向伺服器請求。
 
-import { CHARACTERS } from '../data/characters.js?v=24';
-import { CHARACTER_PROMPTS, SCENE_BACKGROUNDS } from '../data/characterPrompts.js?v=24';
+import { CHARACTERS } from '../data/characters.js?v=32';
+import { CHARACTER_PROMPTS, SCENE_BACKGROUNDS } from '../data/characterPrompts.js?v=32';
 
 const blobUrlCache = new Map();
 const decodedImageCache = new Map();

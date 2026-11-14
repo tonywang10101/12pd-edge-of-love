@@ -1,10 +1,10 @@
 {
   "name": "edge-of-love",
-  "version": "1.0.0",
-  "description": "《愛的邊緣》Edge of Love — 基於 DSM-5-TR 12 種人格障礙之心理學戀愛養成遊戲",
+  "version": "2.4.0",
+  "description": "《愛的邊緣》— 12 位角色，認識 DSM-5-TR 人格障礙與相關人格改變",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node --check js/app.js && node --check js/data/characters.js && node --check js/data/eventTreeEngine.js && node --check js/data/characterPrompts.js && node --check js/data/scenarios_cluster_a.js && node --check js/data/scenarios_cluster_b.js && node --check js/data/scenarios_cluster_c_other.js && node --check js/ui/avatarRenderer.js && node --check js/ui/audioEngine.js"
+    "test": "node --check js/app.js && node --check js/data/storyContent.js && node --test tests/*.test.mjs"
   }
 }

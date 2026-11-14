@@ -31,13 +31,13 @@ export const CHARACTER_PROMPTS = {
   shen_mo: {
     id: 'shen_mo',
     number: '01',
-    name: '沈墨 (Shen Mo)',
+    name: '沈墨 (Adrian)',
     rarity: 'SSR',
     imagePath: './assets/characters/shen_mo.png',
     appearanceAnchor:
-      'A handsome 27-year-old East Asian man (Shen Mo, investigative journalist), slightly messy dark indigo-black hair with soft bangs framing his sharp deep violet-blue eyes, wearing a tailored charcoal trench coat over a black turtleneck, signature silver voice recorder',
+      'A handsome 27-year-old East Asian man (Adrian, investigative journalist), slightly messy dark indigo-black hair with soft bangs framing his sharp deep violet-blue eyes, wearing a tailored charcoal trench coat over a black turtleneck, signature silver voice recorder',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A handsome 27-year-old East Asian man (Shen Mo, investigative journalist), slightly messy dark indigo-black hair with soft bangs framing his sharp, guarded deep violet-blue eyes. Wearing a tailored charcoal trench coat over a black turtleneck, holding a sleek silver voice recorder in one hand. Standing on a rainy city rooftop at twilight with soft neon rose and indigo bokeh lights in the background, warm rim lighting on his face, mysterious and intense romantic gaze, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A handsome 27-year-old East Asian man (Adrian, investigative journalist), slightly messy dark indigo-black hair with soft bangs framing his sharp, guarded deep violet-blue eyes. Wearing a tailored charcoal trench coat over a black turtleneck, holding a sleek silver voice recorder in one hand. Standing on a rainy city rooftop at twilight with soft neon rose and indigo bokeh lights in the background, warm rim lighting on his face, mysterious and intense romantic gaze, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -63,13 +63,13 @@ export const CHARACTER_PROMPTS = {
   lin_jianwei: {
     id: 'lin_jianwei',
     number: '02',
-    name: '林見微 (Lin Jianwei)',
+    name: '林見微 (Claire)',
     rarity: 'SSR',
     imagePath: './assets/characters/lin_jianwei.png',
     appearanceAnchor:
-      'A breathtaking 25-year-old East Asian woman (Lin Jianwei, astronomer and antique watchmaker), long silky straight raven-black hair, calm and ethereal ice-blue eyes with long eyelashes, porcelain skin, wearing an elegant vintage slate-blue vest over a crisp white blouse, golden antique pocket watch',
+      'A breathtaking 25-year-old East Asian woman (Claire, astronomer and antique watchmaker), long silky straight raven-black hair, calm and ethereal ice-blue eyes with long eyelashes, porcelain skin, wearing an elegant vintage slate-blue vest over a crisp white blouse, golden antique pocket watch',
     basePrompt:
-      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A breathtaking 25-year-old East Asian woman (Lin Jianwei, astronomer and antique watchmaker), long silky straight raven-black hair, calm and ethereal ice-blue eyes with long eyelashes, porcelain skin. Wearing an elegant vintage slate-blue vest over a crisp white blouse, holding a delicate golden antique pocket watch with a fine chain. Starry observatory dome background with soft glowing stardust and dreamy silver-blue bokeh flares, serene and poetic atmosphere, masterpiece anime illustration.',
+      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A breathtaking 25-year-old East Asian woman (Claire, astronomer and antique watchmaker), long silky straight raven-black hair, calm and ethereal ice-blue eyes with long eyelashes, porcelain skin. Wearing an elegant vintage slate-blue vest over a crisp white blouse, holding a delicate golden antique pocket watch with a fine chain. Starry observatory dome background with soft glowing stardust and dreamy silver-blue bokeh flares, serene and poetic atmosphere, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -95,13 +95,13 @@ export const CHARACTER_PROMPTS = {
   ruri: {
     id: 'ruri',
     number: '03',
-    name: '星野 琉璃 (Hoshino Ruri)',
+    name: '星野 琉璃 (Iris)',
     rarity: 'SSR',
     imagePath: './assets/characters/ruri.png',
     appearanceAnchor:
-      'An enchanting 23-year-old East Asian beauty (Hoshino Ruri, tarot astrologer and vintage shop owner), wavy plum-violet hair with delicate silver star hairpins and a crystal forehead ornament, luminous amethyst eyes, wearing a romantic bohemian velvet shawl with gold embroidery',
+      'An enchanting 23-year-old East Asian beauty (Iris, tarot astrologer and vintage shop owner), wavy plum-violet hair with delicate silver star hairpins and a crystal forehead ornament, luminous amethyst eyes, wearing a romantic bohemian velvet shawl with gold embroidery',
     basePrompt:
-      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An enchanting 23-year-old androgynous East Asian beauty (Hoshino Ruri, tarot astrologer and vintage shop owner), wavy plum-violet hair with delicate silver star hairpins and a crystal forehead ornament, luminous amethyst eyes. Wearing a romantic bohemian velvet shawl with gold embroidery, holding a glowing gilded tarot card. Warm candlelight and floating lavender prism sparkles in an antique atelier background, dreamy and mystical romantic gaze, masterpiece anime illustration.',
+      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An enchanting 23-year-old androgynous East Asian beauty (Iris, tarot astrologer and vintage shop owner), wavy plum-violet hair with delicate silver star hairpins and a crystal forehead ornament, luminous amethyst eyes. Wearing a romantic bohemian velvet shawl with gold embroidery, holding a glowing gilded tarot card. Warm candlelight and floating lavender prism sparkles in an antique atelier background, dreamy and mystical romantic gaze, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -127,14 +127,14 @@ export const CHARACTER_PROMPTS = {
   han_xiao: {
     id: 'han_xiao',
     number: '04',
-    name: '韓梟 (Han Xiao)',
+    name: '韓梟 (Logan)',
     rarity: 'SSR',
     imagePath: './assets/characters/han_xiao.png',
     emotionalImagePath: './assets/characters/han_xiao_emotional.png',
     appearanceAnchor:
-      'A dangerously handsome and muscular 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), athletic bodybuilder physique with sculpted pecs and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, wearing an open black biker leather jacket with bare muscular chest',
+      'A dangerously handsome and muscular 28-year-old East Asian man (Logan, underground bartender and motorcycle racer), athletic bodybuilder physique with sculpted pecs and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, wearing an open black biker leather jacket with bare muscular chest',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dangerously handsome and muscular 28-year-old East Asian man (Han Xiao, underground bartender and motorcycle racer), athletic physique with sculpted chest and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, a charming and provocative half-smile. Wearing an open black leather jacket revealing his muscular bare torso, holding a crystal cocktail glass with amber whiskey. Warm golden-rose bar lighting with dreamy bokeh sparkles, intense romantic tension, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dangerously handsome and muscular 28-year-old East Asian man (Logan, underground bartender and motorcycle racer), athletic physique with sculpted chest and six-pack abs, styled jet-black undercut hair, captivating crimson-amber eyes, a charming and provocative half-smile. Wearing an open black leather jacket revealing his muscular bare torso, holding a crystal cocktail glass with amber whiskey. Warm golden-rose bar lighting with dreamy bokeh sparkles, intense romantic tension, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -160,13 +160,14 @@ export const CHARACTER_PROMPTS = {
   su_fei: {
     id: 'su_fei',
     number: '05',
-    name: '蘇緋 (Su Fei)',
+    name: '蘇緋 (Ruby)',
     rarity: 'SSR',
     imagePath: './assets/characters/su_fei.png',
+    emotionalImagePath: './assets/characters/su_fei_emotional_v2.png',
     appearanceAnchor:
-      'A gorgeous 22-year-old East Asian woman (Su Fei, expressionist painter and indie vocalist), wavy rose-crimson hair tied in soft side ribbons, emotional and sparkling ruby-pink eyes, wearing an off-shoulder cream knit sweater, vintage pastel-pink plush bunny',
+      'A gorgeous 22-year-old East Asian woman (Ruby, expressionist painter and indie vocalist), wavy rose-crimson hair tied in soft side ribbons, emotional and sparkling ruby-pink eyes, wearing an off-shoulder cream knit sweater, vintage pastel-pink plush bunny',
     basePrompt:
-      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A gorgeous 22-year-old East Asian woman (Su Fei, expressionist painter and indie vocalist), wavy rose-crimson hair tied in soft side ribbons, emotional and sparkling ruby-pink eyes with a touch of vulnerability. Wearing an off-shoulder cream knit sweater with a tiny smudge of rose paint on her finger, hugging a cute vintage pastel-pink plush bunny close to her chest. Sunlit art studio background with floating cherry blossom petals and warm golden light flares, deeply affectionate gaze, masterpiece anime illustration.',
+      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A gorgeous 22-year-old East Asian woman (Ruby, expressionist painter and indie vocalist), wavy rose-crimson hair tied in soft side ribbons, emotional and sparkling ruby-pink eyes with a touch of vulnerability. Wearing an off-shoulder cream knit sweater with a tiny smudge of rose paint on her finger, hugging a cute vintage pastel-pink plush bunny close to her chest. Sunlit art studio background with floating cherry blossom petals and warm golden light flares, deeply affectionate gaze, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -192,13 +193,13 @@ export const CHARACTER_PROMPTS = {
   xia_le: {
     id: 'xia_le',
     number: '06',
-    name: '夏樂 (Xia Le)',
+    name: '夏樂 (Julian)',
     rarity: 'SSR',
     imagePath: './assets/characters/xia_le.png',
     appearanceAnchor:
-      'A dazzling 24-year-old East Asian man (Xia Le / Charlotte, theater actor and fashion icon), fluffy golden-blonde wavy hair, bright honey-amber eyes with long lashes, wearing an ivory silk shirt',
+      'A dazzling 24-year-old East Asian man (Julian, theater actor and fashion icon), fluffy golden-blonde wavy hair, bright honey-amber eyes with long lashes, wearing an ivory silk shirt',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dazzling 24-year-old East Asian man (Xia Le / Charlotte, theater actor and fashion icon), fluffy golden-blonde wavy hair, bright honey-amber eyes with long lashes, radiant and flirtatious smile. Wearing a luxurious ivory silk shirt with a loose ribbon tie, holding a blooming red rose near his lips. Soft stage spotlight with iridescent champagne and rose-gold bokeh sparkles, romantic and glamorous atmosphere, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A dazzling 24-year-old East Asian man (Julian, theater actor and fashion icon), fluffy golden-blonde wavy hair, bright honey-amber eyes with long lashes, radiant and flirtatious smile. Wearing a luxurious ivory silk shirt with a loose ribbon tie, holding a blooming red rose near his lips. Soft stage spotlight with iridescent champagne and rose-gold bokeh sparkles, romantic and glamorous atmosphere, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -224,13 +225,13 @@ export const CHARACTER_PROMPTS = {
   gu_qingcheng: {
     id: 'gu_qingcheng',
     number: '07',
-    name: '顧傾城 (Gu Qingcheng)',
+    name: '顧傾城 (Vivian)',
     rarity: 'SSR',
     imagePath: './assets/characters/gu_qingcheng.png',
     appearanceAnchor:
-      'A regal and stunning 30-year-old East Asian woman (Gu Qingcheng, star architect), sleek jet-black hair in an elegant high updo with a gold hairpin, sharp yet alluring golden-hazel eyes, wearing a tailored champagne-white blazer',
+      'A regal and stunning 30-year-old East Asian woman (Vivian, star architect), sleek jet-black hair in an elegant high updo with a gold hairpin, sharp yet alluring golden-hazel eyes, wearing a tailored champagne-white blazer',
     basePrompt:
-      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A regal and stunning 30-year-old East Asian woman (Gu Qingcheng, star architect), sleek jet-black hair in an elegant high updo with a gold hairpin, sharp yet alluring golden-hazel eyes. Wearing a tailored champagne-white blazer over a silk camisole, standing by a floor-to-ceiling glass window at sunset with golden hour light warming her features, soft lens flare and floating light particles, proud yet tender romantic expression, masterpiece anime illustration.',
+      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A regal and stunning 30-year-old East Asian woman (Vivian, star architect), sleek jet-black hair in an elegant high updo with a gold hairpin, sharp yet alluring golden-hazel eyes. Wearing a tailored champagne-white blazer over a silk camisole, standing by a floor-to-ceiling glass window at sunset with golden hour light warming her features, soft lens flare and floating light particles, proud yet tender romantic expression, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -256,13 +257,14 @@ export const CHARACTER_PROMPTS = {
   wen_yan: {
     id: 'wen_yan',
     number: '08',
-    name: '溫言 (Wen Yan)',
+    name: '溫言 (Elliot)',
     rarity: 'SR',
     imagePath: './assets/characters/wen_yan.png',
+    emotionalImagePath: './assets/characters/wen_yan_emotional_v2.png',
     appearanceAnchor:
-      'A gentle, handsome 26-year-old East Asian man (Wen Yan, antique book restorer and literary translator), soft dark-brown hair with bangs, warm emerald-brown eyes behind thin gold-rimmed glasses, wearing a cozy sage-green cardigan over a white collared shirt',
+      'A gentle, handsome 26-year-old East Asian man (Elliot, antique book restorer and literary translator), soft dark-brown hair with bangs, warm emerald-brown eyes behind thin gold-rimmed glasses, wearing a cozy sage-green cardigan over a white collared shirt',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A gentle, handsome 26-year-old East Asian man (Wen Yan, antique book restorer and literary translator), soft dark-brown hair with bangs, warm emerald-brown eyes behind thin gold-rimmed glasses, a shy blush on his cheeks. Wearing a cozy sage-green cardigan over a white collared shirt, holding an open leather-bound poetry book. Sunbeams filtering through a library window with floating dust motes and soft warm bokeh, tender and affectionate gaze, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A gentle, handsome 26-year-old East Asian man (Elliot, antique book restorer and literary translator), soft dark-brown hair with bangs, warm emerald-brown eyes behind thin gold-rimmed glasses, a shy blush on his cheeks. Wearing a cozy sage-green cardigan over a white collared shirt, holding an open leather-bound poetry book. Sunbeams filtering through a library window with floating dust motes and soft warm bokeh, tender and affectionate gaze, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -288,13 +290,13 @@ export const CHARACTER_PROMPTS = {
   bai_xiaolu: {
     id: 'bai_xiaolu',
     number: '09',
-    name: '白小鹿 (Bai Xiaolu)',
+    name: '白小鹿 (Lily)',
     rarity: 'SR',
     imagePath: './assets/characters/bai_xiaolu.png',
     appearanceAnchor:
-      'An adorable and sweet 21-year-old East Asian woman (Bai Xiaolu, pastry chef apprentice and florist), soft chestnut-pink braided hair with small baby’s breath flowers, big dewy rose-brown eyes, wearing a pastel pink frilled apron over a cream dress',
+      'An adorable and sweet 21-year-old East Asian woman (Lily, pastry chef apprentice and florist), soft chestnut-pink braided hair with small baby’s breath flowers, big dewy rose-brown eyes, wearing a pastel pink frilled apron over a cream dress',
     basePrompt:
-      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An adorable and sweet 21-year-old East Asian woman (Bai Xiaolu, pastry chef apprentice and florist), soft chestnut-pink braided hair with small baby’s breath flowers, big dewy rose-brown eyes looking up with pure devotion. Wearing a pastel pink frilled apron over a cream dress, holding a delicate plate with a strawberry shortcake. Warm afternoon patisserie sunlight with dreamy sakura-pink bokeh light flares, heart-melting romantic atmosphere, masterpiece anime illustration.',
+      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An adorable and sweet 21-year-old East Asian woman (Lily, pastry chef apprentice and florist), soft chestnut-pink braided hair with small baby’s breath flowers, big dewy rose-brown eyes looking up with pure devotion. Wearing a pastel pink frilled apron over a cream dress, holding a delicate plate with a strawberry shortcake. Warm afternoon patisserie sunlight with dreamy sakura-pink bokeh light flares, heart-melting romantic atmosphere, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -320,13 +322,13 @@ export const CHARACTER_PROMPTS = {
   ji_yan: {
     id: 'ji_yan',
     number: '10',
-    name: '紀嚴 (Ji Yan)',
+    name: '紀嚴 (Vincent)',
     rarity: 'SSR',
     imagePath: './assets/characters/ji_yan.png',
     appearanceAnchor:
-      'A refined, handsome 29-year-old East Asian man (Ji Yan, forensic pathologist and classical pianist), neatly parted raven-black hair, deep teal-gray eyes behind sleek silver-framed glasses, wearing a crisp white dress shirt buttoned to the top with a dark teal vest',
+      'A refined, handsome 29-year-old East Asian man (Vincent, forensic pathologist and classical pianist), neatly parted raven-black hair, deep teal-gray eyes behind sleek silver-framed glasses, wearing a crisp white dress shirt buttoned to the top with a dark teal vest',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A refined, handsome 29-year-old East Asian man (Ji Yan, forensic pathologist and classical pianist), neatly parted raven-black hair, deep teal-gray eyes behind sleek silver-framed glasses, composed yet subtly softened expression. Wearing a crisp white dress shirt buttoned to the top with a dark teal vest, resting one hand on a grand piano keyboard with sheet music. Soft afternoon light through sheer curtains with pearlescent bokeh sparkles, elegant and romantic mood, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A refined, handsome 29-year-old East Asian man (Vincent, forensic pathologist and classical pianist), neatly parted raven-black hair, deep teal-gray eyes behind sleek silver-framed glasses, composed yet subtly softened expression. Wearing a crisp white dress shirt buttoned to the top with a dark teal vest, resting one hand on a grand piano keyboard with sheet music. Soft afternoon light through sheer curtains with pearlescent bokeh sparkles, elegant and romantic mood, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -352,13 +354,13 @@ export const CHARACTER_PROMPTS = {
   lu_qinglan: {
     id: 'lu_qinglan',
     number: '11',
-    name: '陸晴嵐 (Lu Qinglan)',
+    name: '陸晴嵐 (Audrey)',
     rarity: 'SSR',
     imagePath: './assets/characters/lu_qinglan.png',
     appearanceAnchor:
-      'A warm and radiant 29-year-old East Asian woman (Lu Qinglan, former neurosurgeon turned kintsugi ceramic artist), chestnut-brown short bob hair with a delicate gold leaf hair clip near her right temple, bright amber eyes, wearing a linen artist smock over an amber knit top',
+      'A warm and radiant 29-year-old East Asian woman (Audrey, former neurosurgeon turned kintsugi ceramic artist), chestnut-brown short bob hair with a delicate gold leaf hair clip near her right temple, bright amber eyes, wearing a linen artist smock over an amber knit top',
     basePrompt:
-      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A warm and radiant 29-year-old East Asian woman (Lu Qinglan, former neurosurgeon turned kintsugi ceramic artist), chestnut-brown short bob hair with a tiny, delicate faint healed scar near her right temple hairline accented by a gold leaf hair clip, bright amber eyes filled with lively warmth and emotion. Wearing a linen artist smock over an amber knit top, holding a teacup repaired with glowing golden kintsugi lines. Warm golden sunset light in a pottery studio with floating light particles, touching and romantic smile, masterpiece anime illustration.',
+      'Otome romance game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. A warm and radiant 29-year-old East Asian woman (Audrey, former neurosurgeon turned kintsugi ceramic artist), chestnut-brown short bob hair with a tiny, delicate faint healed scar near her right temple hairline accented by a gold leaf hair clip, bright amber eyes filled with lively warmth and emotion. Wearing a linen artist smock over an amber knit top, holding a teacup repaired with glowing golden kintsugi lines. Warm golden sunset light in a pottery studio with floating light particles, touching and romantic smile, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
@@ -384,14 +386,14 @@ export const CHARACTER_PROMPTS = {
   you_ziqian: {
     id: 'you_ziqian',
     number: '12',
-    name: '游子謙 (You Ziqian)',
+    name: '游子謙 (Oliver)',
     rarity: 'SSR',
     imagePath: './assets/characters/you_ziqian.png',
     emotionalImagePath: './assets/characters/you_ziqian_emotional.png',
     appearanceAnchor:
-      'An adorable, puppy-eyed 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), fluffy messy-wavy ash-brown hair, innocent droopy violet-amber puppy eyes, soft blushed cheeks and sweet harmless smile, wearing a cozy cream knit sweater',
+      'An adorable, puppy-eyed 26-year-old East Asian man (Oliver, cafe owner and graphic designer), fluffy messy-wavy ash-brown hair, innocent droopy violet-amber puppy eyes, soft blushed cheeks and sweet harmless smile, wearing a cozy cream knit sweater',
     basePrompt:
-      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An adorable, handsome puppy-boy archetype 26-year-old East Asian man (You Ziqian, cafe owner and graphic designer), soft fluffy wavy ash-brown hair with soft bangs, big innocent round droopy puppy eyes with violet-amber reflections, soft pink blushed cheeks, sweet harmless smile. Wearing a cozy cream cable-knit sweater, holding a warm ceramic latte mug with both hands, tilting head with an endearing gaze. Cozy sunlit cafe background with rainbow lens flare and warm bokeh sparkles, masterpiece anime illustration.',
+      'Otome game character portrait in the style of Love and Producer (戀與製作人), SSR card art style. An adorable, handsome puppy-boy archetype 26-year-old East Asian man (Oliver, cafe owner and graphic designer), soft fluffy wavy ash-brown hair with soft bangs, big innocent round droopy puppy eyes with violet-amber reflections, soft pink blushed cheeks, sweet harmless smile. Wearing a cozy cream cable-knit sweater, holding a warm ceramic latte mug with both hands, tilting head with an endearing gaze. Cozy sunlit cafe background with rainbow lens flare and warm bokeh sparkles, masterpiece anime illustration.',
     storyActions: [
       {
         chapter: 1,
