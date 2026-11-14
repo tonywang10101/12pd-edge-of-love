@@ -2881,8 +2881,8 @@ button, input, select, textarea {
   font-size: 0.78rem;
 }
 
-.vn-diary-drawer summary,
-.card-diary-dossier summary {
+.vn-diary-drawer > summary,
+.card-diary-dossier > summary {
   cursor: pointer;
   display: flex;
   flex-wrap: wrap;
@@ -2893,8 +2893,8 @@ button, input, select, textarea {
   user-select: none;
 }
 
-.vn-diary-drawer summary::-webkit-details-marker,
-.card-diary-dossier summary::-webkit-details-marker {
+.vn-diary-drawer > summary::-webkit-details-marker,
+.card-diary-dossier > summary::-webkit-details-marker {
   display: none;
 }
 

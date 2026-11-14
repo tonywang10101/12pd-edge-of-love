@@ -167,7 +167,7 @@ button:focus-visible, summary:focus-visible, input:focus-visible,
 .vn-top-bar .relationship-meter, .char-card-body .relationship-meter {width: 100%; min-width: 0;}
 .vn-choice-btn .choice-idx {flex-shrink: 0;}
 .vn-choice-btn:hover {transform: none;}
-.vn-diary-drawer summary, .card-diary-dossier summary {flex-wrap: wrap; gap: 8px;}
+.vn-diary-drawer > summary, .card-diary-dossier > summary {flex-wrap: wrap; gap: 8px;}
 .diary-summary-left {min-width: 0;}
 .story-current-body {flex: 1;}
 .story-roster h4 {font-size: .85rem; font-weight: 500; color: #dfcfe5; margin-bottom: 12px;}
@@ -432,4 +432,78 @@ button:focus-visible, summary:focus-visible, input:focus-visible,
   .evidence-modal .modal-body { padding: 14px; gap: 16px; }
   .evidence-modal .evidence-record { padding: 16px 12px; }
   .evidence-modal-overview { padding: 14px; }
+}
+
+/* Ending-page typography: narrative, section labels, body text and metadata. */
+.ending-stage, .evidence-modal, .learning-modal {
+  --ending-copy-size: .9rem;
+  --ending-label-size: .95rem;
+  --ending-meta-size: .78rem;
+}
+.ending-card { overflow-wrap: anywhere; }
+.ending-card > h2 { font-family: var(--font-serif); font-size: clamp(1.35rem,2vw,1.65rem); font-weight: 700; line-height: 1.5; }
+.ending-card > p { font-size: var(--ending-copy-size); line-height: 1.9; color: #dccde4; }
+.ending-stage .completed-case-dossier > summary,
+.ending-stage .case-evidence > summary,
+.ending-stage .case-resources > details > summary,
+.ending-stage .ending-switcher > summary,
+.ending-stage .ending-ethics > summary,
+.ending-stage .vn-diary-drawer > summary {
+  font-family: var(--font-sans);
+  font-size: var(--ending-label-size);
+  font-weight: 600;
+  line-height: 1.7;
+  color: #f1d5ed;
+}
+.ending-stage .case-section-heading h4,
+.ending-stage .case-section-heading strong { font-size: var(--ending-label-size); font-weight: 600; color: #f1d5ed; line-height: 1.7; }
+.ending-stage .case-section > p,
+.ending-stage .case-background li,
+.ending-stage .case-other-explanations p,
+.ending-stage .case-specifiers p,
+.ending-stage .case-resources .ending-continuity p,
+.ending-stage .case-resources .ending-continuity li,
+.ending-stage .educational-sources li,
+.ending-stage .criterion-description { font-size: var(--ending-copy-size); line-height: 1.9; }
+.ending-stage .case-evidence-note,
+.ending-stage .criterion-source { font-size: var(--ending-meta-size); line-height: 1.8; }
+.ending-stage .learning-prompt h3, .learning-modal .learning-prompt h3 { margin: 0 0 12px; font-size: var(--ending-label-size); color: #f1d5ed; line-height: 1.7; }
+.ending-stage .learning-prompt p, .learning-modal .learning-prompt p { margin: 12px 0; font-size: var(--ending-copy-size); line-height: 1.9; }
+.ending-stage .learning-prompt .learning-scope, .learning-modal .learning-prompt .learning-scope { font-size: var(--ending-meta-size); color: #c9bed2; opacity: 1; }
+.ending-stage .learning-prompt summary, .learning-modal .learning-prompt summary { cursor: pointer; font-size: var(--ending-copy-size); line-height: 1.8; color: #e8d3e7; }
+.ending-stage .learning-option, .learning-modal .learning-option { min-height: 44px; padding: 12px 14px; font-size: var(--ending-copy-size); line-height: 1.8; border-radius: 12px; }
+.ending-stage .btn-evidence-anchor { min-height: 44px; padding: 10px 14px; font-size: .83rem; line-height: 1.6; white-space: normal; border-radius: 10px; }
+.ending-stage .ending-switcher { display: block; }
+.ending-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin-top: 16px; }
+.ending-options > button { min-width: 0; min-height: 48px; margin: 0; padding: 12px; border-radius: 12px; font-size: var(--ending-copy-size); line-height: 1.7; text-align: left; }
+.ending-card > .nav-btn, .ending-card > .btn-vn-continue { width: 100%; min-height: 48px; white-space: normal; line-height: 1.7; font-size: var(--ending-copy-size); }
+.ending-ethics { padding: 16px; border: 1px solid rgba(250,132,146,.3); border-radius: 12px; background: rgba(113,35,62,.12); }
+.ending-ethics[open] > summary { margin-bottom: 16px; }
+.ending-stage .diary-summary-left, .ending-stage .diary-summary-left strong { font-size: var(--ending-label-size); line-height: 1.7; color: #f1d5ed; }
+.ending-stage .diary-count-pill { font-size: var(--ending-meta-size); font-weight: 500; }
+.ending-stage .diary-drawer-body { max-height: 65dvh; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.ending-stage .diary-entry-card { padding: 16px; gap: 12px; }
+.ending-stage .diary-entry-header strong { font-size: var(--ending-copy-size); line-height: 1.7; color: #e8d3e7; }
+.ending-stage .diary-story-block, .ending-stage .diary-dsm-block { font-size: var(--ending-copy-size); line-height: 1.9; }
+.ending-stage .diary-story-block summary, .ending-stage .diary-dsm-block > summary { display: list-item; list-style: disclosure-closed inside; font-size: var(--ending-copy-size); line-height: 1.8; color: #e8d3e7; }
+.ending-stage .diary-story-block details[open] > summary, .ending-stage .diary-dsm-block[open] > summary { list-style-type: disclosure-open; margin-bottom: 10px; }
+.ending-stage .diary-story-block summary::-webkit-details-marker, .ending-stage .diary-dsm-block > summary::-webkit-details-marker { display: inline; }
+.ending-stage .diary-dsm-block { display: block; padding: 12px; }
+.ending-stage .diary-dsm-block p { margin-top: 10px; }
+.ending-stage .diary-story-block p { white-space: pre-line; }
+.evidence-modal .modal-header h2, .learning-modal .modal-header h2 { font-family: var(--font-serif); font-size: 1.25rem; line-height: 1.6; }
+.evidence-modal .evidence-modal-eyebrow { font-size: var(--ending-meta-size); }
+.evidence-modal .evidence-record-section p, .evidence-modal .evidence-record-section blockquote { font-size: var(--ending-copy-size); line-height: 1.9; }
+.evidence-modal .evidence-record-section h4 { font-size: var(--ending-label-size); font-weight: 600; line-height: 1.7; }
+.learning-modal { max-width: 800px; }
+.modal-window { min-width: 0; max-height: min(88vh,calc(100dvh - 24px)); }
+.modal-header > div { min-width: 0; overflow-wrap: anywhere; }
+.modal-body { min-height: 0; overscroll-behavior: contain; scrollbar-gutter: stable; }
+body:has(#modal-root .modal-window) { overflow: hidden; }
+@media (max-width: 600px) {
+  .ending-options { grid-template-columns: minmax(0,1fr); }
+  .ending-stage .vn-diary-drawer { padding: 14px 12px; }
+  .ending-stage .diary-entry-card { padding: 12px; }
+  .ending-stage .diary-drawer-body { max-height: 65dvh; }
+  .evidence-modal .modal-header h2, .learning-modal .modal-header h2 { font-size: 1.05rem; }
 }
