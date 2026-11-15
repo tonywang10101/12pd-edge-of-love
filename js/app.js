@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=49';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=52';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=49';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=49';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=49';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=49';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=49';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=49';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=52';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=52';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=52';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=52';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=52';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=52';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=49';
+} from './data/eventTreeEngine.js?v=52';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=49';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=49';
+} from './data/characterPrompts.js?v=52';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=52';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,

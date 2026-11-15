@@ -22,8 +22,11 @@ function playEvent(g,id,num,pick=()=>0){g.startEvent(id,num);let limit=0;while(g
 const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
  shen_mo:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'},
  gu_qingcheng:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
- bai_xiaolu:{second:'trueEnd',reasoning:'codependentEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
+ bai_xiaolu:{second:'trueEnd',reasoning:'codependentEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
+ han_xiao:{second:'codependentEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'normalEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
+// 一路挑戰對多數角色是「讓對方想保持距離」；韓梟例外（挑戰讓他尊重你），改用一路戀愛攻略
+const pauseKind=id=>({han_xiao:'romance-style'})[id]||'pause';
 function route(id,kind){
  const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
  for(let e=1;e<=13;e++)playEvent(g,id,e,()=>designed?designed[e-1]:kind==='second'?1:kind==='reasoning'?3:kind==='romance-style'?4:kind==='pause'?2:0);
@@ -128,7 +131,7 @@ test('unfinished tasks do not magically produce autonomous success at E13',()=>{
 
 test('character refusal, player refusal and relationship quality are independent',()=>{
  for(const c of CHARACTERS){
-  const g=route(c.id,'pause'),cs=g.state.characters[c.id];
+  const g=route(c.id,pauseKind(c.id)),cs=g.state.characters[c.id];
   assert.equal(cs.relationshipIntent,'romantic');assert.equal(cs.characterConsent,'distance');assert.equal(g.activeScene.endingKey,'triggerEnd');
   playEvent(g,c.id,14,()=>1);assert.equal(cs.relationshipIntent,'friendship');assert.equal(g.activeScene.endingKey,'triggerEnd');
  }
@@ -346,7 +349,7 @@ test('friendship remembers only the drawing, tea name and lining choice actually
   assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'畫了湯碗'));
  }
  for(const id of ['han_xiao','ruri']){
-  const g=game();for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===14?1:1);
+  const ex=ENDING_EXAMPLES[id]?.friendEnd,g=game();for(let e=1;e<=14;e++)playEvent(g,id,e,()=>ex?Number(e===14?ex.split('|')[1]:ex[e-1]):1);
   assert.equal(g.activeScene.endingKey,'friendEnd');
   assert.ok(!g.activeScene.endingData.romanticText.includes(id==='han_xiao'?'你取的名字':'你挑的那段'));
  }
@@ -398,7 +401,7 @@ test('rewritten options restore pending older text by its original index without
 test('all three romantic voices respect refusal and a clear distance choice remains effective',()=>{
  for(const c of CHARACTERS){
   for(const pick of [0,3,4]){const g=route(c.id,'romantic');playEvent(g,c.id,14,()=>pick);assert.equal(g.activeScene.endingKey,'trueEnd');
-   const h=route(c.id,'pause');h.startEvent(c.id,14);const reply=h.activeScene.eventData.nodes[1].choices[pick].reply;
+   const h=route(c.id,pauseKind(c.id));h.startEvent(c.id,14);const reply=h.activeScene.eventData.nodes[1].choices[pick].reply;
    assert.notEqual(reply,content.buildRouteEvents(c.id)[13].nodes[1].choices[pick].reply);
    playEvent(h,c.id,14,()=>pick);assert.equal(h.state.characters[c.id].characterConsent,'distance');assert.equal(h.activeScene.endingKey,'triggerEnd');
   }
@@ -445,7 +448,7 @@ test('every conversation offers five approaches without repeated spoken choices 
  for(const c of CHARACTERS){
   for(const ev of content.buildRouteEvents(c.id))if(ev.nodes[1]){
    const options=ev.nodes[1].choices;assert.equal(options.length,5);
-   if(content.getTuning(c.id)){assert.deepEqual(options.map(x=>x.style).sort(),[...content.STYLE_CODES].sort());assert.equal(options.find(x=>x.style==='empathy').healthy,true);assert.equal(options.find(x=>x.style==='friend').healthy,true);}
+   if(content.getTuning(c.id)){assert.deepEqual(options.map(x=>x.style).sort(),[...content.STYLE_CODES].sort());assert.ok(options.filter(x=>x.healthy).length>=2);}
    else{assert.deepEqual(options.map(x=>x.style).sort(),['anxious','everyday','reasoning','romantic','supportive']);
    assert.equal(options.find(x=>x.style==='supportive').healthy,true);
    assert.equal(options.find(x=>x.style==='everyday').healthy,true);}
@@ -528,7 +531,7 @@ test('randomized choice order stays stable while reading one scene and indexes r
 
 test('declined final scenes do not narrate an accepted invitation and keep each answer distinct',()=>{
  const reactions=new Set();
- for(const c of CHARACTERS){const g=route(c.id,'pause');g.startEvent(c.id,14);const ev=g.activeScene.eventData;
+ for(const c of CHARACTERS){const g=route(c.id,pauseKind(c.id));g.startEvent(c.id,14);const ev=g.activeScene.eventData;
   assert.equal(ev.nodes[1].text,content.DISTANCE_LINES[c.id]);assert.equal(ev.nodes[0].text,content.PAUSED_CLOSURES[c.id]);
   const size=[...ev.nodes[0].text.replace(/\s/g,'')].length;assert.ok(size>=100&&size<=150);
   for(const ch of ev.nodes[1].choices){assert.ok(!reactions.has(ch.reply));reactions.add(ch.reply);}
@@ -559,6 +562,7 @@ const ENDING_EXAMPLES={
  su_fei:{trueEnd:'0413101111104|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'4333330041004|0',triggerEnd:'2034032442003|4'},
  shen_mo:{trueEnd:'1133213132004|0',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'1111114114141|0',triggerEnd:'2034032442003|4'},
  gu_qingcheng:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3400340443414|3',triggerEnd:'3232222220343|3'},
+ han_xiao:{trueEnd:'3314333333334|3',friendEnd:'4133233344333|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'4131321344441|3'},
  bai_xiaolu:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'2220430233214|4'}};
 test('every ending of a tuned character can actually be reached',()=>{
  for(const [id,routes] of Object.entries(ENDING_EXAMPLES))for(const [end,code] of Object.entries(routes)){

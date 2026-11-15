@@ -1,6 +1,6 @@
 // Character identity and diagnosis references are independent of observed evidence.
-import { DSM_REFERENCE } from './dsmReference.js?v=49';
-import { STORY_ROUTES, buildRouteEvents, getTuning } from './storyContent.js?v=49';
+import { DSM_REFERENCE } from './dsmReference.js?v=52';
+import { STORY_ROUTES, buildRouteEvents, getTuning } from './storyContent.js?v=52';
 export const LOCATIONS = [
   {
     "id": "rooftop",
