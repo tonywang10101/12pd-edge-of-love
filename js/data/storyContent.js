@@ -1,7 +1,7 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=45';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=49';
 export {DIALOGUE_REVISION,DECLINED_INVITATIONS,PAUSED_CLOSURES,DISTANCE_LINES};
-import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=45';
-export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=45';
+import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=49';
+export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=49';
 // Revised narrative source: evidence belongs to an observed scene, never an array index.
 // Dialogue is fictional. Case notes describe teaching hypotheses, not player diagnoses.
 export const CONTENT_VERSION = 6;
@@ -18,11 +18,11 @@ export const CLINICAL_SOURCES = [
 function S(title, context, line, criteria, actions, note, effects = {}) {
   return { title, context, line, criteria, actions, note, ...effects };
 }
-export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=45';
+export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=49';
 
-import { STORY_ROUTES } from './routeStories.js?v=45';
+import { STORY_ROUTES } from './routeStories.js?v=49';
 export { STORY_ROUTES };
-import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=45';
+import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=49';
 export { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning };
 
 // Each case may leave criteria unobserved. These are learning questions, not romance scores.
@@ -98,7 +98,7 @@ function ordinaryScene(route,index){
  return S(d.title,d.context,d.line,[],d.actions,'日常的喜好、互惠與分歧不作為症狀證據。',{portrait:d.portrait,memory:`ordinary_${index}`});
 }
 
-import { TRIO_PAIRS } from './sharedScenes.js?v=45';
+import { TRIO_PAIRS } from './sharedScenes.js?v=49';
 
 export function buildRouteEvents(id) {
  const r=STORY_ROUTES[id];if(!r)return [];
@@ -167,10 +167,10 @@ export function makeScenario(id){
   trueEnd:ending(`【戀愛結局】${r.confession[0]}`,'雙方願意，慢慢相處',r.endings[0]),
   friendEnd:ending(`【友情結局】${r.ordinary[0].title}`,'友情有自己的生活',r.endings[1]),
   normalEnd:ending(`【開放結局】${r.task}之後`,'保留距離，或還需要時間',r.endings[2]),
-  codependentEnd:ending(`【界線重議】${r.task}的另一種分工`,'暫不開始戀愛',`「${r.task}」還有沒談好的分工。${r.slow}
+  codependentEnd:ending(`【說不清的關係】${r.task}的另一種分工`,'暫不開始戀愛',`「${r.task}」還有沒談好的分工。${r.slow}
 
 工作仍由各自負責的人處理，私下先不約。你們還沒決定下次要不要見面；就算彼此喜歡，之前沒談好的問題也還在。`),
-  triggerEnd:ending(`【暫停結局】先交接${r.task}`,'暫停互動，保留各自的未來',`幾次談到彼此的期待，都沒能達成共識。後來的訊息，就只剩工作交接。${r.name}把「${r.task}」的必要事項交給窗口，你收回自己的東西。
+  triggerEnd:ending(`【道別結局】先交接${r.task}`,'暫停互動，保留各自的未來',`幾次談到彼此的期待，都沒能達成共識。後來的訊息，就只剩工作交接。${r.name}把「${r.task}」的必要事項交給窗口，你收回自己的東西。
 
 你們先停止私下來往，各自處理工作，也可以找熟悉的人商量。即使有人道歉，對方仍可以不見面，不必勉強答應再試一次。`)
  }};

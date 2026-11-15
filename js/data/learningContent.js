@@ -1021,7 +1021,7 @@ export const LEARNING_TASKS = {
   "bai_xiaolu": [
     {
       "kind": "辨識線索",
-      "prompt": "E03 要把續約、薪資、住處全交給主角，較有資訊的是？",
+      "prompt": "E03 她想把續約、薪水、住處全交給你決定。哪一點最能支持 A2 的線索？",
       "options": [
         {
           "id": "evidence",
@@ -1045,7 +1045,7 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "比較解釋",
-      "prompt": "安全關係中因怕失去照顧而不敢說不，與怕實際報復有何差異？",
+      "prompt": "在安全的關係裡，因為怕失去照顧而不敢說不；和因為怕真的被報復而不敢說不，有什麼不同？",
       "options": [
         {
           "id": "evidence",
@@ -1069,7 +1069,7 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "資料缺口",
-      "prompt": "E12 同談獨處無助與害怕被留下，還需區分？",
+      "prompt": "E12 她同時說到一個人時很無助，也擔心以後被留下。還需要分清楚什麼？",
       "options": [
         {
           "id": "evidence",
@@ -1093,7 +1093,7 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "新案例",
-      "prompt": "有人暫因手術需要家人幫忙選餐、處理帳單。能判定依賴型嗎？",
+      "prompt": "有人因為剛動完手術，暫時需要家人幫忙選餐、處理帳單。這樣能判定是依賴型嗎？",
       "options": [
         {
           "id": "evidence",
@@ -1111,6 +1111,84 @@ export const LEARNING_TASKS = {
           "id": "inference",
           "text": "只有完全獨立的人才健康。",
           "feedback": "合理互助不是失敗。",
+          "correct": false
+        }
+      ]
+    },
+  {
+      "event": 7,
+      "key": "nurture",
+      "kind": "處理優先",
+      "prompt": "E07 她主動接下五天夜班，又問你下班會不會來看她。哪個回應比較合適？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "接住她怕一個人在家的心情，同時讓她自己說出最多能接幾天班；不承諾每天去陪她。",
+          "feedback": "A5 是為了被需要而過度付出。承諾隨叫隨到，等於幫她用犧牲換陪伴。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "說「那你上夜班我都去陪你」。",
+          "feedback": "這是本幕的陷阱：她會當場再多接兩天夜班，好讓你每天都來。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "直接幫她把班都推掉。",
+          "feedback": "替她決定看起來像在保護她，其實又把她的責任接過來了。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 10,
+      "key": "start",
+      "kind": "處理優先",
+      "prompt": "E10 她想比賽、能力也夠，卻一直等你替她按報名。怎麼做比較合適？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "相信她做得到，讓她自己完成第一個小步驟，例如自己寄出規則問題，或自己按下報名。",
+          "feedback": "A4 是因為不相信自己的判斷，很難自己開始。陪她自己做，比替她做更能累積信心。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "說「我幫你按報名」，讓她安心。",
+          "feedback": "這是本幕的陷阱：她會很開心，接著說「以後我的事都給哥決定」。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "她不敢開始，代表她其實不想比。",
+          "feedback": "她說得很清楚她想比；猶豫不等於不想要。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 11,
+      "key": "rebound",
+      "kind": "辨識線索",
+      "prompt": "E11 她上個月剛被分手，就急著要你當「那個人」。這段怎麼整理？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "一段關係剛結束，就急著找下一個人來照顧自己，連喜不喜歡都沒想，可以討論 A7；被分手後難過、想找人陪，本身是很常見的反應。",
+          "feedback": "要看的是「急著找替代的照顧來源」這個模式，以及它是否反覆出現，不是失戀難過本身。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "答應她，她就不會那麼痛苦了。",
+          "feedback": "在她最急的時候答應，關係就建立在「誰都可以，只要有人」上；遊戲裡她會每十分鐘就問你在哪。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "她馬上下載交友軟體，代表她很隨便。",
+          "feedback": "這是道德評價，不是臨床觀察；重點在她為什麼這麼急、急著要什麼。",
           "correct": false
         }
       ]

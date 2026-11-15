@@ -1,8 +1,8 @@
 // 《愛的邊緣》— 選角前預載圖片與背景音樂，並以 Blob URL 共用本機記憶體快取。
 // 圖片下載後完成解碼；音樂完整下載後仍需由玩家互動解鎖播放。
 
-import { CHARACTERS } from '../data/characters.js?v=45';
-import { CHARACTER_PROMPTS, SCENE_BACKGROUNDS } from '../data/characterPrompts.js?v=45';
+import { CHARACTERS } from '../data/characters.js?v=49';
+import { CHARACTER_PROMPTS, SCENE_BACKGROUNDS } from '../data/characterPrompts.js?v=49';
 
 const blobUrlCache = new Map();
 export const MUSIC_ASSET = './assets/audio/apartment-at-dusk.mp3';

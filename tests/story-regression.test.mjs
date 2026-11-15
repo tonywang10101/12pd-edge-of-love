@@ -21,7 +21,8 @@ function playEvent(g,id,num,pick=()=>0){g.startEvent(id,num);let limit=0;while(g
 // 調整過的角色：單一風格不會走到真結局，'romantic' 改走設計路線
 const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
  shen_mo:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'},
- gu_qingcheng:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'}};
+ gu_qingcheng:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
+ bai_xiaolu:{second:'trueEnd',reasoning:'codependentEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 function route(id,kind){
  const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
@@ -550,5 +551,19 @@ test('rewritten learning questions archive their old answers without resetting s
  assert.equal(g.state.characters.shen_mo.knowledge.compare.correct,true);
  const next=g.migrateState(g.state);for(const id of ['lin_jianwei','ji_yan','su_fei']){
   assert.equal(next.characters[id].knowledge.compare.revision,2);assert.equal(Object.keys(next.characters[id].knowledgeArchive).length,1);
+ }
+});
+
+// 每個調整過的角色，五個結局都至少有一條走得到的路線（E01–E13 選項｜E14 選項）
+const ENDING_EXAMPLES={
+ su_fei:{trueEnd:'0413101111104|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'4333330041004|0',triggerEnd:'2034032442003|4'},
+ shen_mo:{trueEnd:'1133213132004|0',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'1111114114141|0',triggerEnd:'2034032442003|4'},
+ gu_qingcheng:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3400340443414|3',triggerEnd:'3232222220343|3'},
+ bai_xiaolu:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'2220430233214|4'}};
+test('every ending of a tuned character can actually be reached',()=>{
+ for(const [id,routes] of Object.entries(ENDING_EXAMPLES))for(const [end,code] of Object.entries(routes)){
+  const [main,last]=code.split('|'),g=game();
+  for(let e=1;e<=13;e++)playEvent(g,id,e,()=>Number(main[e-1]));playEvent(g,id,14,()=>Number(last));
+  assert.equal(g.activeScene.endingKey,end,`${id} ${end} via ${code}`);
  }
 });
