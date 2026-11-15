@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=38';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=40';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=38';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=38';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=38';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=38';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=38';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=38';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=40';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=40';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=40';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=40';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=40';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=40';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=38';
+} from './data/eventTreeEngine.js?v=40';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=38';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=38';
+} from './data/characterPrompts.js?v=40';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=40';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -750,7 +750,7 @@ class EdgeOfLoveGame {
   showConsentModal() {
     const root = document.getElementById('modal-root');
     if (!root || !this.pendingNewGame) return;
-    root.innerHTML = `<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="consent-title"><div class="modal-header"><h2 id="consent-title">💡 溫馨備註</h2></div><div class="modal-body"><p>${this.getWelcomeNote()}</p><p class="ethics-note">${this.getEthicsNote()}</p><p>請確認你已閱讀並同意以上敘述，再開始故事。</p><div class="welcome-actions"><button class="nav-btn" data-action="decline-consent">不同意，返回選角</button><button class="btn-primary-large" data-action="accept-consent">我已閱讀並同意</button></div></div></section></div>`;
+    root.innerHTML = `<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="consent-title"><div class="modal-header"><h2 id="consent-title">💡 溫馨備註</h2></div><div class="modal-body"><p>一、${this.getWelcomeNote()}</p><p>二、${this.getEthicsNote()}</p><p>請確認你已閱讀並同意以上敘述，再開始故事。</p><div class="welcome-actions"><button class="nav-btn" data-action="decline-consent">不同意，返回選角</button><button class="btn-primary-large" data-action="accept-consent">我已閱讀並同意</button></div></div></section></div>`;
     document.getElementById('app-root').inert = true;
     root.querySelector('[data-action="decline-consent"]')?.focus();
   }
@@ -2123,7 +2123,7 @@ class EdgeOfLoveGame {
             </p>
           </div>
 
-          <aside class="loading-welcome-note"><h2>💡 溫馨備註</h2><p>${this.getWelcomeNote()}</p><p class="ethics-note">${this.getEthicsNote()}</p></aside>
+          <aside class="loading-welcome-note"><h2>💡 溫馨備註</h2><p>${this.getWelcomeNote()}</p></aside>
 
           <div class="loading-progress-panel">
             <div class="loading-progress-meta">
@@ -2856,7 +2856,7 @@ class EdgeOfLoveGame {
   }
 
   renderFooter() {
-    return `<footer class="game-footer" aria-label="遊戲備註與提示"><p><strong>💡 溫馨備註</strong>　${this.getWelcomeNote()}</p><p class="ethics-note">${this.getEthicsNote()}</p>${this.state.legacyArchive?'<p>舊版相處紀錄已封存。<button class="nav-btn" data-action="view-legacy-archive">閱讀舊版紀錄</button></p>':''}</footer>`;
+    return `<footer class="game-footer" aria-label="遊戲備註與提示"><p><strong>💡 溫馨備註</strong>　${this.getWelcomeNote()}</p>${this.state.legacyArchive?'<p>舊版相處紀錄已封存。<button class="nav-btn" data-action="view-legacy-archive">閱讀舊版紀錄</button></p>':''}</footer>`;
   }
 
   renderProse(value, narrative = true) {

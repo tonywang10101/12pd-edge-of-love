@@ -101,7 +101,7 @@ export const LEARNING_TASKS = {
       "event": 5,
       "key": "loyalty",
       "kind": "比較解釋",
-      "prompt": "E05 他懷疑你把調查進度透露給別人。怎麼判斷這是不是妄想型人格的線索？",
+      "prompt": "E05 他懷疑你把他的事說出去。怎麼判斷這是不是妄想型人格的線索？",
       "options": [
         {
           "id": "evidence",
