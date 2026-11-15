@@ -13,7 +13,7 @@ export function makeNarration(id,number,core){
 export function expandChoiceReply(id,number,choice,index=0,sharedKey=null,stalled=false){
   const core=choice.replyCore||choice.reply;
   const note=stalled?'工作還沒談妥。今天的小事做完，也不等於已經恢復合作。':'';
-  return {...choice,replyCore:core,interactionAnalysis:(sharedKey?getSharedAnalysis(sharedKey,index):CHOICE_ANALYSIS[id]?.[number]?.[index])||choice.interactionAnalysis||null,reply:[core,note].filter(Boolean).join('\n\n')};
+  return {...choice,replyCore:core,interactionAnalysis:choice.interactionAnalysis||(sharedKey?getSharedAnalysis(sharedKey,index):CHOICE_ANALYSIS[id]?.[number]?.[index])||null,reply:[core,note].filter(Boolean).join('\n\n')};
 }
 const ENDING_DETAILS = {
 shen_mo:'相機還有他的工作，你也有自己的行程。是否再拍一張照片，兩個人都能重新回答，不用拿鑰匙或密碼來換。',

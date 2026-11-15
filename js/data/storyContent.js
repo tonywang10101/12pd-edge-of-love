@@ -1,5 +1,7 @@
-import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=31';
-export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=31';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=32';
+export {DIALOGUE_REVISION,DECLINED_INVITATIONS,PAUSED_CLOSURES,DISTANCE_LINES};
+import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=32';
+export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=32';
 // Revised narrative source: evidence belongs to an observed scene, never an array index.
 // Dialogue is fictional. Case notes describe teaching hypotheses, not player diagnoses.
 export const CONTENT_VERSION = 6;
@@ -16,9 +18,9 @@ export const CLINICAL_SOURCES = [
 function S(title, context, line, criteria, actions, note, effects = {}) {
   return { title, context, line, criteria, actions, note, ...effects };
 }
-export { getLearningTasks, LEARNING_TASKS } from './learningContent.js?v=31';
+export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS } from './learningContent.js?v=32';
 
-import { STORY_ROUTES } from './routeStories.js?v=31';
+import { STORY_ROUTES } from './routeStories.js?v=32';
 export { STORY_ROUTES };
 
 // Each case may leave criteria unobserved. These are learning questions, not romance scores.
@@ -26,25 +28,50 @@ export function makeStudySummary(points, title = '觀察與限制') {
   return { title, points: Array.isArray(points) ? points : [points] };
 }
 const codeFor = (route, key) => `${route.code}-${key}`;
-export function buildSceneChoices(scene) {
-  const [a, ar, b, br] = scene.actions;
-  const [shortcut, attack] = scene.shortcuts;
-  const task = scene.task;
-  const decision = status => task ? {task, label:scene.taskLabel, status} : null;
-  return [
-    {text:a,reply:ar,stats:{affection:3,security:3,boundary:3},healthy:true,psychNote:scene.note,setFlag:scene.flag||null,decision:decision('committed'),memory:scene.memory||null,expression:scene.portrait?.responses?.[0]||'pensive'},
-    {text:b,reply:br,stats:{affection:1,security:3,boundary:5},healthy:true,psychNote:scene.note,setFlag:scene.flag||null,decision:decision('deferred'),memory:scene.memory||null,expression:scene.portrait?.responses?.[1]||'guarded'},
-    {text:shortcut,reply:scene.shortcutReply,stats:{affection:3,security:0,boundary:-6},healthy:false,ethicalRisk:scene.shortcutEthicalRisk!==false,psychNote:'把話說得很滿，不等於對方同意。承諾是否做得到、會不會越過別人的選擇，仍要問清楚。',setFlag:'overstepped',decision:decision('takenOver'),expression:scene.portrait?.responses?.[2]||'anxious'},
-    {text:attack,reply:scene.attackReply,stats:{affection:-3,security:-4,boundary:-2},healthy:false,ethicalRisk:true,psychNote:'你可以拒絕；語氣讓人難受時，對方也可以不想繼續談。',decision:decision('ruptured'),expression:scene.portrait?.responses?.[3]||'hurt'},
-    {text:scene.exitText,reply:scene.exitReply,stats:{affection:0,security:1,boundary:4},healthy:true,psychNote:'安全與拒絕權不以先安撫好對方為條件。這個選項不代表同意私人往來。',decision:decision('deferred'),expression:'neutral'}
-  ];
+// Five natural approaches; intent alone is not consent or a clinical judgment.
+const PROFILES = [
+ {style:'supportive',stats:{affection:3,security:3,boundary:3},expression:'pensive'},
+ {style:'everyday',stats:{affection:2,security:2,boundary:4},expression:'neutral'},
+ {style:'anxious',stats:{affection:1,security:1,boundary:1},expression:'anxious'},
+ {style:'reasoning',stats:{affection:1,security:3,boundary:3},expression:'pensive'},
+ {style:'romantic',stats:{affection:3,security:2,boundary:2},expression:'warm'}
+];
+// Only explicit requests for repeated reassurance or taking on unasked-for responsibility
+// strain the boundary. Simply disclosing fear remains a respectful choice.
+const PRESSURE_SCENES={shen_mo:[5,7,9],lin_jianwei:[3,5,9],ruri:[7,8,13],han_xiao:[4,7,9],su_fei:[1,7,12],xia_le:[8,10,11],gu_qingcheng:[1,5,11],wen_yan:[3,6,11],bai_xiaolu:[3,7,10],ji_yan:[1,3,9],lu_qinglan:[1,5,9],you_ziqian:[3,5,8]};
+const APPROACH_NOTES={
+ everyday:'你說出自己當下能做、想做或不想做的部分，對方仍能有不同選擇。',
+ anxious:'你讓不安被聽見；表達害怕不等於要求對方負責消除它，仍須看這次實際提出的請求。',
+ reasoning:'你用能核對的資訊整理問題；分析有助理解，但不代替本人感受或同意。',
+ romantic:'你把想靠近放進一個具體邀請，對方仍能拒絕、需要時間或只談眼前的事。'
+};
+export function buildSceneChoices(scene,id,number,{daily=false}={}) {
+ const variants=DIALOGUE_VARIANTS[id]?.[number];
+ if(!variants)throw new Error(`Missing authored dialogue: ${id} E${number}`);
+ const helper=SHARED_HELPERS[`${id}:${number}`]||[scene.actions[0],scene.actions[1]];
+ let lines=[{text:helper[0].startsWith('「')?helper[0]:`「${helper[0]}」`,reply:helper[1]},...variants];
+ if(daily){
+  const index=[2,6,13].indexOf(number),d=STORY_ROUTES[id].ordinary[index],extra=DAILY_VARIANTS[id][index];
+  lines=[{text:d.dailyChoices[0],reply:extra.supportReply},{text:d.dailyChoices[1],reply:extra.everydayReply},...extra.alternatives];
+ }
+ return lines.map((line,index)=>{
+  const profile=PROFILES[index],pressure=!daily&&index===2&&PRESSURE_SCENES[id].includes(number);
+  const stats=pressure?{affection:2,security:0,boundary:-4}:{...profile.stats};
+  const status=index===0?'committed':index===2?'unsettled':'deferred';
+  return {...line,...profile,stats,healthy:!pressure,ethicalRisk:false,
+   psychNote:APPROACH_NOTES[profile.style]||scene.note,
+   interactionAnalysis:index===0&&!daily?null:APPROACH_NOTES[profile.style]||'你們在這次日常裡各自表達喜好，並保留可以不同意的空間。',
+   decision:!daily&&scene.task?{task:scene.task,label:scene.taskLabel,status,...(index===0?{}:{summary:line.reply})}:null,
+   memory:!daily&&scene.memory&&!pressure?scene.memory:null,
+   expression:index===0?(scene.portrait?.responses?.[0]||profile.expression):profile.expression};
+ });
 }
 function ordinaryScene(route,index){
  const d=route.ordinary[index];
- return S(d.title,d.context,d.line,[],d.actions,'日常的喜好、互惠與分歧不作為症狀證據。',{exitText:d.exitText,exitReply:d.exitReply,shortcutReply:d.shortcutReply,attackReply:d.attackReply,shortcuts:d.shortcuts,shortcutEthicalRisk:d.shortcutEthicalRisk,portrait:d.portrait,memory:`ordinary_${index}`});
+ return S(d.title,d.context,d.line,[],d.actions,'日常的喜好、互惠與分歧不作為症狀證據。',{portrait:d.portrait,memory:`ordinary_${index}`});
 }
 
-import { TRIO_PAIRS } from './sharedScenes.js?v=31';
+import { TRIO_PAIRS } from './sharedScenes.js?v=32';
 
 export function buildRouteEvents(id) {
  const r=STORY_ROUTES[id];if(!r)return [];
@@ -57,23 +84,25 @@ export function buildRouteEvents(id) {
   if(number===4||number===9){
    const partner=r.partners[number===4?0:1],key=[id,partner].sort().join('__'),pair=TRIO_PAIRS[key];
    const t=r.trioChoices[number===4?0:1];
-   scene=S(pair[0],pair[1],pair[2],[],t.actions,pair[3],{...t,shortcuts:t.shortcuts});
+   scene=S(pair[0],pair[1],pair[2],[],t.actions,pair[3],{...t});
    ev.type='trio';ev.partnerId=partner;ev.sharedSceneKey=key;
   }
   if(number===8){
    ev.title=`${code}｜${r.task}：中途筆記`;ev.type='caseStudy';ev.unlockCaseStudyOnComplete=true;
-   scene=S(`${r.task}：中途筆記`,r.caseContext,r.caseLine,[],r.caseActions,'作者背景、本人分享與玩家所見分開；不把資料閱讀當作確診。',{exitText:r.caseExit,exitReply:`${r.name}把私人的頁面收好，說今天先到這裡。工作需要確認的部分改天再談，不用為了繼續合作讀完整本筆記。`,shortcutReply:`${r.name}沒有把整本交來。「我只是想一起看這幾頁，沒有請你保管全部。」資料留在本人手裡，話說得甜也沒有改變分享範圍。`,attackReply:`${r.name}闔上筆記。「那今天不讀了。」這次沒有再問私人經驗，剩下的工作另外聯絡。`,shortcuts:r.caseShortcuts,portrait:{dialogue:'neutral',responses:['vulnerable','pensive','anxious','hurt','neutral']}});
+   scene=S(`${r.task}：中途筆記`,r.caseContext,r.caseLine,[],r.caseActions,'作者背景、本人分享與玩家所見分開；不把資料閱讀當作確診。',{portrait:{responses:['vulnerable']}});
   }
   if(number===14){
    const [title,line,romance,romanceReply,friend,friendReply,distance,distanceReply]=r.confession;
    ev.title=`${code}｜${title}`;ev.type='relationshipDecision';
-   ev.nodes=[{speaker:'narrator',expression:'neutral',text:r.closureContext},{speaker:'char',expression:'pensive',text:line,choices:[
-    {text:romance,reply:romanceReply,relationshipIntent:'romantic',expression:'vulnerable',healthy:true,stats:{affection:1,security:2,boundary:2},psychNote:'玩家意願與對方意願分開記錄。答應約會也不推定所有身體接觸的同意。'},
-    {text:friend,reply:friendReply,relationshipIntent:'friendship',expression:'soft',healthy:true,stats:{affection:0,security:2,boundary:3},psychNote:'友情是完整方向，但關係品質仍需看先前互動與雙方意願。'},
-    {text:distance,reply:distanceReply,relationshipIntent:'distance',expression:'pensive',healthy:true,stats:{affection:0,security:1,boundary:4},psychNote:'可以拒絕私人來往，工作交接另外處理。'},
-    {text:r.confessionOil,reply:`${r.name}沒有點頭。「不要先替我答應以後。我想知道的是一次見面，不是把生活全部交給你。」這次沒有因為說得動聽，就多出任何同意。`,relationshipIntent:'romantic',consentCap:'friendship',expression:'guarded',healthy:false,ethicalRisk:true,stats:{affection:1,security:0,boundary:-6},psychNote:'過度承諾不會換來對方同意。'},
-    {text:r.confessionCold,reply:`${r.name}聽完，沒有再追問。「好，那就先別約了。」必要工作照原約定完成，私人時間各自安排。`,relationshipIntent:'distance',expression:'pensive',healthy:true,stats:{affection:0,security:1,boundary:4},psychNote:'語氣冷淡仍可以清楚拒絕，不代表有權傷害或接管對方。'}
-   ]}];
+   const [anxious,romantic]=CONFESSION_VARIANTS[id];
+   const confessionLines=[
+    {text:romance,reply:romanceReply,relationshipIntent:'romantic',style:'supportive',stats:{affection:1,security:2,boundary:2}},
+    {text:friend,reply:friendReply,relationshipIntent:'friendship',style:'everyday',stats:{affection:0,security:2,boundary:3}},
+    {text:distance,reply:distanceReply,relationshipIntent:'distance',style:'reasoning',stats:{affection:0,security:1,boundary:4}},
+    {text:`「${anxious[0]}」`,reply:anxious[1],relationshipIntent:'romantic',style:'anxious',stats:{affection:1,security:1,boundary:1}},
+    {text:`「${romantic[0]}」`,reply:romantic[1],relationshipIntent:'romantic',style:'romantic',stats:{affection:2,security:2,boundary:2}}
+   ];
+   ev.nodes=[{speaker:'narrator',expression:'neutral',text:r.closureContext},{speaker:'char',expression:'pensive',text:line,choices:confessionLines.map(choice=>({...choice,healthy:true,ethicalRisk:false,expression:choice.style==='anxious'?'anxious':'soft',psychNote:'這裡表達的是你的關係意願；對方的答覆仍須另行確認。',interactionAnalysis:'這次邀請與既有工作分開，選擇關係方向不代表同意其他接觸。'}))}];
    ev.studySummary=makeStudySummary(['關係方向不由診斷、分數或學習答案決定。角色也能拒絕或要求時間。']);
   }else if(number===15){
    ev.title=`${code}｜${r.task}之後`;ev.type='ending';
@@ -85,7 +114,7 @@ export function buildRouteEvents(id) {
    ev.criterionTags=[...ev.unlockCriteria];
    ev.evidence=Object.fromEntries(Object.entries(scene.evidence||{}).map(([k,v])=>[codeFor(r,k),v]));
    ev.studySummary=makeStudySummary([scene.note]);
-   ev.nodes=[{speaker:'narrator',expression:'neutral',text:scene.context},{speaker:ev.type==='trio'?'ensemble':'char',expression:scene.portrait?.dialogue||'neutral',text:scene.line,choices:buildSceneChoices(scene)}];
+   ev.nodes=[{speaker:'narrator',expression:'neutral',text:scene.context},{speaker:ev.type==='trio'?'ensemble':'char',expression:scene.portrait?.dialogue||'neutral',text:scene.line,choices:buildSceneChoices(scene,id,number)}];
    if(scene.spec)ev.unlockSpecifiers=['F07.0-TYPES'];
    if(number===13)ev.unlockBackstoryOnComplete=true;
   }
@@ -101,14 +130,18 @@ export function buildRouteEvents(id) {
 }
 export function makeScenario(id){
  const r=STORY_ROUTES[id];const ending=(title,subtitle,text)=>({title,subtitle,romanticText:text,soulmateText:text});
- const scenario={chapters:[],dailyTalks:r.ordinary.map((_,i)=>{const s=ordinaryScene(r,i);const n=makeNarration(id,[2,6,13][i],s.context);return {title:s.title,prompt:n.text,narrativeCore:n.narrativeCore,narrativeAdditions:n.narrativeAdditions,response:s.line,choices:buildSceneChoices(s).map((c,j)=>expandChoiceReply(id,[2,6,13][i],{...c,text:r.ordinary[i].dailyChoices[j]},j))};}),endings:{
+ const scenario={chapters:[],dailyTalks:r.ordinary.map((d,i)=>{
+  const number=[2,6,13][i],scene=ordinaryScene(r,i),place=getEpisodePlace(id,number);
+  return {title:scene.title,sourceEvent:number,...place,prompt:d.context,narrativeCore:d.context,narrativeAdditions:[],response:d.line,
+   choices:buildSceneChoices(scene,id,number,{daily:true}).map((c,j)=>expandChoiceReply(id,number,c,j))};
+ }),endings:{
   trueEnd:ending(`【戀愛結局】${r.confession[0]}`,'雙方願意，慢慢相處',r.endings[0]),
   friendEnd:ending(`【友情結局】${r.ordinary[0].title}`,'友情有自己的生活',r.endings[1]),
   normalEnd:ending(`【開放結局】${r.task}之後`,'保留距離，或還需要時間',r.endings[2]),
   codependentEnd:ending(`【界線重議】${r.task}的另一種分工`,'暫不開始戀愛',`「${r.task}」還有沒談好的分工。${r.slow}
 
 必要工作回到各自負責的人手裡，私人邀請先停。下一次是否見面還沒決定，今天不靠一句喜歡，就當那些分歧都處理好了。`),
-  triggerEnd:ending(`【暫停結局】先交接${r.task}`,'停止傷害，保留各自的未來',`幾次讓人難受的回覆之後，訊息只剩必要交接。${r.name}把「${r.task}」的必要事項交給窗口，你收回自己的東西。
+  triggerEnd:ending(`【暫停結局】先交接${r.task}`,'暫停互動，保留各自的未來',`幾次談不攏的期待之後，訊息只剩必要交接。${r.name}把「${r.task}」的必要事項交給窗口，你收回自己的東西。
 
 你們先停止私人來往，各自處理工作，也能找原來的支持。道歉不等於對方必須見面，沒有任何一個人需要為了好看的結局改口。`)
  }};

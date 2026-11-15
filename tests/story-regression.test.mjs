@@ -18,7 +18,15 @@ const ctx={...engine,...content,CHARACTERS,LOCATIONS,CLUSTERS,DSM_REFERENCE,ALL_
 vm.createContext(ctx);vm.runInContext(body+'\nthis.Game=EdgeOfLoveGame;',ctx);
 function game(){const g=new ctx.Game();for(const key of ['render','autoSave','showToast','renderAchievementModal','renderRouteUnlockModal'])g[key]=noop;g.state.initialized=true;g.state.unlockedRoutes=CHARACTERS.map(c=>c.id);return g;}
 function playEvent(g,id,num,pick=()=>0){g.startEvent(id,num);let limit=0;while(g.activeScene?.mode==='event'&&limit++<30){const sc=g.activeScene,n=sc.eventData.nodes[sc.nodeIndex];if(n.choices?.length&&!sc.awaitingNextAfterChoice)g.handleChoiceSelect(pick(n,sc));else g.handleNextNode();}assert.ok(limit<30);}
-function route(id,kind){const g=game();for(let e=1;e<=14;e++)playEvent(g,id,e,(n,sc)=>sc.eventNumber===14?kind==='friend'?1:kind==='distance'?2:0:kind==='second'?1:kind==='boundary'&&e<=5?2:kind==='pause'?3:0);return g;}
+function route(id,kind){
+ const g=game();
+ for(let e=1;e<=13;e++)playEvent(g,id,e,()=>kind==='second'?1:kind==='reasoning'?3:kind==='romance-style'?4:kind==='pause'?2:0);
+ if(kind==='boundary'){
+  const ev=g.getEventsForChar(id).find(e=>e.nodes[1]?.choices.some(c=>!c.healthy));
+  for(let n=0;n<12;n++)playEvent(g,id,ev.eventNumber,()=>2);
+ }
+ playEvent(g,id,14,()=>kind==='friend'?1:kind==='distance'?2:0);return g;
+}
 
 test('all scenes have explicit, valid evidence and three untagged daily scenes',()=>{
  assert.equal(CHARACTERS.length,12);
@@ -29,8 +37,8 @@ test('all scenes have explicit, valid evidence and three untagged daily scenes',
  }
 });
 for(const c of CHARACTERS){test(c.name+': consent, multiple good choices, five endings, and no unearned evidence',()=>{
- for(const [policy,end]of [['romantic','trueEnd'],['second','trueEnd'],['friend','friendEnd'],['distance','normalEnd'],['boundary','codependentEnd'],['pause','triggerEnd']]){
-  const g=route(c.id,policy),cs=g.state.characters[c.id];assert.equal(g.activeScene.endingKey,end,policy);assert.equal(cs.eventCompleted,15);assert.equal(cs.caseStudyUnlocked,true);assert.equal(cs.diagnosed,undefined);assert.equal(cs.perfectAchieved,['romantic','second','friend','distance'].includes(policy));
+ for(const [policy,end]of [['romantic','trueEnd'],['second','trueEnd'],['reasoning','trueEnd'],['romance-style','trueEnd'],['friend','friendEnd'],['distance','normalEnd'],['boundary','codependentEnd'],['pause','triggerEnd']]){
+  const g=route(c.id,policy),cs=g.state.characters[c.id];assert.equal(g.activeScene.endingKey,end,policy);assert.equal(cs.eventCompleted,15);assert.equal(cs.caseStudyUnlocked,true);assert.equal(cs.diagnosed,undefined);assert.equal(cs.perfectAchieved,['romantic','second','reasoning','romance-style','friend','distance'].includes(policy));
   const actual=new Set(g.getEventsForChar(c.id).flatMap(e=>e.unlockCriteria||[]));assert.deepEqual([...cs.unlockedCriteria].sort(),[...actual].sort());
   const before=JSON.stringify(cs);g.showEndingForCharacter(c.id,'trueEnd');assert.equal(JSON.stringify(cs),before,'preview must not mutate saved outcome');assert.equal(g.activeScene.preview,true);g.showEndingForCharacter(c.id);assert.equal(g.activeScene.endingKey,end);
   assert.ok(!g.renderEndingScene(c,cs,g.getRouteType(c),g.getDiagnosisDisplay(c)).includes('[object Object]'));
@@ -45,7 +53,7 @@ test('structured and legacy summaries are rendered safely; teaching and relation
 test('daily choices make small changes once per selection without manufacturing consent or evidence',()=>{
  for(const pick of [0,1,2,3,4]){const g=game(),id='bai_xiaolu',cs=g.state.characters[id];
  const before={affection:cs.affection,security:cs.security,boundary:cs.boundary};
- g.startDailyTalk(id);g.handleDailyChoice(pick);
+ g.state.characters[id].eventCompleted=Math.max(2,g.state.characters[id].eventCompleted);g.startDailyTalk(id);g.handleDailyChoice(pick);
  assert.ok(Object.keys(before).some(k=>cs[k]!==before[k]),'each choice changes at least one value');
  for(const k of Object.keys(before))assert.ok(Math.abs(cs[k]-before[k])<=2,k);
  const after=JSON.stringify(cs);g.handleDailyChoice(pick);assert.equal(JSON.stringify(cs),after,'resolved choice cannot apply twice');
@@ -69,7 +77,7 @@ test('current saves restore pending choices, learning answers, evidence, and ear
  assert.equal(restored.activeScene.endingKey,'friendEnd');assert.equal(restored.state.characters[id].relationshipIntent,'friendship');assert.equal(restored.state.characters[id].perfectAchieved,true);
 });
 test('ordinary interaction has no clinical judgment panel or fabricated score display',()=>{
- const g=game();g.startDailyTalk('xia_le');g.handleDailyChoice(0);
+ const g=game();g.state.characters.xia_le.eventCompleted=2;g.startDailyTalk('xia_le');g.handleDailyChoice(0);
  const c=CHARACTERS.find(c=>c.id==='xia_le');const html=g.renderDailyScene(c,g.state.characters[c.id],g.getRouteType(c),{});
  assert.ok(!html.includes('DSM 臨床觀察判斷'));assert.ok(!html.includes('outcome-deltas'));assert.ok(!html.includes('[object Object]'));
  for(const c of CHARACTERS){const events=g.getEventsForChar(c.id);assert.match(events[7].ambience,/第 3 週/);assert.match(events[14].ambience,/第 7 週/);}
@@ -101,7 +109,7 @@ test('source provenance and multiple distinct item bases survive in journal and 
 
 test('a temporary privacy hold is never described as deletion and persists on reload',()=>{
  const id='shen_mo',g=game();for(let e=1;e<=9;e++)playEvent(g,id,e);playEvent(g,id,10,()=>1);
- g.startEvent(id,11);assert.match(g.activeScene.eventData.continuityText,/仍封存/);assert.match(g.activeScene.eventData.continuityText,/還沒有|還沒/);
+ g.startEvent(id,11);assert.match(g.activeScene.eventData.continuityText,/仍封存/);assert.match(g.activeScene.eventData.continuityText,/沒有刪除|還沒有|還沒/);
  const state=JSON.parse(JSON.stringify(g.state)),scene=JSON.parse(JSON.stringify({...g.activeScene,contentVersion:content.CONTENT_VERSION}));const h=game();h.state=h.migrateState(state);h.activeScene=h.sanitizeActiveScene(scene);assert.match(h.activeScene.eventData.continuityText,/仍封存/);
  playEvent(h,id,10,()=>0);h.startEvent(id,11);assert.match(h.activeScene.eventData.continuityText,/刪除|銷毀/);assert.ok(!h.activeScene.eventData.continuityText.includes('仍封存'));
 });
@@ -114,11 +122,12 @@ test('unfinished tasks do not magically produce autonomous success at E13',()=>{
 
 test('character refusal, player refusal and relationship quality are independent',()=>{
  for(const c of CHARACTERS){
-  const g=route(c.id,'pause'),cs=g.state.characters[c.id];assert.equal(cs.relationshipIntent,'romantic');assert.equal(cs.characterConsent,'distance');assert.equal(g.activeScene.endingKey,'triggerEnd');
-  playEvent(g,c.id,14,()=>1);assert.equal(cs.relationshipIntent,'friendship');assert.equal(g.activeScene.endingKey,'triggerEnd','friendship request cannot erase repeated harm');
+  const g=route(c.id,'pause'),cs=g.state.characters[c.id];
+  assert.equal(cs.relationshipIntent,'romantic');assert.equal(cs.characterConsent,'distance');assert.equal(g.activeScene.endingKey,'triggerEnd');
+  playEvent(g,c.id,14,()=>1);assert.equal(cs.relationshipIntent,'friendship');assert.equal(g.activeScene.endingKey,'triggerEnd');
  }
- const g=game(),id='lin_jianwei';for(let e=1;e<=13;e++)playEvent(g,id,e,()=>4);g.startEvent(id,14);assert.equal(g.activeScene.eventData.nodes[1].text,content.STORY_ROUTES[id].slow);playEvent(g,id,14,()=>0);assert.equal(g.state.characters[id].characterConsent,'friendship');assert.notEqual(g.activeScene.endingKey,'trueEnd','scores and polite exits cannot manufacture shared attraction');
- const h=route('shen_mo','romantic');playEvent(h,'shen_mo',14,()=>2);assert.equal(h.activeScene.endingKey,'normalEnd');assert.equal(h.state.characters.shen_mo.characterConsent,'distance');
+ const h=route('shen_mo','romantic');playEvent(h,'shen_mo',14,()=>2);
+ assert.equal(h.activeScene.endingKey,'normalEnd');assert.equal(h.state.characters.shen_mo.characterConsent,'distance');
 });
 
 test('learning records first attempts and feedback without delayed review or relationship rewards',()=>{
@@ -188,7 +197,7 @@ test('authored response emotions survive selection, reloading and daily interact
  assert.equal(g.activeScene.expression,choice.expression);
  const restored=g.sanitizeActiveScene({...JSON.parse(JSON.stringify(g.activeScene)),contentVersion:content.CONTENT_VERSION,expression:'smile'});
  assert.equal(restored.expression,choice.expression);assert.equal(restored.lastChoiceOutcome.reply,choice.reply);
- g.startDailyTalk(id);const mood=g.activeScene.talk.choices[0].expression||'neutral';g.handleDailyChoice(0);assert.equal(g.activeScene.expression,mood);
+ g.state.characters[id].eventCompleted=Math.max(2,g.state.characters[id].eventCompleted);g.startDailyTalk(id);const mood=g.activeScene.talk.choices[0].expression||'neutral';g.handleDailyChoice(0);assert.equal(g.activeScene.expression,mood);
  }
 });
 
@@ -208,35 +217,35 @@ test('all three relationship metrics influence the relationship definition and w
  assert.equal(g.getEthicsInfo(c.id).exists,false,'a low score alone does not fabricate misconduct');
 });
 
-test('repeated overstepping causes lasting ethical controversy and a distinct story consequence',()=>{
+test('documented historical interference retains its consequences without labelling new insecurity as misconduct',()=>{
  for(const c of CHARACTERS){const g=route(c.id,'boundary'),cs=g.state.characters[c.id];
- assert.equal(g.activeScene.endingKey,'codependentEnd');assert.match(g.activeScene.endingData.title,/爭議結局/);
- assert.ok(cs.ethicsIncidents.length>0);assert.equal(g.getEthicsInfo(c.id).active,true);
- assert.ok(g.renderActiveScene().includes(content.STORY_ROUTES[c.id].ethicsEnding));
- assert.match(g.getRelationshipStatusInfo(c,cs).label,/倫理爭議/);
- const saved=JSON.parse(JSON.stringify(g.state)),scene=JSON.parse(JSON.stringify(g.activeScene));
- const h=game();h.state=h.migrateState(saved);h.activeScene=h.sanitizeActiveScene(scene);
- assert.match(h.activeScene.endingData.title,/爭議結局/);assert.equal(h.state.characters[c.id].ethicsIncidents.length,cs.ethicsIncidents.length);
+ assert.equal(g.activeScene.endingKey,'codependentEnd');assert.equal(cs.ethicsIncidents.length,0);
+ g.applyStats(c.id,{boundary:-15});
+ g.recordBoundaryConsequence(c.id,{text:'「未經同意代寄私人資料。」',ethicalRisk:true,stats:{boundary:-1}},{code:'legacy:E10',title:'舊版明確干預紀錄'});
+ assert.ok(cs.ethicsIncidents.length);assert.equal(g.getEthicsInfo(c.id).active,true);
+ const h=game();h.state=h.migrateState(JSON.parse(JSON.stringify(g.state)));
+ assert.equal(h.state.characters[c.id].ethicsIncidents.length,cs.ethicsIncidents.length);
  g.startEvent(c.id,11);assert.ok(g.activeScene.eventData.continuityText.includes(content.STORY_ROUTES[c.id].ethicsContext));
- const count=cs.ethicsIncidents.length;g.applyStats(c.id,{boundary:60});assert.equal(g.getEthicsInfo(c.id).active,false);assert.equal(g.getEthicsInfo(c.id).exists,true);assert.equal(cs.ethicsIncidents.length,count,'repair cannot erase history');
+ const count=cs.ethicsIncidents.length;g.applyStats(c.id,{boundary:100});
+ assert.equal(g.getEthicsInfo(c.id).active,false);assert.equal(g.getEthicsInfo(c.id).exists,true);assert.equal(cs.ethicsIncidents.length,count);
  }
 });
-
 
 test('displayed relationship changes report only the points actually applied at the limits',()=>{
  const g=game(),id='shen_mo',cs=g.state.characters[id];cs.affection=99;cs.security=99;cs.boundary=99;
  g.startEvent(id,1);g.handleNextNode();g.handleChoiceSelect(0);
  for(const key of ['affection','security','boundary']){assert.equal(cs[key],100);assert.equal(g.activeScene.lastChoiceOutcome.stats[key],1);}
  assert.equal(cs.choiceScores['1_1'].affection,3,'raw decision quality is independent of the capped display');
- g.startDailyTalk(id);g.handleDailyChoice(0);assert.ok(Object.values(g.activeScene.picked.stats).every(x=>x===0));
+ g.state.characters[id].eventCompleted=Math.max(2,g.state.characters[id].eventCompleted);g.startDailyTalk(id);g.handleDailyChoice(0);assert.ok(Object.values(g.activeScene.picked.stats).every(x=>x===0));
 });
 
 
-test('giving away one’s own privacy is distinguished from overriding another person’s decisions',()=>{
- const g=game(),id='shen_mo';for(let n=0;n<4;n++)playEvent(g,id,1,()=>2);
- const cs=g.state.characters[id];assert.ok(cs.boundary<30);assert.equal(cs.ethicsIncidents.length,0);assert.equal(g.getEthicsInfo(id).exists,false);
- const restored=g.migrateState(JSON.parse(JSON.stringify(g.state)));assert.equal(restored.characters[id].ethicsIncidents.length,0);
- playEvent(g,id,2,()=>0);playEvent(g,id,3,()=>2);assert.ok(cs.ethicsIncidents.length>0);
+test('expressing insecurity does not invent enacted interference or ethical incidents',()=>{
+ for(const c of CHARACTERS){const g=route(c.id,'pause'),cs=g.state.characters[c.id];
+ assert.equal(cs.ethicsIncidents.length,0);assert.equal(g.getEthicsInfo(c.id).exists,false);
+ const restored=g.migrateState(JSON.parse(JSON.stringify(g.state)));assert.equal(restored.characters[c.id].ethicsIncidents.length,0);
+ for(const d of Object.values(cs.choiceEffects))if(d?.task)assert.notEqual(d.status,'takenOver');
+ }
 });
 
 test('reference tool is character-independent and switches one diagnosis at a time',()=>{
@@ -291,14 +300,16 @@ test('completion dossier belongs only to the completed character and is availabl
 
 test('episode analysis quotes the current dialogue, selected reply and observed reaction',()=>{
  const g=game();g.state.studyMode=true;g.startEvent('shen_mo',1);g.handleNextNode();g.handleChoiceSelect(1);
- const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節互動解析'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes('把核對改到管理室'));
+ const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節互動解析'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes('自己當下能做'));
 });
 
 
-test('low closeness after respectful exits does not invent a history of hurtful speech',()=>{
- const g=game(),id='lin_jianwei';for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===14?0:4);
- assert.equal(g.activeScene.endingKey,'triggerEnd');assert.ok(!g.activeScene.endingData.romanticText.includes('幾次傷人的話'));
- const text=g.activeScene.endingData.romanticText;assert.ok([...text.replace(/\s/g,'')].length<=150);assert.ok([...text.replace(/\s/g,'')].length>=100);
+test('low closeness after respectful interaction does not invent a history of hurtful speech',()=>{
+ const g=route('lin_jianwei','reasoning'),cs=g.state.characters.lin_jianwei;cs.affection=10;
+ g.showEndingForCharacter('lin_jianwei');assert.equal(g.activeScene.endingKey,'triggerEnd');
+ assert.ok(!g.activeScene.endingData.romanticText.includes('幾次傷人的話'));
+ assert.ok(!g.activeScene.endingData.romanticText.includes('幾次談不攏的期待'));
+ assert.ok(g.activeScene.endingData.title.includes('未完結局'));
 });
 
 test('all story and optional daily choices are unique spoken lines with five replies per scene',()=>{
@@ -324,9 +335,9 @@ test('friendship remembers only the drawing, tea name and lining choice actually
  for(const pick of [0,1]){
   const g=game(),id='shen_mo';for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===13?pick:e===14?1:0);
   assert.equal(g.activeScene.endingKey,'friendEnd');
-  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'畫了公車'));
+  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'今天帶來的相紙'));
   const saved=JSON.parse(JSON.stringify({...g.activeScene,contentVersion:content.CONTENT_VERSION}));g.activeScene=g.sanitizeActiveScene(saved);
-  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'畫了公車'));
+  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'今天帶來的相紙'));
  }
  for(const id of ['han_xiao','ruri']){
   const g=game();for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===14?1:1);
@@ -377,19 +388,19 @@ test('rewritten options restore pending older text by its original index without
 });
 
 
-test('an oily confession cannot create character consent and a cold refusal still means distance',()=>{
+test('all three romantic voices respect refusal and a clear distance choice remains effective',()=>{
  for(const c of CHARACTERS){
-  const g=game();for(let e=1;e<=13;e++)playEvent(g,c.id,e);
-  playEvent(g,c.id,14,()=>3);assert.equal(g.activeScene.endingKey,'normalEnd');assert.equal(g.state.characters[c.id].characterConsent,'friendship');
-  playEvent(g,c.id,14,()=>4);assert.equal(g.activeScene.endingKey,'normalEnd');assert.equal(g.state.characters[c.id].relationshipIntent,'distance');
-  const h=game();for(let e=1;e<=13;e++)playEvent(h,c.id,e,()=>3);
-  h.startEvent(c.id,14);assert.ok(h.activeScene.eventData.nodes[1].choices[3].reply.includes(content.STORY_ROUTES[c.id].slow));
-  playEvent(h,c.id,14,()=>3);assert.equal(h.state.characters[c.id].characterConsent,'distance');assert.equal(h.activeScene.endingKey,'triggerEnd');
+  for(const pick of [0,3,4]){const g=route(c.id,'romantic');playEvent(g,c.id,14,()=>pick);assert.equal(g.activeScene.endingKey,'trueEnd');
+   const h=route(c.id,'pause');h.startEvent(c.id,14);const reply=h.activeScene.eventData.nodes[1].choices[pick].reply;
+   assert.notEqual(reply,content.buildRouteEvents(c.id)[13].nodes[1].choices[pick].reply);
+   playEvent(h,c.id,14,()=>pick);assert.equal(h.state.characters[c.id].characterConsent,'distance');assert.equal(h.activeScene.endingKey,'triggerEnd');
+  }
+  const g=route(c.id,'romantic');playEvent(g,c.id,14,()=>2);assert.equal(g.activeScene.endingKey,'normalEnd');assert.equal(g.state.characters[c.id].relationshipIntent,'distance');
  }
 });
 
 test('an older optional daily choice restores rewritten text and response without changing its stats',()=>{
- const g=game(),id='shen_mo';g.startDailyTalk(id);g.handleDailyChoice(0);const before=JSON.stringify(g.state.characters[id]);
+ const g=game(),id='shen_mo';g.state.characters[id].eventCompleted=Math.max(2,g.state.characters[id].eventCompleted);g.startDailyTalk(id);g.handleDailyChoice(0);const before=JSON.stringify(g.state.characters[id]);
  const saved=JSON.parse(JSON.stringify({...g.activeScene,contentVersion:content.CONTENT_VERSION}));delete saved.picked.choiceIndex;
  saved.picked.text='「拍你的白牆，我替它取名字。」';saved.talk.choices[0].text=saved.picked.text;
  g.activeScene=g.sanitizeActiveScene(saved);assert.equal(g.activeScene.picked.text,all[id].dailyTalks[0].choices[0].text);assert.equal(JSON.stringify(g.state.characters[id]),before);
@@ -412,4 +423,123 @@ test('entering a scene starts at the top and returning restores the list positio
   g.activeScene=null;render();
   assert.equal(scrolls.at(-1),860,'returning to the roster restores its position');
  } finally {ctx.document=oldDocument;ctx.window=oldWindow;}
+});
+
+// Semantic regression cases from the 2026-11-15 playthrough.
+test('every conversation offers five approaches without repeated spoken choices or reactions',()=>{
+ const choices=new Map(),replies=new Map();let count=0;
+ const check=(choice,label)=>{
+  for(const [value,seen]of [[choice.text,choices],[choice.reply,replies]]){
+   const normalized=value.replace(/[\p{P}\p{Z}\s]/gu,'');
+   assert.ok(!seen.has(normalized),`${label} repeats ${seen.get(normalized)}`);seen.set(normalized,label);
+  }
+  assert.match(choice.text,/^「[^「」]+」$/);count++;
+ };
+ for(const c of CHARACTERS){
+  for(const ev of content.buildRouteEvents(c.id))if(ev.nodes[1]){
+   const options=ev.nodes[1].choices;assert.equal(options.length,5);
+   assert.deepEqual(options.map(x=>x.style).sort(),['anxious','everyday','reasoning','romantic','supportive']);
+   assert.equal(options.find(x=>x.style==='supportive').healthy,true);
+   assert.equal(options.find(x=>x.style==='everyday').healthy,true);
+   options.forEach((x,i)=>check(x,`${c.id} ${ev.code} ${i}`));
+  }
+  all[c.id].dailyTalks.forEach((d,i)=>{assert.equal(d.choices.length,5);d.choices.forEach((x,j)=>check(x,`${c.id} daily${i} ${j}`));});
+ }
+ assert.equal(count,1020);assert.equal(choices.size,1020);assert.equal(replies.size,1020);
+});
+
+test('unplayed late daily scenes cannot appear by repeatedly opening optional conversations',()=>{
+ for(const c of CHARACTERS){const g=game(),cs=g.state.characters[c.id];
+  for(const progress of [0,1]){cs.eventCompleted=progress;const before=cs.dailyTalkIndex;g.startDailyTalk(c.id);assert.equal(g.activeScene,null);assert.equal(cs.dailyTalkIndex,before);}
+  cs.eventCompleted=2;
+  for(let n=0;n<9;n++){g.startDailyTalk(c.id);assert.equal(g.activeScene.talk.sourceEvent,2);}
+  cs.eventCompleted=6;const early=new Set();for(let n=0;n<6;n++){g.startDailyTalk(c.id);early.add(g.activeScene.talk.sourceEvent);}
+  assert.deepEqual([...early].sort(),[2,6]);
+  cs.eventCompleted=13;const late=new Set();for(let n=0;n<6;n++){g.startDailyTalk(c.id);late.add(g.activeScene.talk.sourceEvent);}
+  assert.deepEqual([...late].sort((a,b)=>a-b),[2,6,13]);
+  const saved=JSON.parse(JSON.stringify(g.activeScene));saved.talk=all[c.id].dailyTalks[2];saved.contentVersion=content.CONTENT_VERSION;
+  cs.eventCompleted=1;assert.equal(g.sanitizeActiveScene(saved),null);
+ }
+});
+
+test('rejected reassurance requests never become completed takeovers in later scenes',()=>{
+ for(const c of CHARACTERS){const g=game();for(let e=1;e<=5;e++)playEvent(g,c.id,e,()=>e===3?2:0);
+  const selected=g.getEventsForChar(c.id)[2].nodes[1].choices[2];g.startEvent(c.id,6);
+  assert.ok(g.activeScene.eventData.continuityText.includes(selected.reply));
+  assert.ok(!g.activeScene.eventData.continuityText.includes('還沒交還'));
+  assert.equal(g.getTaskDecision(c.id,'firstAgreement',6).status,'unsettled');
+  assert.equal(g.state.characters[c.id].ethicsIncidents.length,0);
+ }
+});
+
+test('letter state stays sent at the ending across all five approaches',()=>{
+ for(let pick=0;pick<5;pick++){
+  const g=game();for(let e=1;e<=14;e++)playEvent(g,'you_ziqian',e,()=>e===14?1:pick);
+  const ending=g.renderEndingContinuity('you_ziqian',g.activeScene.endingKey,false);
+  assert.match(ending,/拒絕信已由子謙寄出/);assert.ok(!ending.includes('拒絕信還是草稿'));
+  const restored=game();restored.state=restored.migrateState(g.state);
+  assert.match(restored.renderEndingContinuity('you_ziqian','friendEnd',false),/拒絕信已由子謙寄出/);
+ }
+});
+
+test('already answered legacy dialogue retains the actual answer, reaction and points on repeated restoration',()=>{
+ const g=game();g.startEvent('shen_mo',1);g.handleNextNode();g.handleChoiceSelect(3);
+ const before=JSON.stringify(g.state.characters.shen_mo),old=JSON.parse(JSON.stringify(g.activeScene));
+ old.contentVersion=content.CONTENT_VERSION;delete old.dialogueRevision;old.lastChoiceOutcome.choiceText='「舊版傷人的回答。」';old.lastChoiceOutcome.reply='舊版實際的反應，沒有被改成理性推論。';old.lastChoiceOutcome.replyCore=old.lastChoiceOutcome.reply;
+ let scene=g.sanitizeActiveScene(old);scene=g.sanitizeActiveScene(scene);
+ assert.equal(scene.lastChoiceOutcome.choiceText,old.lastChoiceOutcome.choiceText);assert.equal(scene.lastChoiceOutcome.reply,old.lastChoiceOutcome.reply);
+ assert.equal(JSON.stringify(g.state.characters.shen_mo),before);
+ g.state.characters.shen_mo.eventCompleted=2;g.startDailyTalk('shen_mo');g.handleDailyChoice(3);
+ const daily=JSON.parse(JSON.stringify(g.activeScene));daily.contentVersion=content.CONTENT_VERSION;delete daily.dialogueRevision;daily.picked.text='「舊版日常的回答。」';daily.picked.reply='舊版日常留下的反應。';
+ const restored=g.sanitizeActiveScene(g.sanitizeActiveScene(daily));assert.equal(restored.picked.text,daily.picked.text);assert.equal(restored.picked.reply,daily.picked.reply);
+});
+
+test('scene addresses and memories no longer invent an insult, a film mistake or an empty occupied chair',()=>{
+ const wen=content.buildRouteEvents('wen_yan')[3];
+ assert.ok(wen.nodes[1].choices[0].text.startsWith('「傾城，'));assert.ok(wen.nodes[1].choices[1].text.startsWith('「傾城，'));
+ assert.ok(!content.buildRouteEvents('shen_mo')[7].nodes[1].text.includes('你裝反底片'));
+ assert.ok(!content.buildRouteEvents('lin_jianwei')[13].nodes[0].text.includes('兩把椅子都空著'));
+ for(const c of CHARACTERS){const tasks=content.getLearningTasks(c.id,8);assert.equal(tasks.length,1);}
+ assert.ok(!content.getLearningTasks('ji_yan',8)[0].prompt.includes('無價值物品'));
+ assert.ok(!content.getLearningTasks('lin_jianwei',8)[0].prompt.includes('溫言'));
+ assert.ok(!JSON.stringify(content.getLearningTasks('su_fei',8)).includes('自傷'));
+});
+
+test('randomized choice order stays stable while reading one scene and indexes remain attached to their text',()=>{
+ const savedMath=ctx.Math;let seed=4781;ctx.Math=Object.create(Math);ctx.Math.random=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+ try{const g=game(),orders=new Set();
+  for(let n=0;n<8;n++){g.startEvent('shen_mo',1);g.handleNextNode();const node=g.activeScene.eventData.nodes[1],order=[...g.getChoiceOrder(node)];
+   assert.deepEqual([...order].sort(),[0,1,2,3,4]);assert.deepEqual([...g.getChoiceOrder(node)],order);orders.add(order.join(''));
+   g.handleChoiceSelect(order[0]);assert.equal(g.activeScene.lastChoiceOutcome.choiceText,node.choices[order[0]].text);
+  }
+  assert.ok(orders.size>1);
+ }finally{if(savedMath===undefined)delete ctx.Math;else ctx.Math=savedMath;}
+});
+
+test('declined final scenes do not narrate an accepted invitation and keep each answer distinct',()=>{
+ const reactions=new Set();
+ for(const c of CHARACTERS){const g=route(c.id,'pause');g.startEvent(c.id,14);const ev=g.activeScene.eventData;
+  assert.equal(ev.nodes[1].text,content.DISTANCE_LINES[c.id]);assert.equal(ev.nodes[0].text,content.PAUSED_CLOSURES[c.id]);
+  const size=[...ev.nodes[0].text.replace(/\s/g,'')].length;assert.ok(size>=100&&size<=150);
+  for(const ch of ev.nodes[1].choices){assert.ok(!reactions.has(ch.reply));reactions.add(ch.reply);}
+ }
+});
+
+test('rewritten learning questions archive their old answers without resetting story or unrelated answers',()=>{
+ const g=game(),saved=JSON.parse(JSON.stringify(g.state));
+ for(const id of ['lin_jianwei','ji_yan','su_fei','shen_mo']){
+  saved.characters[id].eventCompleted=15;saved.characters[id].affection=52;
+  saved.characters[id].knowledge.compare={attempts:[{optionId:'alternative',correct:false},{optionId:'evidence',correct:true}],firstCorrect:false,correct:true};
+ }
+ g.state=g.migrateState(saved);
+ for(const id of ['lin_jianwei','ji_yan','su_fei']){
+  const cs=g.state.characters[id];assert.equal(cs.eventCompleted,15);assert.equal(cs.affection,52);
+  assert.equal(cs.knowledge.compare,undefined);assert.equal(cs.knowledgeArchive['compare:1'].record.firstCorrect,false);
+  assert.match(g.renderLearningArchive(id),/改寫前的題目與作答/);
+  assert.equal(g.answerLearning(id,'compare','evidence'),true);assert.equal(cs.knowledge.compare.revision,2);
+ }
+ assert.equal(g.state.characters.shen_mo.knowledge.compare.correct,true);
+ const next=g.migrateState(g.state);for(const id of ['lin_jianwei','ji_yan','su_fei']){
+  assert.equal(next.characters[id].knowledge.compare.revision,2);assert.equal(Object.keys(next.characters[id].knowledgeArchive).length,1);
+ }
 });

@@ -1,11 +1,12 @@
-// 《愛的邊緣》2.3 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=32';
+// 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=31';
+import { DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=32';
 import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=32';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=31';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=31';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=31';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=31';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=32';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=32';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=32';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=32';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -16,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=31';
+} from './data/eventTreeEngine.js?v=32';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
 } from './data/characterPrompts.js?v=32';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=31';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=32';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -89,6 +90,8 @@ class EdgeOfLoveGame {
     this.dsmWidgetOpen = false;
     this.selectedDsmRefCode = null;
     this.mobileNavOpen = false;
+    this.relationshipView = 'cards';
+    this.saveError = false;
     this.sessionStartTime = Date.now();
     this.selectedFirstCharId = null; // 封面合照選定之開場角色 ID（null 代表預設隨機挑選）
     this._lastHoveredPillar = null;
@@ -124,6 +127,7 @@ class EdgeOfLoveGame {
         choiceEffects: {},
         ethicsIncidents: [],
         knowledge: {},
+        knowledgeArchive: {},
         sharedQuakeDone: false,
         sharedTyphoonDone: false,
         backstoryUnlocked: false,
@@ -157,16 +161,11 @@ class EdgeOfLoveGame {
 
   init() {
     const savedRaw =
-      localStorage.getItem(STORAGE_KEY_AUTOSAVE) ||
-      sessionStorage.getItem(STORAGE_KEY_SESSION) ||
-      localStorage.getItem('edge_of_love_browser_save_v5') ||
-      sessionStorage.getItem('edge_of_love_session_save_v5') ||
-      localStorage.getItem('edge_of_love_browser_save_v4') ||
-      sessionStorage.getItem('edge_of_love_session_save_v4') ||
-      localStorage.getItem('edge_of_love_browser_save_v3') ||
-      sessionStorage.getItem('edge_of_love_session_save_v3') ||
-      localStorage.getItem('edge_of_love_browser_save_v2') ||
-      sessionStorage.getItem('edge_of_love_session_save_v2');
+      this.readBrowserSave(STORAGE_KEY_AUTOSAVE, STORAGE_KEY_SESSION) ||
+      this.readBrowserSave('edge_of_love_browser_save_v5', 'edge_of_love_session_save_v5') ||
+      this.readBrowserSave('edge_of_love_browser_save_v4', 'edge_of_love_session_save_v4') ||
+      this.readBrowserSave('edge_of_love_browser_save_v3', 'edge_of_love_session_save_v3') ||
+      this.readBrowserSave('edge_of_love_browser_save_v2', 'edge_of_love_session_save_v2');
 
     if (savedRaw) {
       try {
@@ -240,15 +239,17 @@ class EdgeOfLoveGame {
       const curNode = freshEv.nodes[safeIdx];
       const previousIndex=scene.lastChoiceOutcome?.choiceIndex ?? scene.eventData?.nodes?.[scene.nodeIndex]?.choices?.findIndex(c=>this.formatText(c.text)===scene.lastChoiceOutcome?.choiceText);
       const chosen = scene.awaitingNextAfterChoice && (curNode?.choices?.find(c => this.formatText(c.text) === scene.lastChoiceOutcome?.choiceText)||curNode?.choices?.[previousIndex]);
-      const outcome = chosen ? {...scene.lastChoiceOutcome, choiceText:this.formatText(chosen.text),reply:this.formatText(chosen.reply),replyCore:this.formatText(chosen.replyCore||chosen.reply)} : scene.lastChoiceOutcome;
+      const legacyOutcome=scene.awaitingNextAfterChoice && scene.dialogueRevision!==DIALOGUE_REVISION;
+      const outcome = legacyOutcome ? scene.lastChoiceOutcome : chosen ? {...scene.lastChoiceOutcome, choiceText:this.formatText(chosen.text),reply:this.formatText(chosen.reply),replyCore:this.formatText(chosen.replyCore||chosen.reply)} : scene.lastChoiceOutcome;
       return {
         ...scene,
         eventNumber: freshEv.eventNumber,
+        dialogueRevision:legacyOutcome?(scene.dialogueRevision||1):DIALOGUE_REVISION,
         eventData: freshEv,
         partnerId: freshEv.partnerId || null,
         locationId: freshEv.locationId || char.locationId,
         nodeIndex: safeIdx,
-        expression: chosen?.expression || curNode?.expression || scene.expression || 'neutral',
+        expression: legacyOutcome?(scene.expression||'neutral'):(chosen?.expression || curNode?.expression || scene.expression || 'neutral'),
         awaitingNextAfterChoice: Boolean(scene.awaitingNextAfterChoice && scene.lastChoiceOutcome),
         lastChoiceOutcome: scene.awaitingNextAfterChoice ? outcome : null
       };
@@ -258,11 +259,14 @@ class EdgeOfLoveGame {
       if (!scene.talk || !Array.isArray(scene.talk.choices) || scene.talk.choices.length === 0) {
         return null;
       }
-      const talk = ALL_SCENARIOS[scene.charId]?.dailyTalks?.find(t => t.title === scene.talk.title) || scene.talk;
+      const freshTalk=ALL_SCENARIOS[scene.charId]?.dailyTalks?.find(t=>t.title===scene.talk.title);
+      if(freshTalk?.sourceEvent>this.state.characters[scene.charId].eventCompleted)return null;
+      const legacyPicked=scene.picked&&scene.dialogueRevision!==DIALOGUE_REVISION;
+      const talk=legacyPicked?scene.talk:(freshTalk||scene.talk);
       const previousIndex=scene.picked?.choiceIndex ?? scene.talk.choices.findIndex(c=>this.formatText(c.text)===scene.picked?.text);
       const chosen = talk.choices.find(c => this.formatText(c.text) === scene.picked?.text)||talk.choices[previousIndex];
-      return {...scene, talk, picked: chosen ? {...scene.picked,text:this.formatText(chosen.text),reply:this.formatText(chosen.reply),replyCore:this.formatText(chosen.replyCore||chosen.reply)} : scene.picked,
-        expression: chosen?.expression || scene.expression || 'neutral'};
+      return {...scene, talk, dialogueRevision:legacyPicked?(scene.dialogueRevision||1):DIALOGUE_REVISION, picked: legacyPicked ? scene.picked : chosen ? {...scene.picked,text:this.formatText(chosen.text),reply:this.formatText(chosen.reply),replyCore:this.formatText(chosen.replyCore||chosen.reply)} : scene.picked,
+        expression: legacyPicked?(scene.expression||'neutral'):(chosen?.expression || scene.expression || 'neutral')};
     }
 
     if (scene.mode === 'ending') {
@@ -304,6 +308,13 @@ class EdgeOfLoveGame {
       cs.eventCompleted = Math.max(0,Math.min(15,Math.floor(Number(cs.eventCompleted)||0)));
       for (const key of ['diary','unlockedEndings','ethicsIncidents']) if (!Array.isArray(cs[key])) cs[key] = [];
       for (const key of ['evidenceLog','choiceScores','choiceEffects','knowledge','memories']) if (!cs[key] || typeof cs[key] !== 'object' || Array.isArray(cs[key])) cs[key] = {};
+      if(!cs.knowledgeArchive||typeof cs.knowledgeArchive!=='object'||Array.isArray(cs.knowledgeArchive))cs.knowledgeArchive={};
+      const revisedTask=getLearningTasks(c.id,8)[0],oldAnswer=cs.knowledge[revisedTask.id];
+      if(oldAnswer&&Number(oldAnswer.revision||1)<Number(revisedTask.revision||1)){
+        const key=`${revisedTask.id}:${oldAnswer.revision||1}`;
+        cs.knowledgeArchive[key]={task:LEGACY_LEARNING_TASKS[c.id],record:oldAnswer};
+        delete cs.knowledge[revisedTask.id];
+      }
       const events=this.getEventsForChar(c.id);
       if(cs.boundary<30&&!cs.ethicsIncidents.length){
         const prior=Object.entries(cs.choiceScores).find(([key,value])=>this.isRecordedEthicalRisk(c.id,key,value,cs));
@@ -330,53 +341,74 @@ class EdgeOfLoveGame {
     return state;
   }
 
-  autoSave() {
-    if (this.staleSavePending) return;
+  readBrowserSave(key, sessionKey = key) {
+    let local = null, session = null;
+    try { local = localStorage.getItem(key); } catch (_) {}
+    try { session = sessionStorage.getItem(sessionKey); } catch (_) {}
+    if (!local) return session;
+    if (!session) return local;
     try {
-      const nowStr = new Date().toLocaleTimeString('zh-TW', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-      this.lastSavedTime = nowStr;
-      if (this.activeScene) this.activeScene.contentVersion = CONTENT_VERSION;
-      const payload = JSON.stringify({
-        savedAt: new Date().toLocaleString('zh-TW'),
-        savedAtMs: Date.now(),
-        state: this.state,
-        activeScene: this.activeScene
-      });
-      localStorage.setItem(STORAGE_KEY_AUTOSAVE, payload);
-      sessionStorage.setItem(STORAGE_KEY_SESSION, payload);
-    } catch (_) {
-      // ignore storage quota errors
-    }
+      return (JSON.parse(session).savedAtMs || 0) > (JSON.parse(local).savedAtMs || 0) ? session : local;
+    } catch (_) { return local; }
+  }
+
+  writeBrowserSave(key, serialized, sessionKey = key) {
+    // Either browser store can preserve progress. A failed persistent store is disclosed.
+    let persistent = false, session = false;
+    try { localStorage.setItem(key, serialized); persistent = true; } catch (_) {}
+    try { sessionStorage.setItem(sessionKey, serialized); session = true; } catch (_) {}
+    return { persistent, session, ok: persistent || session };
+  }
+
+  autoSave() {
+    if (this.staleSavePending) return false;
+    if (this.activeScene) this.activeScene.contentVersion = CONTENT_VERSION;
+    const savedAt = new Date().toLocaleString('zh-TW');
+    const result = this.writeBrowserSave(STORAGE_KEY_AUTOSAVE, JSON.stringify({
+      savedAt, savedAtMs: Date.now(), state: this.state, activeScene: this.activeScene
+    }), STORAGE_KEY_SESSION);
+    const wasError = this.saveError;
+    this.saveError = !result.persistent;
+    this.saveSessionOnly = !result.persistent && result.session;
+    if (result.persistent) this.lastSavedTime = savedAt;
+    if (this.saveError && !wasError) this.showToast(this.saveSessionOnly
+      ? '無法長期儲存，目前僅暫存於此分頁；請勿關閉分頁。'
+      : '進度儲存失敗，請檢查瀏覽器儲存空間後再試。');
+    return result.persistent;
   }
 
   saveToSlot(slotIndex) {
     const key = `edge_of_love_slot_${slotIndex}`;
-    const payload = {
-      savedAt: new Date().toLocaleString('zh-TW'),
-        savedAtMs: Date.now(),
-      state: this.state,
-      activeScene: this.activeScene
-    };
-    const serialized = JSON.stringify(payload);
-    localStorage.setItem(key, serialized);
-    sessionStorage.setItem(key, serialized);
+    const existing = this.readBrowserSave(key);
+    if (existing) {
+      let summary = '原有存檔';
+      try { const old = JSON.parse(existing); summary = `${old.state?.player?.name || '主角'}・${old.savedAt || '時間不詳'}`; } catch (_) {}
+      if (!confirm(`覆寫手動記憶槽 #${slotIndex}？\n${summary}\n覆寫後無法還原這個槽位的原有進度。`)) return false;
+    }
+    const result = this.writeBrowserSave(key, JSON.stringify({
+      savedAt: new Date().toLocaleString('zh-TW'), savedAtMs: Date.now(),
+      state: this.state, activeScene: this.activeScene
+    }));
+    if (!result.persistent) {
+      this.showToast(result.session ? '此槽位僅暫存於分頁，無法長期保存。請勿關閉分頁。' : '存檔失敗，原有進度未能更新。');
+      this.renderSaveModal();
+      return false;
+    }
     this.autoSave();
     audio.playSelect();
     this.showToast(`💾 已儲存至瀏覽器記憶槽 #${slotIndex}`);
     this.renderSaveModal();
+    return true;
   }
 
   loadFromSlot(slotIndex) {
     const key = `edge_of_love_slot_${slotIndex}`;
-    const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+    const raw = this.readBrowserSave(key);
     if (!raw) return;
     try {
       const payload = JSON.parse(raw);
       if (payload && payload.state) {
+        if (!confirm(`讀取手動記憶槽 #${slotIndex}？目前自動進度將由此存檔取代。`)) return;
         this.state = this.migrateState(payload.state);
         this.activeScene = this.sanitizeActiveScene(payload.activeScene);
         this.autoSave();
@@ -687,7 +719,9 @@ class EdgeOfLoveGame {
     if (!this.loadingState?.snapshot.done || this.loadingState.failedAssets.length) return;
     this.loadingState = null;
     this.render();
-    document.querySelector('[data-action="continue-stale-save"], #player-name-input')?.focus();
+    window.scrollTo?.({ top: 0, behavior: 'instant' });
+    document.querySelector('.creator-header h1')?.setAttribute('tabindex', '-1');
+    document.querySelector('.creator-header h1')?.focus({ preventScroll: true });
   }
 
   getWelcomeNote() {
@@ -975,6 +1009,7 @@ class EdgeOfLoveGame {
     });
     this.activeScene = {
       mode: 'event',
+      dialogueRevision:DIALOGUE_REVISION,
       charId,
       partnerId: evObj.partnerId || null,
       eventNumber: evObj.eventNumber,
@@ -1057,7 +1092,8 @@ class EdgeOfLoveGame {
 
     const extraPool = EXTRA_DAILY_TALKS[charId] || [];
     const basePool = scenario.dailyTalks || [];
-    const talks = [...extraPool, ...basePool];
+    const talks = [...extraPool, ...basePool].filter(talk=>(talk.sourceEvent||2)<=cs.eventCompleted);
+    if(!talks.length){this.showToast('先走完第一段日常，再回來看看不同的相處方式。');return;}
     const talk = talks[cs.dailyTalkIndex % talks.length];
     const repeatCount = Math.floor(cs.dailyTalkIndex / Math.max(1, talks.length));
     cs.dailyTalkIndex += 1;
@@ -1071,8 +1107,9 @@ class EdgeOfLoveGame {
 
     this.activeScene = {
       mode: 'daily',
+      dialogueRevision:DIALOGUE_REVISION,
       charId,
-      locationId: this.activeLocationId !== 'apartment' ? this.activeLocationId : char.locationId,
+      locationId:talk.locationId||char.locationId,
       talk,
       repeatCount,
       picked: null,
@@ -1123,13 +1160,9 @@ class EdgeOfLoveGame {
       const memory=cs.memories?.ordinary_2;
       let core=data.narrativeCore;
       if(charId==='shen_mo'){
-        const bus=memory?.choiceIndex===1||/公車/.test(memory?.choice||'');
-        const tofu=memory?.choiceIndex===0||/空白|豆腐/.test(memory?.choice||'');
+        const bus=/公車/.test((memory?.choice||'')+(memory?.reply||''));
+        const tofu=/空白|豆腐/.test((memory?.choice||'')+(memory?.reply||''));
         core=core.replace('你把畫了公車的相紙帶來',bus?'你把畫了公車的相紙帶來':tofu?'你把寫了豆腐的相紙帶來':'你們翻看今天帶來的相紙');
-      }
-      if(charId==='han_xiao'){
-        const named=cs.memories?.ordinary_0?.choiceIndex===0||/酸，不是輸贏/.test(cs.memories?.ordinary_0?.choice||'');
-        core=core.replace('果茶用了你取的名字',named?'果茶用了你取的名字':'你們又試了一杯新果茶');
       }
       if(charId==='ruri'){
         const picked=cs.memories?.ordinary_0?.choiceIndex===0||/選裡面|秘密口袋/.test(cs.memories?.ordinary_0?.choice||'');
@@ -1303,7 +1336,7 @@ class EdgeOfLoveGame {
     cs.choiceScores[key]={choiceIndex,...(choice.stats||{}),healthy:choice.healthy===true,ethicalRisk:choice.ethicalRisk===true};
     this.recordBoundaryConsequence(charId,choice,{code:eventData.code,title:eventData.title});
     cs.choiceEffects[key]=choice.decision || choice.setFlag || null;
-    if(choice.memory)cs.memories[choice.memory]={event:eventData.code,choice:this.formatText(choice.text),choiceIndex};
+    if(choice.memory)cs.memories[choice.memory]={event:eventData.code,choice:this.formatText(choice.text),choiceIndex,reply:choice.replyCore||choice.reply};
     else if([2,6,13].includes(sc.eventNumber))delete cs.memories[`ordinary_${[2,6,13].indexOf(sc.eventNumber)}`];
     if(choice.relationshipIntent){
       cs.relationshipIntent=choice.relationshipIntent;
@@ -1344,7 +1377,58 @@ class EdgeOfLoveGame {
     }, 3800);
   }
 
+  focusControl(selector) {
+    const control = document.querySelector(selector);
+    const visible = control && control.getClientRects().length > 0 && !control.closest('[inert]');
+    (visible ? control : document.querySelector('[data-action="toggle-mobile-nav"]'))?.focus({ preventScroll: true });
+  }
+
+  getFocusables(container) {
+    return [...container.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select, textarea, summary, [tabindex="0"]')]
+      .filter(el => !el.closest('[hidden], [inert]') && el.getClientRects().length > 0);
+  }
+
+  syncModalAccessibility() {
+    const root = document.getElementById('modal-root');
+    const modal = root?.querySelector('.modal-window');
+    if (!modal) return;
+    document.getElementById('app-root').inert = true;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    const title = modal.querySelector('h2');
+    if (title) {
+      if (!title.id) title.id = 'active-modal-title';
+      modal.setAttribute('aria-labelledby', title.id);
+    }
+    const match = this.modalFocusKey && [...modal.querySelectorAll('[data-action]')]
+      .find(el => this.focusKey(el) === this.modalFocusKey);
+    if (!modal.contains(document.activeElement)) {
+      (match || this.getFocusables(modal)[0] || modal).focus({ preventScroll: true });
+    }
+  }
+
+  focusKey(element) {
+    return JSON.stringify(element ? Object.entries(element.dataset || {}) : []);
+  }
+
+  trapDialogFocus(event) {
+    const modal = document.querySelector('#modal-root .modal-window')
+      || (this.dsmWidgetOpen && document.getElementById('dsm-reference-drawer'));
+    if (!modal || event.key !== 'Tab') return;
+    const items = this.getFocusables(modal), first = items[0], last = items.at(-1);
+    if (!first) { event.preventDefault(); modal.focus(); return; }
+    if (!modal.contains(document.activeElement)) { event.preventDefault(); first.focus(); }
+    else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
+
   bindGlobalEvents() {
+    const modalRoot = document.getElementById('modal-root');
+    if (typeof MutationObserver !== 'undefined' && modalRoot) {
+      this.modalObserver = new MutationObserver(() => this.syncModalAccessibility());
+      this.modalObserver.observe(modalRoot, { childList: true });
+    }
+
     // Browsers require a real gesture before starting background audio.
     document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
     document.addEventListener('keydown', () => audio.unlock());
@@ -1352,15 +1436,8 @@ class EdgeOfLoveGame {
       if (this.dsmWidgetOpen) this.render();
     });
     document.addEventListener('keydown', (e) => {
-      if (this.pendingNewGame && !this.consentAccepted) {
-        if (e.key === 'Escape') { e.preventDefault(); return; }
-        if (e.key === 'Tab') {
-          const buttons = [...document.querySelectorAll('#modal-root button')];
-          const first = buttons[0], last = buttons.at(-1);
-          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
-          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
-        }
-      }
+      this.trapDialogFocus(e);
+      if (this.pendingNewGame && !this.consentAccepted && e.key === 'Escape') { e.preventDefault(); return; }
       if (e.key === 'Escape') {
         if (this.pendingRouteUnlock) {
           this.acknowledgeAchievement();
@@ -1369,7 +1446,7 @@ class EdgeOfLoveGame {
         } else if (this.dsmWidgetOpen) {
           this.dsmWidgetOpen = false;
           this.render();
-          document.querySelector('.dsm-side-launcher-tab')?.focus();
+          this.focusControl('[data-action="toggle-dsm-widget"]');
         } else {
           this.closeModals();
         }
@@ -1418,6 +1495,8 @@ class EdgeOfLoveGame {
         return;
       }
       const action = target.dataset.action;
+      if (!document.querySelector('#modal-root .modal-window')) this.modalReturnKey = this.focusKey(target);
+      else this.modalFocusKey = this.focusKey(target);
 
       switch (action) {
         case 'start-new-game':
@@ -1457,6 +1536,7 @@ class EdgeOfLoveGame {
         case 'toggle-mobile-nav':
           this.mobileNavOpen = !this.mobileNavOpen;
           this.render();
+          document.querySelector('[data-action="toggle-mobile-nav"]')?.focus({preventScroll:true});
           break;
         case 'switch-main-tab':
           this.activeMainTab = target.dataset.tab || 'locations';
@@ -1515,10 +1595,25 @@ class EdgeOfLoveGame {
         case 'open-event-tree-modal':
           this.renderEventTreeModal(target.dataset.charId);
           break;
+        case 'set-relationship-view':
+          this.relationshipView = target.dataset.view === 'map' ? 'map' : 'cards';
+          this.render();
+          document.querySelector(`[data-action="set-relationship-view"][data-view="${this.relationshipView}"]`)?.focus({preventScroll:true});
+          break;
+        case 'jump-case-section': {
+          const section = document.getElementById(target.dataset.section);
+          section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          section?.focus({preventScroll:true});
+          break;
+        }
+        case 'open-diary':
+          this.renderDiaryModal(target.dataset.charId);
+          break;
         case 'filter-roster':
           this.selectedFilter = target.dataset.filter;
           audio.playChime(520, 0.06);
           this.render();
+          this.focusControl('.filter-btn.active');
           break;
         case 'select-story-char': {
           const cid = target.dataset.charId;
@@ -1625,7 +1720,7 @@ class EdgeOfLoveGame {
           this.mobileNavOpen = false;
           audio.playChime(560, 0.06);
           this.render();
-          document.querySelector(this.dsmWidgetOpen ? '#dsm-reference-drawer .btn-close' : '.dsm-side-launcher-tab')?.focus({preventScroll:true});
+          this.focusControl(this.dsmWidgetOpen ? '#dsm-reference-drawer .btn-close' : '[data-action="toggle-dsm-widget"]');
           break;
         case 'close-dsm-widget':
           this.dsmWidgetOpen = false;
@@ -1646,7 +1741,9 @@ class EdgeOfLoveGame {
           break;
         case 'clear-all-saves':
         case 'restart-game':
-          if (confirm('確定要重新開始遊戲嗎？（將重置目前故事進度，重新載入資源後進入選角畫面）')) {
+          if (confirm(action === 'clear-all-saves'
+            ? '確定清除所有存檔並重新開始？\n將刪除目前自動進度、三個手動記憶槽及舊版紀錄，且無法還原。'
+            : '確定重新建立角色？\n目前自動進度將重置，三個手動記憶槽會保留。')) {
             [
               STORAGE_KEY_AUTOSAVE,
               'edge_of_love_browser_save_v5',
@@ -1673,6 +1770,7 @@ class EdgeOfLoveGame {
         case 'toggle-audio': {
           const on = audio.toggle();
           this.render();
+          this.focusControl('[data-action="toggle-audio"]');
           this.showToast(on ? '🔊 背景音樂與音效已開啟' : '🔇 背景音樂與音效已靜音');
           break;
         }
@@ -1682,6 +1780,7 @@ class EdgeOfLoveGame {
           audio.playChime(this.state.studyMode ? 680 : 480, 0.08);
           this.autoSave();
           this.render();
+          this.focusControl('[data-action="toggle-study-mode"]');
           this.showToast(
             this.state.studyMode
               ? '🎓 教學模式 ON：顯示線索解析與練習題。'
@@ -1713,6 +1812,9 @@ class EdgeOfLoveGame {
     this.learningModalChar=null;
     const modalRoot = document.getElementById('modal-root');
     if (modalRoot) modalRoot.innerHTML = '';
+    const trigger = [...(document.querySelectorAll?.('[data-action]') || [])].find(el => this.focusKey(el) === this.modalReturnKey);
+    trigger?.focus({ preventScroll: true });
+    this.modalFocusKey = null;
   }
 
   // 尚未開放的角色不可直接攻略：提示玩家先揭曉目前角色的人格障礙症
@@ -1804,9 +1906,9 @@ class EdgeOfLoveGame {
     this.renderedViewKey = viewKey;
     document.body?.classList.toggle('reference-open', Boolean(this.dsmWidgetOpen));
     this.renderPage();
-    const referenceModal = Boolean(this.dsmWidgetOpen && window.matchMedia?.('(max-width: 1199px)').matches);
+    const referenceModal = Boolean(this.dsmWidgetOpen);
     document.querySelectorAll?.('.top-navbar, .hub-container, .vn-stage, .game-footer').forEach(element => {
-      element.inert = referenceModal;
+      element.inert = referenceModal || Boolean(document.querySelector('#modal-root .modal-window'));
     });
     const drawer = document.getElementById('dsm-reference-drawer');
     if (referenceModal && drawer) {
@@ -1894,7 +1996,7 @@ class EdgeOfLoveGame {
               <h1 class="brand-title">愛的邊緣 <span class="brand-sub">EDGE OF LOVE</span></h1>
               <p class="brand-meta">
                 主角：<strong>${escapeHtml(this.state.player.name)}</strong>（代名詞「${escapeHtml(this.state.player.pronoun)}」）・就讀心諮所的新房客
-                ${this.lastSavedTime ? `｜ <span class="saved-indicator">♥ 記憶已自動保存 (${this.lastSavedTime})</span>` : ''}
+                <span class="saved-indicator ${this.saveError ? 'save-status-error' : ''}" role="status">${this.saveError ? (this.saveSessionOnly ? '僅暫存於此分頁' : '儲存失敗') : this.lastSavedTime ? '✓ 已儲存' : ''}</span>
               </p>
             </div>
           </div>
@@ -1911,21 +2013,23 @@ class EdgeOfLoveGame {
           </button>
         </div>
 
-        <div class="nav-actions ${this.mobileNavOpen ? 'is-open' : ''}">
+        <nav class="nav-actions ${this.mobileNavOpen ? 'is-open' : ''}" aria-label="主要導覽"><div class="nav-section nav-pages" aria-label="故事與人物">
           <button
             class="nav-btn ${!this.activeScene && this.activeMainTab === 'locations' ? 'btn-accent' : ''}"
             data-action="switch-main-tab"
-            data-tab="locations"
+            data-tab="locations" aria-current="${!this.activeScene && this.activeMainTab === 'locations' ? 'page' : 'false'}"
           >
             📍 故事推進
           </button>
           <button
             class="nav-btn ${!this.activeScene && this.activeMainTab === 'relationships' ? 'btn-accent' : ''}"
             data-action="switch-main-tab"
-            data-tab="relationships"
+            data-tab="relationships" aria-current="${!this.activeScene && this.activeMainTab === 'relationships' ? 'page' : 'false'}"
           >
-            💞 人物關係圖
+            💞 公寓房客
           </button>
+          </div><div class="nav-section nav-tools" aria-label="閱讀工具">
+          <button class="nav-btn" data-action="toggle-dsm-widget" aria-controls="dsm-reference-drawer" aria-expanded="${this.dsmWidgetOpen}">📖 準則參照</button>
           <button
             class="nav-btn ${this.state.studyMode ? 'btn-accent' : ''}"
             data-action="toggle-study-mode"
@@ -1941,7 +2045,8 @@ class EdgeOfLoveGame {
             ${audio.enabled ? '🔊 音樂' : '🔇 靜音'}
           </button>
 
-        </div>
+          </div>
+        </nav>
       </header>
     `;
   }
@@ -2215,9 +2320,10 @@ class EdgeOfLoveGame {
             <p>${char.tagline || ''}</p>${this.renderRelationshipMeters(char)}
             <div class="story-current-actions">
               <button class="btn-primary-large" data-action="continue-story">📖 繼續 ${char.name} 的故事（${nextEv.code}）</button>
-              <button class="nav-btn" data-action="story-daily" data-char-id="${char.id}">🌸 日常相處</button>
+              <button class="nav-btn" data-action="story-daily" data-char-id="${char.id}" ${cs.eventCompleted < 2 ? 'disabled aria-describedby="daily-availability"' : ''}>🌸 日常回看</button>
               <button class="nav-btn" data-action="open-event-tree-modal" data-char-id="${char.id}">📑 選幕與重玩</button>
             </div>
+            ${cs.eventCompleted < 2 ? '<p class="action-hint" id="daily-availability">完成 E02 後開放日常回看。</p>' : ''}
           </div>
         </article>
 
@@ -2243,7 +2349,13 @@ class EdgeOfLoveGame {
   }
 
   renderRelationshipGraphTab() {
-    return `<section class="relationship-graph-panel"><div class="panel-header"><div><h2>💞 公寓人物關係圖</h2><p>連線呈現你與房客目前的關係。下方卡片可查看好感度、安全感、邊界感，以及實際走過的故事與互動；走完一位房客的故事後，可在結局閱讀該角色的完整案例。</p></div></div><div class="rel-web-container">${this.renderRelationshipWebDiagram()}</div>${this.renderCharacterRoster()}</section>`;
+    const map = this.relationshipView === 'map';
+    return `<section class="relationship-graph-panel"><div class="panel-header relationship-page-header"><div><h2>💞 公寓房客</h2><p>查看關係、故事進度與相處紀錄。完整角色案例會在該角色的故事結束後開啟。</p></div><div class="view-switch" role="group" aria-label="人物檢視方式"><button class="nav-btn" data-action="set-relationship-view" data-view="cards" aria-pressed="${!map}">人物清單</button><button class="nav-btn" data-action="set-relationship-view" data-view="map" aria-pressed="${map}">關係圖</button></div></div>${map ? `<div class="rel-web-container">${this.renderRelationshipWebDiagram()}</div>` : ''}${this.renderCharacterRoster()}</section>`;
+  }
+
+  getShortRelationshipLabel(rel) {
+    const labels = [['完整友情','友情'],['嘗試戀愛','嘗試戀愛'],['倫理爭議','越界爭議'],['關係緊繃','關係緊繃'],['曖昧失衡','曖昧失衡'],['尚未共同同意','尚未同意'],['戒備與疏離','戒備疏離'],['保留距離','保留距離'],['曖昧漸生','曖昧'],['逐漸信任','信任'],['熟悉的鄰居','熟悉'],['初識','初識']];
+    return labels.find(([key]) => rel.label.includes(key))?.[1] || '相處中';
   }
 
   renderRelationshipWebDiagram() {
@@ -2266,7 +2378,7 @@ class EdgeOfLoveGame {
     return `
       <div class="rel-mobile-list"><div class="rel-mobile-protagonist">🌸 ${escapeHtml(this.state.player.name)}<small>你與房客的關係</small></div>${nodes.map(({char,cs,rel})=>`<button class="rel-mobile-person" data-action="focus-rel-card" data-char-id="${char.id}" style="--node-color:${rel.color}"><img src="${resolveAssetUrl(`./assets/characters/${char.id}.png`)}" alt="" /><span><strong>${escapeHtml(char.name)}</strong><small>${escapeHtml(rel.label)}</small></span><span class="rel-mobile-progress">${cs.eventCompleted}/15 幕 <span aria-hidden="true">›</span></span></button>`).join('')}</div>
       <div class="rel-diagram-box">
-        <svg class="rel-network-svg" viewBox="0 0 1120 660" preserveAspectRatio="xMidYMid meet">
+        <svg class="rel-network-svg" aria-label="房客關係連線與故事進度" role="img" viewBox="0 0 1120 660" preserveAspectRatio="xMidYMid meet">
           <defs>
             <radialGradient id="centerHubGlow" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#f472b6" stop-opacity="0.42" />
@@ -2297,7 +2409,7 @@ class EdgeOfLoveGame {
                   />
                   <rect x="${mx - 56}" y="${my - 11}" width="112" height="22" rx="11" fill="rgba(26, 12, 38, 0.88)" stroke="${rel.color}" stroke-width="1" />
                   <text x="${mx}" y="${my + 4}" text-anchor="middle" fill="#fce7f3" font-size="10.2" font-weight="600">
-                    E${String(cs.eventCompleted).padStart(2, '0')}/15｜${rel.label.slice(0, 6)}
+                    E${String(cs.eventCompleted).padStart(2, '0')}/15｜${this.getShortRelationshipLabel(rel)}
                   </text>
                 </g>
               `;
@@ -2359,18 +2471,17 @@ class EdgeOfLoveGame {
       <section class="roster-panel">
         <div class="panel-header roster-header">
           <div>
-            <h2>✨ 公寓房客與互動紀錄</h2>
-            <p>每張卡片保留人物背景、目前數值與相處日記；完整案例在該角色的故事結束後開啟。</p>
+            <h3>依故事進度篩選</h3>
           </div>
 
           <div class="cluster-filters">
-            <button class="filter-btn ${this.selectedFilter === 'ALL' ? 'active' : ''}" data-action="filter-roster" data-filter="ALL">
+            <button class="filter-btn ${this.selectedFilter === 'ALL' ? 'active' : ''}" data-action="filter-roster" data-filter="ALL" aria-pressed="${this.selectedFilter === 'ALL'}">
               已認識房客 (${metChars.length})
             </button>
-            <button class="filter-btn ${this.selectedFilter === 'OBSERVING' ? 'active' : ''}" data-action="filter-roster" data-filter="OBSERVING">
+            <button class="filter-btn ${this.selectedFilter === 'OBSERVING' ? 'active' : ''}" data-action="filter-roster" data-filter="OBSERVING" aria-pressed="${this.selectedFilter === 'OBSERVING'}">
               📖 故事進行中 (${observingCount})
             </button>
-            <button class="filter-btn ${this.selectedFilter === 'DIAGNOSED' ? 'active' : ''}" data-action="filter-roster" data-filter="DIAGNOSED">
+            <button class="filter-btn ${this.selectedFilter === 'DIAGNOSED' ? 'active' : ''}" data-action="filter-roster" data-filter="DIAGNOSED" aria-pressed="${this.selectedFilter === 'DIAGNOSED'}">
               ✓ 故事已完成 (${diagnosedCount})
             </button>
           </div>
@@ -2393,8 +2504,22 @@ class EdgeOfLoveGame {
   }
 
   renderCharacterCard(char) {
-    const cs=this.state.characters[char.id],rel=this.getRelationshipStatusInfo(char,cs);
-    return `<article class="char-card otome-gacha-card" id="rel-char-card-${char.id}" style="--char-color:${char.themeColor}"><div class="gacha-card-visual">${renderCharacterSVG(char,'neutral','portrait')}</div><div class="char-card-body"><h3>${escapeHtml(char.name)}</h3><p class="character-occupation">${escapeHtml(char.occupation)}</p><p class="character-relationship">${escapeHtml(rel.label)}</p>${this.renderRelationshipMeters(char)}<div class="relationship-records"><section><h4>故事進度</h4><p>已讀 ${cs.eventCompleted} / 15 幕</p></section><section><h4>互動紀錄</h4><p>${cs.diary.length} 段回憶</p></section></div><div class="char-card-actions"><button class="nav-btn btn-accent" data-action="open-event-tree-modal" data-char-id="${char.id}">選幕與重玩</button><button class="nav-btn" data-action="open-learning" data-char-id="${char.id}">學習回顧</button>${cs.eventCompleted>=15?`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}">結局與角色案例</button>`:''}</div><details class="character-details"><summary>人物介紹與更多操作</summary><p>${escapeHtml(char.shortBio)}</p><p>${escapeHtml(char.genderLabel)}・${escapeHtml(char.orientationLabel)}</p><button class="nav-btn" data-action="start-event" data-char-id="${char.id}" data-event-num="1">重溫初遇</button></details>${this.renderCharacterDiaryDrawer(char,cs,false)}</div></article>`;
+    const cs = this.state.characters[char.id], rel = this.getRelationshipStatusInfo(char, cs);
+    return `<article class="char-card otome-gacha-card" id="rel-char-card-${char.id}" style="--char-color:${char.themeColor}">
+      <div class="gacha-card-visual">${renderCharacterSVG(char, 'neutral', 'portrait')}</div>
+      <div class="char-card-body"><h3>${escapeHtml(char.name)}</h3><p class="character-occupation">${escapeHtml(char.occupation)}</p><p class="character-relationship">${escapeHtml(rel.label)}</p>
+      <p class="character-progress">已讀 ${cs.eventCompleted}／15 幕 · ${cs.diary.length} 段回憶</p>
+      ${this.renderRelationshipMeters(char)}
+      <div class="char-card-actions"><button class="nav-btn" data-action="open-event-tree-modal" data-char-id="${char.id}">選幕與重玩</button><button class="nav-btn" data-action="open-learning" data-char-id="${char.id}">學習回顧</button><button class="nav-btn" data-action="open-diary" data-char-id="${char.id}">相處日記</button>${cs.eventCompleted >= 15 ? `<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}">結局與角色案例</button>` : ''}</div>
+      <details class="character-details"><summary>人物介紹</summary><p>${escapeHtml(char.shortBio)}</p><p>${escapeHtml(char.genderLabel)}・${escapeHtml(char.orientationLabel)}</p><button class="nav-btn" data-action="start-event" data-char-id="${char.id}" data-event-num="1">重溫初遇</button></details></div></article>`;
+  }
+
+  renderDiaryModal(charId) {
+    const char = CHARACTERS.find(c => c.id === charId);
+    const root = document.getElementById('modal-root');
+    if (!char || !root) return;
+    root.innerHTML = `<div class="modal-backdrop" data-action="close-modal"><section class="modal-window diary-modal"><div class="modal-header"><h2>${escapeHtml(char.name)}｜相處日記</h2><button class="btn-close" data-action="close-modal" aria-label="關閉相處日記">✕</button></div><div class="modal-body">${this.renderCharacterDiaryDrawer(char, this.state.characters[charId], false)}</div></section></div>`;
+    root.querySelector('details')?.setAttribute('open', '');
   }
 
   // ==================== 彈窗：15 事件決策樹總覽（隱藏功能，已移除舊版章節阻擋） ====================
@@ -2456,6 +2581,10 @@ class EdgeOfLoveGame {
   }
 
   // ==================== 過往相處日記（預設折疊，點擊展開查看過往互動與已記錄之 DSM 觀察判斷） ====================
+  renderDiaryEntry(char, cs) {
+    return `<button class="scene-diary-entry nav-btn" data-action="open-diary" data-char-id="${char.id}"><span>📔 相處日記</span><span>${cs.diary.length} 段回憶 <span aria-hidden="true">›</span></span></button>`;
+  }
+
   renderCharacterDiaryDrawer(char, cs, isSceneView = true) {
     const diaryEntries = Array.isArray(cs.diary) ? cs.diary : [];
     const drawerClass = isSceneView ? 'vn-diary-drawer' : 'card-diary-dossier';
@@ -2557,7 +2686,7 @@ class EdgeOfLoveGame {
     if(!Array.isArray(record.attempts))record.attempts=[];
     if(record.attempts.at(-1)?.correct||record.attempts.some(x=>x.optionId===optionId))return false;
     const attempt={optionId,correct:option.correct,at:Date.now()};record.attempts.push(attempt);
-    record.firstCorrect=record.attempts[0].correct;record.correct=option.correct;
+    record.firstCorrect=record.attempts[0].correct;record.correct=option.correct;record.revision=task.revision||1;
     cs.knowledge[taskId]=record;this.autoSave();this.render();
     if(this.learningModalChar===charId)this.renderLearningModal(charId);
     return true;
@@ -2577,10 +2706,16 @@ class EdgeOfLoveGame {
     return getLearningTasks(charId,eventData.eventNumber).map(task=>this.renderLearningTask(charId,{...task,stage:eventData.eventNumber})).join('');
   }
 
+  renderLearningArchive(charId){
+    const entries=Object.values(this.state.characters[charId].knowledgeArchive||{});
+    if(!entries.length)return '';
+    return `<details class="learning-archive"><summary>改寫前的題目與作答</summary><p>以下保留原題紀錄；新題另行作答，不影響關係分數。</p>${entries.map(({task,record})=>`<section><h3>${escapeHtml(task?.prompt||'先前的題目')}</h3><p>首次作答：${record.firstCorrect?'推理方向合適':'需要補充'}</p><ul>${(record.attempts||[]).map(attempt=>`<li>${escapeHtml(task?.options?.find(o=>o.id===attempt.optionId)?.text||attempt.optionId)}：${attempt.correct?'推理方向合適':'需要補充'}</li>`).join('')}</ul></section>`).join('')}</details>`;
+  }
+
   renderLearningModal(charId){
     const c=CHARACTERS.find(c=>c.id===charId),root=document.getElementById('modal-root');if(!c||!root||!this.isRouteUnlocked(charId))return;
     this.learningModalChar=charId;
-    root.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal-window learning-modal"><div class="modal-header"><h2>${escapeHtml(c.name)}｜學習回顧</h2><button class="btn-close" data-action="close-modal" aria-label="關閉學習回顧">✕</button></div><div class="modal-body"><p>首次與重試分開保存。完成或答對不代表已驗證學習成效，也不影響相處與結局。</p>${[3,8,12,15].map(stage=>this.renderLearningPrompt(charId,{eventNumber:stage})).join('')}</div></div></div>`;
+    root.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal-window learning-modal"><div class="modal-header"><h2>${escapeHtml(c.name)}｜學習回顧</h2><button class="btn-close" data-action="close-modal" aria-label="關閉學習回顧">✕</button></div><div class="modal-body"><p>首次與重試分開保存。完成或答對不代表已驗證學習成效，也不影響相處與結局。</p>${[3,8,12,15].map(stage=>this.renderLearningPrompt(charId,{eventNumber:stage})).join('')}${this.renderLearningArchive(charId)}</div></div></div>`;
   }
 
   renderEvidenceChecklist(char) {
@@ -2604,8 +2739,16 @@ class EdgeOfLoveGame {
     if(preview)return '<p>以下是另一條路的示例，不套用這一輪選擇，也不改變同意或進度。</p>';
     const cs=this.state.characters[charId],r=STORY_ROUTES[charId];
     const memories=Object.values(cs.memories).map(m=>`<li>${escapeHtml(m.event)}：${escapeHtml(m.choice)}</li>`).join('');
-    const tasks=['firstAgreement','repairPlan'].map(task=>{const d=this.getTaskDecision(charId,task);return d?`<p><strong>${escapeHtml(d.label)}</strong>：${escapeHtml(r.checkpoints[task][d.status])}</p>`:'';}).join('');
+    const tasks=['firstAgreement','repairPlan'].map(task=>{const d=this.getTaskDecision(charId,task);return d?`<p><strong>${escapeHtml(d.label)}</strong>：${escapeHtml(this.getTaskSummary(charId,d))}</p>`:'';}).join('');
     return `<details class="ending-continuity"><summary>相處片段與未完的事</summary>${tasks}${memories?`<details><summary>你們實際選擇過的日常</summary><ul>${memories}</ul></details>`:''}<p>你的意願：${{romantic:'想嘗試戀愛',friendship:'希望做朋友',distance:'需要距離'}[cs.relationshipIntent]||'尚未表達'}；對方目前：${{romantic:'願意嘗試約會',friendship:cs.relationshipIntent==='friendship'?'願意做朋友':'暫不交往，保留朋友的可能',distance:'需要暫停私人互動'}[cs.characterConsent]||'未確認'}。</p></details>`;
+  }
+
+  getTaskSummary(charId,decision,eventNumber=15) {
+    const r=STORY_ROUTES[charId],cs=this.state.characters[charId];
+    if(decision.task==='repairPlan'&&charId==='you_ziqian'&&eventNumber>=13&&cs.eventCompleted>=12)return r.letterAfterReply;
+    if(decision.summary)return `上次談到這裡：${decision.summary}`;
+    const summary=r.checkpoints[decision.task]?.[decision.status]||'這項安排還沒有確認，仍由本人決定。';
+    return eventNumber>=13?`先前安排的紀錄：${summary}`:summary;
   }
 
   getTaskDecision(charId, task, before=15) {
@@ -2626,15 +2769,15 @@ class EdgeOfLoveGame {
     const ev=JSON.parse(JSON.stringify(this.getEventsForChar(charId).find(e=>e.eventNumber===number)));
     const cs=this.state.characters[charId],r=STORY_ROUTES[charId];
     if(number===14){
-      const consent=this.getCharacterConsent(charId);
+      const consent=this.getCharacterConsent(charId),replies=DECLINED_INVITATIONS[charId];
       if(consent!=='romantic'){
-        ev.nodes[1].text=r.slow;
-        ev.nodes[1].choices[0].replyCore=r.slow+' 你把原本想說的話留在唇邊，點了點頭。今天不開始戀愛；失落還在，你沒有急著把它藏好。';
-        ev.nodes[1].choices[3].replyCore=r.slow+' 這串承諾沒有改變對方的答案。今天不開始戀愛，也不先替以後的見面作保證。';
-        if(consent==='distance')ev.nodes[1].choices[1].replyCore='對方把最後一件交接物推回桌面，沒有接下私下見面的邀請。你點頭收起東西。朋友的稱呼，今天還沒落在你們之間。';
+        ev.nodes[0].text=PAUSED_CLOSURES[charId];
+        ev.nodes[1].text=consent==='distance'?DISTANCE_LINES[charId]:r.slow;
+        for(const index of [0,3,4])ev.nodes[1].choices[index].replyCore=replies[index===0?0:index===3?2:3];
+        if(consent==='distance')ev.nodes[1].choices[1].replyCore=replies[1];
       }
     }
-    const stalled=number===13&&['firstAgreement','repairPlan'].some(task=>['takenOver','ruptured'].includes(this.getTaskDecision(charId,task,number)?.status));
+    const stalled=number===13&&['firstAgreement','repairPlan'].some(task=>['takenOver','ruptured','unsettled'].includes(this.getTaskDecision(charId,task,number)?.status));
     if(stalled){
       // Keep the actual daily question and its matching result; unfinished work is separate.
       for(const choice of ev.nodes[1].choices)choice.memory=null;
@@ -2647,8 +2790,8 @@ class EdgeOfLoveGame {
   getContinuityText(charId,eventNumber) {
     const r=STORY_ROUTES[charId],lines=[];
     const task=eventNumber===6?'firstAgreement':eventNumber===11?'repairPlan':null;
-    if(task){const d=this.getTaskDecision(charId,task,eventNumber);if(d)lines.push(`${r.checkpoints[task][d.status]}`);}
-    if(eventNumber===13){for(const name of ['firstAgreement','repairPlan']){const d=this.getTaskDecision(charId,name,eventNumber);if(d)lines.push(name==='repairPlan'&&charId==='you_ziqian'&&this.state.characters[charId].eventCompleted>=12?[r.letterAfterReply,['takenOver','ruptured'].includes(d.status)?r.checkpoints[name][d.status]:null].filter(Boolean).join(' '):`${r.checkpoints[name][d.status]}`);}}
+    if(task){const d=this.getTaskDecision(charId,task,eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}
+    if(eventNumber===13){for(const name of ['firstAgreement','repairPlan']){const d=this.getTaskDecision(charId,name,eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}}
     if([6,11,13].includes(eventNumber)&&this.getEthicsInfo(charId).active)lines.push(r.ethicsContext);
     return lines.join('\n\n');
   }
@@ -2665,7 +2808,7 @@ class EdgeOfLoveGame {
   renderInteractionAnalysis(char, event, node, outcome) {
     const choice=node.choices?.find(c=>this.formatText(c.text)===outcome.choiceText);
     const status=choice?.decision?.status;
-    const consequence=status?{committed:'你們說好要做什麼。是否做完，得看後續。',deferred:'你把時間或能幫的部分說清楚，其他事還沒答應。',takenOver:'你說得很甜，卻也接下沒談好的決定或責任，對方不一定願意。',ruptured:'這句冷淡的話讓對方不想再談。必要工作還是得交代。'}[status]:choice?.relationshipIntent?'這裡記錄的是你表達的關係方向；對方有自己的答案，原本的分數不替任何人承諾。':choice?.healthy?'這次回應保留了可以討論的範圍，先看對方實際如何接話，而不把一次順利當成整體改變。':'本次反應已顯示這種回覆的代價；承諾、批評或代替他人決定，需要和當事人的需要分開看。';
+    const consequence=status?{committed:'你們說好要做什麼。是否做完，得看後續。',deferred:'你把時間或能幫的部分說清楚，其他事還沒答應。',takenOver:'你曾提出代為處理，但仍需核對對方是否同意及實際交接。',unsettled:'這次不安有被說出來，但請求與分工還沒有談定。',ruptured:'這句冷淡的話讓對方不想再談。必要工作還是得交代。'}[status]:choice?.relationshipIntent?'這裡記錄的是你表達的關係方向；對方有自己的答案，原本的分數不替任何人承諾。':choice?.healthy?'這次回應保留了可以討論的範圍，先看對方實際如何接話，而不把一次順利當成整體改變。':'本次反應已顯示這種回覆的代價；承諾、批評或代替他人決定，需要和當事人的需要分開看。';
     const core=outcome.replyCore||choice?.replyCore||outcome.reply.split('\n\n')[0];
     const reactionFocus=status?consequence:choice?.relationshipIntent?'這是本次表達方向後的實際回覆，不能由親近分數替代；之後的接觸仍需再次詢問。':event.type==='caseStudy'?'這次資料分享只涵蓋本人同意的內容，不能補成尚未親見的經驗，也不讓閱讀本身成為診斷。':(outcome.criteriaBasis?.length?'回覆中已發生的動作與安排可以記錄，仍不能單憑一次順利或不順利，證明長期模式已改變或診斷成立。':'這裡呈現的是一次具體互動，沒有新增診斷準則。共同完成什麼、還有什麼未答應，需照當下反應分開留下。');
     const bases=outcome.criteriaBasis||[];
@@ -2675,16 +2818,19 @@ class EdgeOfLoveGame {
   renderCompletedCaseDossier(char) {
     const cs = this.state.characters[char.id], r = STORY_ROUTES[char.id];
     if (cs.eventCompleted < 15) return '';
+    const id = suffix => `case-${char.id}-${suffix}`;
+    const continuity = this.renderEndingContinuity(char.id,cs.endingKey,false)
+      .replace('<details class="ending-continuity"><summary>相處片段與未完的事</summary>', '<section class="ending-continuity"><h5>相處片段與未完的事</h5>')
+      .replace(/<\/details>$/, '</section>');
     return `<details class="ending-clinical-box completed-case-dossier">
-      <summary>角色案例解析</summary>
-      <div class="case-dossier-content">
-        <header class="case-dossier-header"><span class="case-eyebrow">角色故事已完成</span><h3>${escapeHtml(char.name)}</h3><p class="case-diagnosis">${escapeHtml(char.dsmTitle)} <span>${escapeHtml(char.dsmCode)}</span></p><p>以下分開呈現本人的說法、作者案例設定，以及你在這一輪讀到的線索。</p></header>
-        <section class="case-section case-self-understanding"><div class="case-section-heading"><span aria-hidden="true">01</span><h4>本人分享的自我理解</h4></div><p>${escapeHtml(r.memory)}</p></section>
-        <section class="case-section case-background"><div class="case-section-heading"><span aria-hidden="true">02</span><h4>作者案例背景</h4></div>${this.renderStudySummary(r.history,'案例背景',false)}<div class="case-other-explanations"><h5>其他解釋與評估限制</h5><p>${escapeHtml(r.differential)}</p></div></section>
-        <details class="case-section case-evidence"><summary><span class="case-section-heading"><span aria-hidden="true">03</span><strong>本角色的準則與故事證據</strong></span><small>展開查看這一輪紀錄</small></summary><div class="case-evidence-content">${this.renderEvidenceChecklist(char)}${char.specifiers.length?`<section class="case-specifiers"><h5>補充說明</h5>${char.specifiers.map(sp=>`<p><strong>${escapeHtml(sp.title)}</strong>：${escapeHtml(sp.desc)}</p>`).join('')}</section>`:''}</div></details>
-        <section class="case-resources"><div class="case-section-heading"><span aria-hidden="true">04</span><h4>延伸閱讀與相處回顧</h4></div><details class="educational-sources"><summary>教材來源</summary><ul>${CLINICAL_SOURCES.map(([title,url])=>`<li><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></li>`).join('')}</ul></details>${this.renderEndingContinuity(char.id,cs.endingKey,false)}<details class="ending-practice"><summary>延伸練習：新的情境</summary>${this.renderLearningPrompt(char.id,{eventNumber:15})}</details></section>
-      </div>
-    </details>`;
+      <summary>角色案例解析</summary><div class="case-dossier-content">
+      <header class="case-dossier-header"><span class="case-eyebrow">角色故事已完成</span><h3>${escapeHtml(char.name)}</h3><p class="case-diagnosis">${escapeHtml(char.dsmTitle)} <span>${escapeHtml(char.dsmCode)}</span></p><p>分開閱讀本人的說法、作者案例設定，以及這一輪的線索。</p></header>
+      <nav class="case-section-nav" aria-label="角色案例區段">${[['self','自我理解'],['background','案例背景'],['evidence','準則與證據'],['resources','延伸與回顧']].map(([key,label])=>`<button class="nav-btn" data-action="jump-case-section" data-section="${id(key)}">${label}</button>`).join('')}</nav>
+      <section id="${id('self')}" tabindex="-1" class="case-section case-self-understanding"><div class="case-section-heading"><span aria-hidden="true">01</span><h4>本人分享的自我理解</h4></div><p>${escapeHtml(r.memory)}</p></section>
+      <section id="${id('background')}" tabindex="-1" class="case-section case-background"><div class="case-section-heading"><span aria-hidden="true">02</span><h4>作者案例背景</h4></div>${this.renderStudySummary(r.history,'案例背景',false)}<div class="case-other-explanations"><h5>其他解釋與評估限制</h5><p>${escapeHtml(r.differential)}</p></div></section>
+      <section id="${id('evidence')}" tabindex="-1" class="case-section case-evidence"><div class="case-section-heading"><span aria-hidden="true">03</span><h4>本角色的準則與故事證據</h4></div><div class="case-evidence-content">${this.renderEvidenceChecklist(char)}${char.specifiers.length?`<section class="case-specifiers"><h5>補充說明</h5>${char.specifiers.map(sp=>`<p><strong>${escapeHtml(sp.title)}</strong>：${escapeHtml(sp.desc)}</p>`).join('')}</section>`:''}</div></section>
+      <section id="${id('resources')}" tabindex="-1" class="case-section case-resources"><div class="case-section-heading"><span aria-hidden="true">04</span><h4>延伸閱讀與相處回顧</h4></div><section class="educational-sources"><h5>教材來源</h5><ul>${CLINICAL_SOURCES.map(([title,url])=>`<li><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></li>`).join('')}</ul></section>${continuity}<section class="ending-practice"><h5>延伸練習：新的情境</h5>${this.renderLearningPrompt(char.id,{eventNumber:15})}</section></section>
+      </div></details>`;
   }
 
   renderScenePortraits(char, scene) {
@@ -2701,17 +2847,17 @@ class EdgeOfLoveGame {
     if(sc.mode==='daily')return this.renderDailyScene(char,cs,route,diag);
     const ev=sc.eventData,node=ev.nodes[sc.nodeIndex],out=sc.lastChoiceOutcome;
     const text=this.renderProse(node.text,node.speaker==='narrator');
-    return `<section class="vn-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><div class="vn-loc-info"><span class="vn-chap-badge">${ev.code} / E15</span><strong>${escapeHtml(ev.title.replace(/^E\d+\s*[｜|]\s*/,''))}</strong><small>${escapeHtml(ev.locationName||'')}・${escapeHtml(ev.ambience)}</small></div>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid ${ev.partnerId?'ensemble-scene':''}"><div class="vn-portrait-column">${this.renderScenePortraits(char,sc)}</div><div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner"><strong>${node.speaker==='char'?escapeHtml(char.name):node.speaker==='ensemble'?'同場對話':'旁白'}</strong><span>STEP ${sc.nodeIndex+1} / ${ev.nodes.length}</span></div>${text}${ev.continuityText?`<details class="scene-continuity"><summary>先前的安排</summary>${this.renderProse(ev.continuityText)}</details>`:''}${sc.awaitingNextAfterChoice&&out?`<div class="choice-outcome-box"><p>你的回應：${escapeHtml(out.choiceText)}</p>${this.renderProse(out.reply)}${this.formatStatDeltas(out.stats)}</div>${this.state.studyMode?this.renderInteractionAnalysis(char,ev,node,out):''}${this.state.studyMode?this.renderLearningPrompt(char.id,ev):''}<button class="btn-vn-continue" data-action="next-node">繼續下一段劇情 ▶</button>`:node.choices?.length?`<div class="vn-choices-list">${this.getChoiceOrder(node).map((index,pos)=>`<button class="vn-choice-btn" data-action="select-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${escapeHtml(this.formatText(node.choices[index].text))}</span></button>`).join('')}</div>`:'<button class="btn-vn-continue" data-action="next-node">下一段對話 ▶</button>'}</div>${this.renderCharacterDiaryDrawer(char,cs,true)}</div></div></section>`;
+    return `<section class="vn-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><div class="vn-loc-info"><span class="vn-chap-badge">${ev.code} / E15</span><strong>${escapeHtml(ev.title.replace(/^E\d+\s*[｜|]\s*/,''))}</strong><small>${escapeHtml(ev.locationName||'')}・${escapeHtml(ev.ambience)}</small></div>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid ${ev.partnerId?'ensemble-scene':''}"><div class="vn-portrait-column">${this.renderScenePortraits(char,sc)}</div><div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner"><strong>${node.speaker==='char'?escapeHtml(char.name):node.speaker==='ensemble'?'同場對話':'旁白'}</strong><span>STEP ${sc.nodeIndex+1} / ${ev.nodes.length}</span></div>${text}${ev.continuityText?`<details class="scene-continuity"><summary>先前的安排</summary>${this.renderProse(ev.continuityText)}</details>`:''}${sc.awaitingNextAfterChoice&&out?`<div class="choice-outcome-box"><p>你的回應：${escapeHtml(out.choiceText)}</p>${this.renderProse(out.reply)}${this.formatStatDeltas(out.stats)}</div>${this.state.studyMode?this.renderInteractionAnalysis(char,ev,node,out):''}${this.state.studyMode?this.renderLearningPrompt(char.id,ev):''}<button class="btn-vn-continue" data-action="next-node">繼續下一段劇情 ▶</button>`:node.choices?.length?`<div class="vn-choices-list">${this.getChoiceOrder(node).map((index,pos)=>`<button class="vn-choice-btn" data-action="select-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${escapeHtml(this.formatText(node.choices[index].text))}</span></button>`).join('')}</div>`:'<button class="btn-vn-continue" data-action="next-node">下一段對話 ▶</button>'}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
   renderDailyScene(char, cs, route, diag) {
     const { talk, picked, expression } = this.activeScene;
     const text = value => escapeHtml(this.formatText(value || ''));
     return `<section class="vn-stage" style="--char-color:${char.themeColor}">
-      <div class="vn-top-bar"><strong>日常時光・${text(talk.title)}</strong><button class="nav-btn" data-action="exit-scene">↩ 返回</button>${this.renderRelationshipMeters(char)}</div>
+      <div class="vn-top-bar daily-top-bar"><div class="daily-heading"><button class="nav-btn" data-action="exit-scene">← 返回故事</button><strong>日常回看・${text(talk.title)}</strong></div>${this.renderRelationshipMeters(char)}</div>
       <div class="vn-main-grid"><div class="vn-portrait-column"><div class="vn-portrait-frame">${renderCharacterSVG(char,expression || 'smile','portrait')}</div></div>
-      <div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner">${text(char.name)}・日常時光</div>${this.renderProse(talk.prompt)}${talk.response?this.renderProse(talk.response,false):''}${picked?`<div class="choice-outcome-box"><p>你：${text(picked.text)}</p>${this.renderProse(picked.reply)}${this.formatStatDeltas(picked.stats)}</div>`:''}
-      ${picked?'<button class="btn-vn-continue" data-action="next-node">完成日常互動 ▶</button>':`<div class="vn-choices-list">${this.getChoiceOrder(talk).map(index=>`<button class="vn-choice-btn" data-action="daily-choice" data-choice-index="${index}">${text(talk.choices[index].text)}</button>`).join('')}</div>`}</div>${this.renderCharacterDiaryDrawer(char,cs,true)}</div></div></section>`;
+      <div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner">${text(char.name)}・已走過的相處片段</div>${this.renderProse(talk.prompt)}${talk.response?this.renderProse(talk.response,false):''}${picked?`<div class="choice-outcome-box"><p>你：${text(picked.text)}</p>${this.renderProse(picked.reply)}${this.formatStatDeltas(picked.stats)}</div>`:''}
+      ${picked?'<button class="btn-vn-continue" data-action="next-node">完成日常互動 ▶</button>':`<div class="vn-choices-list">${this.getChoiceOrder(talk).map((index,pos)=>`<button class="vn-choice-btn" data-action="daily-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${text(talk.choices[index].text)}</span></button>`).join('')}</div>`}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
   renderEndingScene(char, cs, route, diag) {
@@ -2719,7 +2865,7 @@ class EdgeOfLoveGame {
     let text=preview?endingData.romanticText:(cs.relationshipIntent==='romantic'&&endingKey==='trueEnd'?endingData.romanticText:endingData.soulmateText);
 
     const earned=cs.endingKey||'normalEnd';
-    return `<section class="vn-stage ending-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><strong>${preview?'其他結局預覽（不代表這一輪結果）':'E15｜這一輪的故事結局'}・${escapeHtml(char.name)}</strong><small>${escapeHtml(this.activeScene.locationName||'展覽之後')}</small>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid"><div class="vn-portrait-column"><div class="vn-portrait-frame">${renderCharacterSVG(char,this.activeScene.expression,'portrait')}</div></div><div class="vn-dialogue-column"><div class="vn-dialogue-box ending-card"><h2>${escapeHtml(endingData.title)}</h2><p>${escapeHtml(endingData.subtitle)}</p>${this.renderProse(text)}${!preview&&this.getEthicsInfo(char.id).active?`<details class="ending-ethics"><summary>還沒處理完的爭議</summary>${this.renderProse(STORY_ROUTES[char.id].ethicsEnding)}</details>`:''}${preview?'':this.renderCompletedCaseDossier(char)}<details class="ending-switcher"><summary>比較其他結局（僅預覽，不改變這一輪選擇）</summary><div class="ending-options">${Object.entries(ALL_SCENARIOS[char.id].endings).map(([key,end])=>`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}" data-ending-key="${key}">${escapeHtml(end.title)}</button>`).join('')}</div></details>${preview?`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}">回到這一輪的結局：${escapeHtml(ALL_SCENARIOS[char.id].endings[earned].title)}</button>`:''}<button class="btn-vn-continue" data-action="exit-scene">返回公寓繼續邂逅其他角色 ▶</button></div>${this.renderCharacterDiaryDrawer(char,cs,true)}</div></div></section>`;
+    return `<section class="vn-stage ending-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><strong>${preview?'其他結局預覽（不代表這一輪結果）':'E15｜這一輪的故事結局'}・${escapeHtml(char.name)}</strong><small>${escapeHtml(this.activeScene.locationName||'展覽之後')}</small>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid"><div class="vn-portrait-column"><div class="vn-portrait-frame">${renderCharacterSVG(char,this.activeScene.expression,'portrait')}</div></div><div class="vn-dialogue-column"><div class="vn-dialogue-box ending-card"><h2>${escapeHtml(endingData.title)}</h2><p>${escapeHtml(endingData.subtitle)}</p>${this.renderProse(text)}${!preview&&this.getEthicsInfo(char.id).active?`<details class="ending-ethics"><summary>還沒處理完的爭議</summary>${this.renderProse(STORY_ROUTES[char.id].ethicsEnding)}</details>`:''}${preview?'':this.renderCompletedCaseDossier(char)}<details class="ending-switcher"><summary>比較其他結局（僅預覽，不改變這一輪選擇）</summary><div class="ending-options">${Object.entries(ALL_SCENARIOS[char.id].endings).map(([key,end])=>`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}" data-ending-key="${key}">${escapeHtml(end.title)}</button>`).join('')}</div></details>${preview?`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}">回到這一輪的結局：${escapeHtml(ALL_SCENARIOS[char.id].endings[earned].title)}</button>`:''}<button class="btn-vn-continue" data-action="exit-scene">返回公寓繼續邂逅其他角色 ▶</button></div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
   // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格障礙症診斷準則手冊 ====================
@@ -2744,8 +2890,9 @@ class EdgeOfLoveGame {
   }
 
   renderSideDsmCriteriaWidget() {
-    return `<aside class="dsm-side-widget-container ${this.dsmWidgetOpen?'is-open':''}"><button class="dsm-side-launcher-tab" data-action="toggle-dsm-widget" aria-label="${this.dsmWidgetOpen?'關閉':'開啟'}準則參照" aria-controls="dsm-reference-drawer" aria-expanded="${this.dsmWidgetOpen}"><span class="launcher-icon">📖</span><span class="launcher-text">準則參照</span></button><div id="dsm-reference-drawer" class="dsm-side-drawer" ${this.dsmWidgetOpen?'':'hidden'}><div class="dsm-drawer-header"><h3>📖 DSM-5-TR 準則參照</h3><button class="btn-close" data-action="toggle-dsm-widget" aria-label="收合準則參照">✕</button></div><div class="dsm-drawer-body">${this.renderDsmReferenceTab()}</div></div></aside>`;
+    return `<aside class="dsm-side-widget-container ${this.dsmWidgetOpen ? 'is-open' : ''}" ${this.dsmWidgetOpen ? '' : 'hidden'}><button class="reference-backdrop" data-action="toggle-dsm-widget" aria-label="關閉準則參照" tabindex="-1"></button><section id="dsm-reference-drawer" class="dsm-side-drawer" role="dialog" aria-modal="true" aria-labelledby="reference-drawer-title" tabindex="-1"><div class="dsm-drawer-header"><h2 id="reference-drawer-title">📖 準則參照</h2><button class="btn-close" data-action="toggle-dsm-widget" aria-label="關閉準則參照">✕</button></div><div class="dsm-drawer-body">${this.renderDsmReferenceTab()}</div></section></aside>`;
   }
+
 
   renderSaveModal() {
     const modalRoot = document.getElementById('modal-root');
@@ -2753,8 +2900,7 @@ class EdgeOfLoveGame {
 
     const slots = [1, 2, 3].map((num) => {
       const raw =
-        localStorage.getItem(`edge_of_love_slot_${num}`) ||
-        sessionStorage.getItem(`edge_of_love_slot_${num}`);
+        this.readBrowserSave(`edge_of_love_slot_${num}`);
       let info = null;
       if (raw) {
         try {
@@ -2782,8 +2928,8 @@ class EdgeOfLoveGame {
             <div class="save-slot-card" style="border-color:#f472b6;">
               <div>
                 <strong style="color:#f9a8d4;">⚡ 自動儲存</strong>
-                <p>主角：${this.state.player.name}｜已走完 ${CHARACTERS.filter(c=>this.isStoryFinished(c.id)).length} / 12 位角色故事</p>
-                <small>狀態：已同步於瀏覽器，關閉分頁或下次開啟時將自動載入</small>
+                <p>主角：${escapeHtml(this.state.player.name)}｜已走完 ${CHARACTERS.filter(c=>this.isStoryFinished(c.id)).length} / 12 位角色故事</p>
+                <small role="status">${this.saveError ? (this.saveSessionOnly ? '僅暫存於此分頁，請勿關閉分頁。' : '儲存失敗，請檢查瀏覽器儲存空間。') : `已儲存於此瀏覽器${this.lastSavedTime ? '・' + escapeHtml(this.lastSavedTime) : ''}`}</small>
               </div>
             </div>
 
@@ -2796,13 +2942,13 @@ class EdgeOfLoveGame {
                       <strong>手動記憶槽位 #${num}</strong>
                       ${
                         st
-                          ? `<p>主角：${st.player.name}</p>
+                          ? `<p>主角：${escapeHtml(st.player.name)}・${CHARACTERS.filter(c=>(st.characters?.[c.id]?.eventCompleted||0)>=15).length}／12 位故事完成</p>
                              <small>儲存時間：${info.savedAt}</small>`
                           : `<p style="color:#cbd5e1;">— 空白槽位 —</p>`
                       }
                     </div>
                     <div class="save-slot-btns">
-                      <button type="button" class="btn-action-primary" data-action="save-slot" data-slot="${num}">儲存至此槽</button>
+                      <button type="button" class="btn-action-primary" data-action="save-slot" data-slot="${num}">${st ? '覆寫此槽' : '儲存至此槽'}</button>
                       ${
                         st
                           ? `<button type="button" class="btn-action-secondary" data-action="load-slot" data-slot="${num}">讀取</button>`

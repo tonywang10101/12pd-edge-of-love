@@ -125,24 +125,24 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "比較解釋",
-      "prompt": "見微不想參加茶會，溫言卻很想去。哪個問題最有助理解差異？",
+      "prompt": "見微能專注修錶，卻反覆漏掉必要交班，哪種理解較有根據？",
       "options": [
         {
           "id": "evidence",
-          "text": "是偏好獨處，還是想連結卻因害怕拒絕而退縮？",
-          "feedback": "相似的缺席可能有不同動機，還需長期與功能資料。",
+          "text": "手藝、獨處偏好與必要聯繫的功能影響應分開理解，還要看長期脈絡。",
+          "feedback": "修得好不會取消交班影響，漏接也不能單獨證明人格障礙。",
           "correct": true
         },
         {
           "id": "alternative",
-          "text": "誰最後有下樓？",
-          "feedback": "是否參加一次活動不能完成鑑別。",
+          "text": "只要修得好，漏接就不用再了解。",
+          "feedback": "工作能力與某一環節的困難可以並存。",
           "correct": false
         },
         {
           "id": "inference",
-          "text": "誰的笑容比較少？",
-          "feedback": "外顯情感與內心需求不能直接等同。",
+          "text": "不回電話已足夠確定她不在乎任何人。",
+          "feedback": "一種行為不能直接證明所有關係中的動機與感受。",
           "correct": false
         }
       ]
@@ -419,24 +419,24 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "比較解釋",
-      "prompt": "花費、酒精與反覆自傷應怎麼對應？",
+      "prompt": "E05 兩疊帳單分別涉及購物與喝過量，應如何整理線索？",
       "options": [
         {
           "id": "evidence",
-          "text": "前兩者可討論不同衝動領域，自傷史另列，不重複湊項。",
-          "feedback": "A4 至少兩個潛在自我損害領域，與 A5 分開。",
+          "text": "分別確認反覆性、情境及損害，不能只憑帳單或喝過酒就判定衝動準則。",
+          "feedback": "兩個不同領域提供討論方向，仍須確認程度與影響，不由玩家回應決定。",
           "correct": true
         },
         {
           "id": "alternative",
-          "text": "同一次自傷可以同時湊兩種衝動。",
-          "feedback": "同一次自傷不能重複拿來湊 A4 的兩個領域；自傷史應另列 A5。",
+          "text": "有花錢又喝酒，就不需要再問後果。",
+          "feedback": "一般消費與飲酒不直接等於具有損害性的衝動模式。",
           "correct": false
         },
         {
           "id": "inference",
-          "text": "所有衝動都只算情緒不穩。",
-          "feedback": "不同準則有不同概念，不宜混成一項。",
+          "text": "兩疊都發生在難過時，所以必須合成同一次事件。",
+          "feedback": "觸發相近不代表是同一次行為，時間與事件仍應分開記錄。",
           "correct": false
         }
       ]
@@ -909,24 +909,24 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "比較解釋",
-      "prompt": "哪一項較適合討論難以丟棄無價值物品？",
+      "prompt": "簡章已達共同要求仍反覆修改，與必要的專業覆核差在哪裡？",
       "options": [
         {
           "id": "evidence",
-          "text": "無用途、無情感價值的破扣占用空間且難以丟棄。",
-          "feedback": "仍需理解其他原因；保存父親合照不屬相同證據。",
+          "text": "需看額外標準是否超出任務需要，並反覆妨礙完成、分工或人際。",
+          "feedback": "先理解標準的目的、比例與代價，不由精細程度單獨判定。",
           "correct": true
         },
         {
           "id": "alternative",
-          "text": "留下父親合照。",
-          "feedback": "這有明確情感價值。",
+          "text": "只要有兩份清單，就表示控制僵化。",
+          "feedback": "清單可協助分工，還須看實際用法與影響。",
           "correct": false
         },
         {
           "id": "inference",
-          "text": "保留需要用的備品。",
-          "feedback": "合理備品不是無價值物品。",
+          "text": "工作越需要準確，就越能確定是人格問題。",
+          "feedback": "合理安全與品質要求有其用途，不能直接作病理證據。",
           "correct": false
         }
       ]
@@ -1177,4 +1177,80 @@ export const LEARNING_TASKS = {
     }
   ]
 };
-export function getLearningTasks(id,eventNumber){const tasks=LEARNING_TASKS[id]||[];return eventNumber===3?[{...tasks[0],id:'observe'}]:eventNumber===8?[{...tasks[1],id:'compare'}]:eventNumber===12?[{...tasks[2],id:'missing'}]:eventNumber===15?[{...tasks[3],id:'transfer'}]:[];}
+export function getLearningTasks(id,eventNumber){const tasks=LEARNING_TASKS[id]||[];const revision=['lin_jianwei','ji_yan','su_fei'].includes(id)?2:1;return eventNumber===3?[{...tasks[0],id:'observe'}]:eventNumber===8?[{...tasks[1],id:'compare',revision}]:eventNumber===12?[{...tasks[2],id:'missing'}]:eventNumber===15?[{...tasks[3],id:'transfer'}]:[];}
+
+// Retained only for viewing answers to the three rewritten E08 questions.
+export const LEGACY_LEARNING_TASKS = {
+  "lin_jianwei": {
+    "kind": "比較解釋",
+    "prompt": "見微不想參加茶會，溫言卻很想去。哪個問題最有助理解差異？",
+    "options": [
+      {
+        "id": "evidence",
+        "text": "是偏好獨處，還是想連結卻因害怕拒絕而退縮？",
+        "feedback": "相似的缺席可能有不同動機，還需長期與功能資料。",
+        "correct": true
+      },
+      {
+        "id": "alternative",
+        "text": "誰最後有下樓？",
+        "feedback": "是否參加一次活動不能完成鑑別。",
+        "correct": false
+      },
+      {
+        "id": "inference",
+        "text": "誰的笑容比較少？",
+        "feedback": "外顯情感與內心需求不能直接等同。",
+        "correct": false
+      }
+    ]
+  },
+  "ji_yan": {
+    "kind": "比較解釋",
+    "prompt": "哪一項較適合討論難以丟棄無價值物品？",
+    "options": [
+      {
+        "id": "evidence",
+        "text": "無用途、無情感價值的破扣占用空間且難以丟棄。",
+        "feedback": "仍需理解其他原因；保存父親合照不屬相同證據。",
+        "correct": true
+      },
+      {
+        "id": "alternative",
+        "text": "留下父親合照。",
+        "feedback": "這有明確情感價值。",
+        "correct": false
+      },
+      {
+        "id": "inference",
+        "text": "保留需要用的備品。",
+        "feedback": "合理備品不是無價值物品。",
+        "correct": false
+      }
+    ]
+  },
+  "su_fei": {
+    "kind": "比較解釋",
+    "prompt": "花費、酒精與反覆自傷應怎麼對應？",
+    "options": [
+      {
+        "id": "evidence",
+        "text": "前兩者可討論不同衝動領域，自傷史另列，不重複湊項。",
+        "feedback": "A4 至少兩個潛在自我損害領域，與 A5 分開。",
+        "correct": true
+      },
+      {
+        "id": "alternative",
+        "text": "同一次自傷可以同時湊兩種衝動。",
+        "feedback": "同一次自傷不能重複拿來湊 A4 的兩個領域；自傷史應另列 A5。",
+        "correct": false
+      },
+      {
+        "id": "inference",
+        "text": "所有衝動都只算情緒不穩。",
+        "feedback": "不同準則有不同概念，不宜混成一項。",
+        "correct": false
+      }
+    ]
+  }
+};
