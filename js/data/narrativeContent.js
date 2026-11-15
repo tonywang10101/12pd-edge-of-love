@@ -16,7 +16,7 @@ export function expandChoiceReply(id,number,choice,index=0,sharedKey=null,stalle
   return {...choice,replyCore:core,interactionAnalysis:choice.interactionAnalysis||(sharedKey?getSharedAnalysis(sharedKey,index):CHOICE_ANALYSIS[id]?.[number]?.[index])||null,reply:[core,note].filter(Boolean).join('\n\n')};
 }
 const ENDING_DETAILS = {
-shen_mo:'相機還要用來工作，你也有自己的行程。以後想一起拍照，仍得先問過對方，不用拿鑰匙或手機密碼交換。',
+shen_mo:'相機還要用來工作，你也有自己的行程。以後想一起拍照，仍得先問過對方。',
 lin_jianwei:'頂樓的椅子還在，她也會繼續觀測。想來先問，不來就說，各自安排的晚上，不需要每次都給對方一個理由。',
 ruri:'店裡還有衣服要改，困擾她的感覺也仍要繼續評估。詩可以慢慢寫，地址則要清楚；下次同行的事，再另外約。',
 han_xiao:'店還要開，該付的錢也仍照日期付。你可以喜歡他的茶，也可以對他做過的事不諒解，不用為了維持關係改口。',

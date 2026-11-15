@@ -1,7 +1,7 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=37';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=38';
 export {DIALOGUE_REVISION,DECLINED_INVITATIONS,PAUSED_CLOSURES,DISTANCE_LINES};
-import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=37';
-export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=37';
+import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=38';
+export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=38';
 // Revised narrative source: evidence belongs to an observed scene, never an array index.
 // Dialogue is fictional. Case notes describe teaching hypotheses, not player diagnoses.
 export const CONTENT_VERSION = 6;
@@ -18,11 +18,11 @@ export const CLINICAL_SOURCES = [
 function S(title, context, line, criteria, actions, note, effects = {}) {
   return { title, context, line, criteria, actions, note, ...effects };
 }
-export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=37';
+export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=38';
 
-import { STORY_ROUTES } from './routeStories.js?v=37';
+import { STORY_ROUTES } from './routeStories.js?v=38';
 export { STORY_ROUTES };
-import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=37';
+import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=38';
 export { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning };
 
 // Each case may leave criteria unobserved. These are learning questions, not romance scores.
@@ -60,7 +60,7 @@ function buildTunedChoices(lines,scene,id,number,daily,t){
   const style=STYLE_CODES[index];
   const {stats,trap}=getTunedStats(id,number,style);
   const pressure=!daily&&trap;
-  const status=index===0?'committed':index===2?'unsettled':'deferred';
+  const status=t.decisionStatus?.[number]?.[style]||(index===0?'committed':index===2?'unsettled':'deferred');
   const note=(!daily&&t.sceneNotes?.[number]?.[style])||t.styleNotes?.[style]||APPROACH_NOTES[style]||scene.note;
   const extra=!daily&&[7,10,11].includes(number)&&t.contentWarnings?.[number]?(' '+HELP_RESOURCES+(number===10?' '+STALKING_RESOURCES:'')):'';
   return {...line,style,styleLabel:STYLE_LABELS[style],stats,healthy:!pressure,ethicalRisk:false,
@@ -98,7 +98,7 @@ function ordinaryScene(route,index){
  return S(d.title,d.context,d.line,[],d.actions,'日常的喜好、互惠與分歧不作為症狀證據。',{portrait:d.portrait,memory:`ordinary_${index}`});
 }
 
-import { TRIO_PAIRS } from './sharedScenes.js?v=37';
+import { TRIO_PAIRS } from './sharedScenes.js?v=38';
 
 export function buildRouteEvents(id) {
  const r=STORY_ROUTES[id];if(!r)return [];

@@ -1,2 +1,2 @@
-import { makeScenario } from './storyContent.js?v=37';
+import { makeScenario } from './storyContent.js?v=38';
 export const SCENARIOS_CLUSTER_A = Object.fromEntries(["shen_mo","lin_jianwei","ruri"].map(id => [id, makeScenario(id)]));

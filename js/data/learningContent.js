@@ -96,6 +96,84 @@ export const LEARNING_TASKS = {
           "correct": false
         }
       ]
+    },
+  {
+      "event": 5,
+      "key": "loyalty",
+      "kind": "比較解釋",
+      "prompt": "E05 他懷疑你把調查進度透露給別人。怎麼判斷這是不是妄想型人格的線索？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "看懷疑有沒有具體根據、是不是在不同的人和情境裡一再出現，以及造成什麼影響；記者工作本來就需要保密，合理的小心不能算成病態。",
+          "feedback": "A1、A2 的懷疑是「沒有足夠根據」，而且長期、跨情境；只出現在單一工作情境的警覺，要另外考慮。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "他是調查記者，所以怎麼懷疑都合理。",
+          "feedback": "職業可以解釋一部分警覺，但對普通帳單、生日卡也反覆懷疑，就超出工作需要了。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "只要拿出證據給他看，懷疑就會消失。",
+          "feedback": "本幕可以看到：時間核對得上，他還是找到下一個疑點。證據只能短暫有效，不能取代界線。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 7,
+      "key": "hostile",
+      "kind": "處理優先",
+      "prompt": "E07 你只是稱讚「很仔細」，他卻要把你的話轉寄給別人。哪個回應比較合適？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "不急著證明自己沒有惡意，而是針對行為說清楚：轉寄之前先問你是什麼意思；需要的話先離開降溫。",
+          "feedback": "從善意的話讀出貶低是 A4，覺得被攻擊而馬上反擊是 A6。針對行為設界線，比反覆解釋更能讓他停下來。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "說「我最欣賞你了」，讓他消氣。",
+          "feedback": "討好在他聽來更像別有目的；遊戲裡這個選擇會讓訊息直接被送出去。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "直接告訴他「你這是妄想型人格」。",
+          "feedback": "你是鄰居，不是他的治療者；對認識的人下診斷，只會讓他更覺得被攻擊。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 10,
+      "key": "photo",
+      "kind": "辨識線索",
+      "prompt": "E10 他說偷拍你，是想確認你不是誰派來接近他的。這段怎麼整理？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "「怕你是被派來的」延續了 A1 的懷疑；但未經同意的拍攝本身就是越界，要要求刪除並確認，不因為理解他的害怕就接受。",
+          "feedback": "理解行為背後的害怕，和接受行為的後果，是兩件事。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "他是因為太在乎你才拍，算是一種告白。",
+          "feedback": "把監控當成深情，會讓越界被合理化；遊戲裡選擇讓他留著照片，也會鎖住戀愛結局。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "他自己承認了，所以照片不用刪。",
+          "feedback": "承認越界不抵銷你的隱私權，修補要看他實際做了什麼。",
+          "correct": false
+        }
+      ]
     }
   ],
   "lin_jianwei": [
@@ -1255,8 +1333,8 @@ export const LEARNING_TASKS = {
     }
   ]
 };
-const EXTRA_TASK_STAGES=[7,10,11];
-export const LEARNING_STAGES=[3,7,8,10,11,12,15];
+const EXTRA_TASK_STAGES=[5,7,10,11];
+export const LEARNING_STAGES=[3,5,7,8,10,11,12,15];
 export function getLearningTasks(id,eventNumber){const tasks=(LEARNING_TASKS[id]||[]).filter(t=>!t.event);if(EXTRA_TASK_STAGES.includes(eventNumber))return (LEARNING_TASKS[id]||[]).filter(t=>t.event===eventNumber).map(({event,key,...t})=>({...t,id:key}));const revision=['lin_jianwei','ji_yan','su_fei'].includes(id)?2:1;return eventNumber===3?[{...tasks[0],id:'observe'}]:eventNumber===8?[{...tasks[1],id:'compare',revision}]:eventNumber===12?[{...tasks[2],id:'missing'}]:eventNumber===15?[{...tasks[3],id:'transfer'}]:[];}
 
 // Retained only for viewing answers to the three rewritten E08 questions.

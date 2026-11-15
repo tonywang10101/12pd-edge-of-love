@@ -19,7 +19,8 @@ vm.createContext(ctx);vm.runInContext(body+'\nthis.Game=EdgeOfLoveGame;',ctx);
 function game(){const g=new ctx.Game();for(const key of ['render','autoSave','showToast','renderAchievementModal','renderRouteUnlockModal'])g[key]=noop;g.state.initialized=true;g.state.unlockedRoutes=CHARACTERS.map(c=>c.id);return g;}
 function playEvent(g,id,num,pick=()=>0){g.startEvent(id,num);let limit=0;while(g.activeScene?.mode==='event'&&limit++<30){const sc=g.activeScene,n=sc.eventData.nodes[sc.nodeIndex];if(n.choices?.length&&!sc.awaitingNextAfterChoice)g.handleChoiceSelect(pick(n,sc));else g.handleNextNode();}assert.ok(limit<30);}
 // 調整過的角色：單一風格不會走到真結局，'romantic' 改走設計路線
-const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
+const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
+ shen_mo:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 function route(id,kind){
  const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
@@ -235,7 +236,7 @@ test('documented historical interference retains its consequences without labell
 });
 
 test('displayed relationship changes report only the points actually applied at the limits',()=>{
- const g=game(),id='shen_mo',cs=g.state.characters[id];cs.affection=99;cs.security=99;cs.boundary=99;
+ const g=game(),id='lin_jianwei',cs=g.state.characters[id];cs.affection=99;cs.security=99;cs.boundary=99;
  g.startEvent(id,1);g.handleNextNode();g.handleChoiceSelect(0);
  for(const key of ['affection','security','boundary']){assert.equal(cs[key],100);assert.equal(g.activeScene.lastChoiceOutcome.stats[key],1);}
  assert.equal(cs.choiceScores['1_1'].affection,3,'raw decision quality is independent of the capped display');
@@ -302,7 +303,7 @@ test('completion dossier belongs only to the completed character and is availabl
 });
 
 test('episode analysis quotes the current dialogue, selected reply and observed reaction',()=>{
- const g=game();g.state.studyMode=true;g.startEvent('shen_mo',1);g.handleNextNode();g.handleChoiceSelect(1);
+ const g=game();g.state.studyMode=true;g.startEvent('lin_jianwei',1);g.handleNextNode();g.handleChoiceSelect(1);
  const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節互動解析'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes('自己當下能做'));
 });
 
@@ -336,11 +337,11 @@ test('all story and optional daily choices are unique spoken lines with five rep
 
 test('friendship remembers only the drawing, tea name and lining choice actually selected',()=>{
  for(const pick of [0,1]){
-  const g=game(),id='shen_mo';for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===13?pick:e===14?1:0);
+  const g=game(),id='shen_mo',plan=content.getTuning(id).designedRoute;for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===13?pick:e===14?1:plan[e-1]);
   assert.equal(g.activeScene.endingKey,'friendEnd');
-  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'今天帶來的相紙'));
+  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'畫了湯碗'));
   const saved=JSON.parse(JSON.stringify({...g.activeScene,contentVersion:content.CONTENT_VERSION}));g.activeScene=g.sanitizeActiveScene(saved);
-  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'今天帶來的相紙'));
+  assert.ok(g.activeScene.endingData.romanticText.includes(pick===0?'寫了豆腐':'畫了湯碗'));
  }
  for(const id of ['han_xiao','ruri']){
   const g=game();for(let e=1;e<=14;e++)playEvent(g,id,e,()=>e===14?1:1);

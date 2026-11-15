@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=37';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=38';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=37';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=37';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=37';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=37';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=37';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=37';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=38';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=38';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=38';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=38';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=38';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=38';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=37';
+} from './data/eventTreeEngine.js?v=38';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=37';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=37';
+} from './data/characterPrompts.js?v=38';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=38';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -1165,9 +1165,9 @@ class EdgeOfLoveGame {
       const memory=cs.memories?.ordinary_2;
       let core=data.narrativeCore;
       if(charId==='shen_mo'){
-        const bus=/公車/.test((memory?.choice||'')+(memory?.reply||''));
-        const tofu=/空白|豆腐/.test((memory?.choice||'')+(memory?.reply||''));
-        core=core.replace('你把畫了公車的相紙帶來',bus?'你把畫了公車的相紙帶來':tofu?'你把寫了豆腐的相紙帶來':'你們翻看今天帶來的相紙');
+        const said=(memory?.choice||'')+(memory?.reply||'');
+        const tofu=/豆腐/.test(said),soup=/湯/.test(said);
+        core=core.replace('你把畫了湯碗的相紙帶來',tofu?'你把寫了豆腐的相紙帶來':soup?'你把畫了湯碗的相紙帶來':'你們翻看今天帶來的相紙');
       }
       if(charId==='ruri'){
         const picked=cs.memories?.ordinary_0?.choiceIndex===0||/選裡面|秘密口袋/.test(cs.memories?.ordinary_0?.choice||'');
@@ -1380,6 +1380,7 @@ class EdgeOfLoveGame {
     const mult=(k,v)=>{const vol=t.volatility?.[k];if(!vol||!v)return v;return Math.round(v*(v>0?vol.gain:vol.loss));};
     const stats=Object.fromEntries(Object.entries(requested).map(([k,v])=>[k,mult(k,v)]));
     let reply=choice.reply,devalued=false,repaired=false;
+    if(t.securityCap&&(stats.security||0)>t.securityCap)stats.security=t.securityCap; // 信任只能慢慢累積
     if(t.special==='splitting'&&!replay&&choice.style){
       if(f.idealized&&['challenge','solve'].includes(choice.style)){
         stats.affection=(stats.affection||0)-8;stats.security=(stats.security||0)-6;f.idealized=false;f.devaluedAt=number;f.repairStreak=0;devalued=true;
