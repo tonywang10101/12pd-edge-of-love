@@ -701,7 +701,7 @@ export const LEARNING_TASKS = {
   "xia_le": [
     {
       "kind": "辨識線索",
-      "prompt": "E03 的性暗示互動為何可供討論？",
+      "prompt": "E03 他帶著性暗示靠近同事，還說對方只是害羞。為什麼這段可以拿來討論？",
       "options": [
         {
           "id": "evidence",
@@ -725,7 +725,7 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "比較解釋",
-      "prompt": "E01 離開焦點不舒服、反覆插話，最直接支持什麼？",
+      "prompt": "E01 大家聊別人時，他坐不住、一直插話。這最直接支持什麼？",
       "options": [
         {
           "id": "evidence",
@@ -749,24 +749,24 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "資料缺口",
-      "prompt": "他對剛認識的廠商稱生死知己，還需了解？",
+      "prompt": "E12 新人得到全場掌聲，他大哭到整條走廊都聽得到，五分鐘後又笑著合照。還需要了解什麼？",
       "options": [
         {
           "id": "evidence",
-          "text": "雙方實際說好什麼、他是否反覆高估親密程度、持續多久，以及對生活和工作的影響。",
-          "feedback": "一次親暱稱呼不夠，未獲同意的安排及反覆模式才更有資訊。",
+          "text": "這種又快又淺、很戲劇化的情緒，是不是在不同場合反覆出現、持續多久，以及對工作和關係的影響；為新人感到失落本身很正常。",
+          "feedback": "A3 和 A6 要看的是長期的模式，不是一次的哭和笑。",
           "correct": true
         },
         {
           "id": "alternative",
-          "text": "對方有沒有叫他親愛的。",
-          "feedback": "單一句客氣話不能決定關係深度。",
+          "text": "他會哭，代表他其實很在乎新人，所以沒有問題。",
+          "feedback": "在乎和情緒表達的方式可以同時存在；兩件事要分開看。",
           "correct": false
         },
         {
           "id": "inference",
-          "text": "是否善於演戲。",
-          "feedback": "表演能力不是診斷證明。",
+          "text": "演員本來就很會演，所以他的難過都是假的。",
+          "feedback": "職業不能拿來判斷情緒的真假；他自己也說「另一半是真的」。",
           "correct": false
         }
       ]
@@ -794,6 +794,58 @@ export const LEARNING_TASKS = {
           "correct": false
         }
       ]
+    },
+    {
+      "event": 5,
+      "key": "seduce",
+      "kind": "處理優先",
+      "prompt": "E05 開會時，他坐到你的桌角、解開扣子，問你「一顆比較好看，還是兩顆」。哪個回應比較合適？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "直接說出這讓你不舒服，請他坐回去；衣服的事，等會議結束再說。",
+          "feedback": "不恰當的挑逗（A2）和用外表吸引注意（A4），最需要的是清楚、不帶羞辱的界線。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "說「超好看，你今天最美」，讓他開心。",
+          "feedback": "這是本幕的陷阱：他會再解開一顆扣子，會議又停了十分鐘。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "當場說他「很做作」，讓大家都聽到。",
+          "feedback": "羞辱不會讓行為停下來，只會讓他更想把注意力搶回來。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "kind": "辨識線索",
+      "prompt": "E10 廠商叫他一聲親愛的，他就當成生死之交，還訂了雙人房。還需要了解什麼？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "雙方實際說好什麼、他是否反覆高估親密程度、持續多久，以及對生活和工作的影響。",
+          "feedback": "一次親暱稱呼不夠，未獲同意的安排及反覆模式才更有資訊。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "對方有沒有叫他親愛的。",
+          "feedback": "單一句客氣話不能決定關係深度。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "是否善於演戲。",
+          "feedback": "表演能力不是診斷證明。",
+          "correct": false
+        }
+      ],
+      "event": 10,
+      "key": "intimacy"
     }
   ],
   "gu_qingcheng": [

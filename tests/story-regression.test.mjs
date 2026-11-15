@@ -23,10 +23,11 @@ const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-sty
  shen_mo:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'},
  gu_qingcheng:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
  bai_xiaolu:{second:'trueEnd',reasoning:'codependentEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
- han_xiao:{second:'codependentEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'normalEnd'}};
+ han_xiao:{second:'codependentEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'normalEnd'},
+ xia_le:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 // 一路挑戰對多數角色是「讓對方想保持距離」；韓梟例外（挑戰讓他尊重你），改用一路戀愛攻略
-const pauseKind=id=>({han_xiao:'romance-style'})[id]||'pause';
+const pauseKind=id=>({han_xiao:'romance-style',xia_le:'romance-style'})[id]||'pause';
 function route(id,kind){
  const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
  for(let e=1;e<=13;e++)playEvent(g,id,e,()=>designed?designed[e-1]:kind==='second'?1:kind==='reasoning'?3:kind==='romance-style'?4:kind==='pause'?2:0);
@@ -74,7 +75,7 @@ test('privacy decisions have visible later consequences',()=>{const g=game(),id=
 test('replay uses raw decision quality but diminishes numeric gains',()=>{const g=route('wen_yan','romantic');g.state.characters.wen_yan.affection=10;playEvent(g,'wen_yan',1);assert.equal(g.state.characters.wen_yan.affection,11);assert.equal(g.state.characters.wen_yan.choiceScores['1_1'].affection,3);assert.equal(g.getPerfectInfo('wen_yan').isPerfect,true);});
 
 test('current saves restore pending choices, learning answers, evidence, and earned friendship',()=>{
- const g=game(),id='xia_le';for(let e=1;e<=7;e++)playEvent(g,id,e);g.startEvent(id,8);g.handleNextNode();g.handleChoiceSelect(0);
+ const g=game(),id='ruri';for(let e=1;e<=7;e++)playEvent(g,id,e);g.startEvent(id,8);g.handleNextNode();g.handleChoiceSelect(0);
  g.state.characters[id].knowledge.E08={answered:true,correct:true};
  const saved=JSON.parse(JSON.stringify(g.state)),scene=JSON.parse(JSON.stringify({...g.activeScene,contentVersion:content.CONTENT_VERSION}));
  const restored=game();restored.state=restored.migrateState(saved);restored.activeScene=restored.sanitizeActiveScene(scene);
@@ -562,6 +563,7 @@ const ENDING_EXAMPLES={
  su_fei:{trueEnd:'0413101111104|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'4333330041004|0',triggerEnd:'2034032442003|4'},
  shen_mo:{trueEnd:'1133213132004|0',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'1111114114141|0',triggerEnd:'2034032442003|4'},
  gu_qingcheng:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3400340443414|3',triggerEnd:'3232222220343|3'},
+ xia_le:{trueEnd:'3410300231003|0',friendEnd:'0324230101444|1',normalEnd:'2220430233214|4',codependentEnd:'2034032442003|4',triggerEnd:'0444444414340|1'},
  han_xiao:{trueEnd:'3314333333334|3',friendEnd:'4133233344333|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'4131321344441|3'},
  bai_xiaolu:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'2220430233214|4'}};
 test('every ending of a tuned character can actually be reached',()=>{
@@ -570,4 +572,12 @@ test('every ending of a tuned character can actually be reached',()=>{
   for(let e=1;e<=13;e++)playEvent(g,id,e,()=>Number(main[e-1]));playEvent(g,id,14,()=>Number(last));
   assert.equal(g.activeScene.endingKey,end,`${id} ${end} via ${code}`);
  }
+});
+
+test('both people in a shared scene change to their emotional portrait together',()=>{
+ const g=game(),id='su_fei';for(let e=1;e<=3;e++)playEvent(g,id,e,()=>1);
+ g.startEvent(id,4);g.handleNextNode();g.handleChoiceSelect(2); // 挑戰：蘇緋受傷
+ const original=ctx.renderCharacterSVG,seen=[];ctx.renderCharacterSVG=(person,expression)=>{seen.push([person.id,expression]);return '';};
+ try{g.renderActiveScene();}finally{ctx.renderCharacterSVG=original;}
+ assert.deepEqual(seen,[['su_fei','hurt'],['bai_xiaolu','hurt']]);
 });

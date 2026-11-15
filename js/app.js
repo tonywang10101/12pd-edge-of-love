@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=52';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=55';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=52';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=52';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=52';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=52';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=52';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=52';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=55';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=55';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=55';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=55';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=55';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=55';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=52';
+} from './data/eventTreeEngine.js?v=55';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=52';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=52';
+} from './data/characterPrompts.js?v=55';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=55';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -2907,7 +2907,7 @@ class EdgeOfLoveGame {
     const partnerId=scene.eventData?.partnerId || scene.partnerId;
     const partner=CHARACTERS.find(c=>c.id===partnerId&&c.id!==char.id);
     const cast=[char,partner].filter(Boolean);
-    return `<div class="vn-cast-portraits ${partner?'is-ensemble':''}" aria-label="本幕在場角色">${cast.map(person=>`<div class="vn-portrait-frame" data-cast-char-id="${person.id}" aria-label="${escapeHtml(person.name)}">${renderCharacterSVG(person,person.id===char.id?scene.expression:'neutral','portrait')}</div>`).join('')}</div>`;
+    return `<div class="vn-cast-portraits ${partner?'is-ensemble':''}" aria-label="本幕在場角色">${cast.map(person=>`<div class="vn-portrait-frame" data-cast-char-id="${person.id}" aria-label="${escapeHtml(person.name)}">${renderCharacterSVG(person,person.id===char.id?scene.expression:(scene.partnerExpression||scene.expression||'neutral'),'portrait')}</div>`).join('')}</div>`;
   }
 
   renderActiveScene() {
