@@ -20,7 +20,8 @@ function game(){const g=new ctx.Game();for(const key of ['render','autoSave','sh
 function playEvent(g,id,num,pick=()=>0){g.startEvent(id,num);let limit=0;while(g.activeScene?.mode==='event'&&limit++<30){const sc=g.activeScene,n=sc.eventData.nodes[sc.nodeIndex];if(n.choices?.length&&!sc.awaitingNextAfterChoice)g.handleChoiceSelect(pick(n,sc));else g.handleNextNode();}assert.ok(limit<30);}
 // 調整過的角色：單一風格不會走到真結局，'romantic' 改走設計路線
 const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
- shen_mo:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'}};
+ shen_mo:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'},
+ gu_qingcheng:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 function route(id,kind){
  const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
@@ -359,7 +360,8 @@ test('Ziqian sends his own refusal at E12 and never returns it to drafts at E13'
 });
 
 test('stalled daily responses still answer the selected activity without awarding a repaired memory',()=>{
- for(const c of CHARACTERS){
+ // 調整過的角色若把 E03 的挑戰設為已完成安排（例：顧傾城被面質後排了回饋會），就不會卡在未談妥
+ for(const c of CHARACTERS.filter(c=>!content.getTuning(c.id)?.decisionStatus?.[3]?.challenge)){
   const g=game();for(let e=1;e<=12;e++)playEvent(g,c.id,e,()=>e<=5?2:0);
   g.startEvent(c.id,13);const choices=g.activeScene.eventData.nodes[1].choices;
   for(const i of [0,1])assert.ok(choices[i].reply.startsWith(content.STORY_ROUTES[c.id].ordinary[2].actions[i*2+1]));
@@ -468,7 +470,7 @@ test('unplayed late daily scenes cannot appear by repeatedly opening optional co
 });
 
 test('rejected reassurance requests never become completed takeovers in later scenes',()=>{
- for(const c of CHARACTERS){const g=game();for(let e=1;e<=5;e++)playEvent(g,c.id,e,()=>e===3?2:0);
+ for(const c of CHARACTERS.filter(c=>!content.getTuning(c.id)?.decisionStatus?.[3]?.challenge)){const g=game();for(let e=1;e<=5;e++)playEvent(g,c.id,e,()=>e===3?2:0);
   // 承接只接最接近的一幕（E05），不再回頭引用 E03
   const nearest=g.getEventsForChar(c.id)[4].nodes[1].choices[0],selected=g.getEventsForChar(c.id)[2].nodes[1].choices[2];g.startEvent(c.id,6);
   assert.ok(g.activeScene.eventData.continuityText.includes((nearest.replyCore||nearest.reply).split('\n\n')[0]));

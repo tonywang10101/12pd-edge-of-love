@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=40';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=45';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=40';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=40';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=40';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=40';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=40';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=40';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=45';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=45';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=45';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=45';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=45';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=45';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=40';
+} from './data/eventTreeEngine.js?v=45';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=40';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=40';
+} from './data/characterPrompts.js?v=45';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=45';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -1390,6 +1390,11 @@ class EdgeOfLoveGame {
         if(f.repairStreak>=2){stats.security=(stats.security||0)+4;f.devaluedAt=null;f.repairStreak=0;repaired=true;if(t.repairLine)reply=`${reply}\n\n${t.repairLine}`;}
       }else if(f.devaluedAt)f.repairStreak=0;
       if((stats.affection||0)>=6||(number<8&&cs.affection+(stats.affection||0)>=45))f.idealized=true;
+    }
+    if(t.special==='injury'&&!replay&&choice.style){
+      // 被面質後自尊受傷：下一幕的好感增加減半，開場會先冷淡
+      if(f.injuredAt===number-1&&(stats.affection||0)>0)stats.affection=Math.floor(stats.affection/2);
+      f.injuredAt=choice.style==='challenge'?number:(f.injuredAt===number?number:f.injuredAt);
     }
     return {stats,reply,devalued,repaired};
   }
@@ -2851,6 +2856,8 @@ class EdgeOfLoveGame {
     if(eventNumber===6||eventNumber===13){const last=this.getPreviousSceneLine(charId,eventNumber);if(last)lines.push(last);}
     if(eventNumber===11){const d=this.getTaskDecision(charId,'repairPlan',eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}
     if(eventNumber===13){const d=this.getTaskDecision(charId,'repairPlan',eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}
+    const tn=getTuning(charId),injured=this.state.characters[charId]?.tuningFlags?.injuredAt;
+    if(tn?.special==='injury'&&injured&&injured===eventNumber-1)lines.push(tn.injuryLines?.[eventNumber]||tn.injuryLine); // 先回顧上次，再寫之後的冷淡
     if([6,11,13].includes(eventNumber)&&this.getEthicsInfo(charId).active)lines.push(r.ethicsContext);
     return lines.join('\n\n');
   }

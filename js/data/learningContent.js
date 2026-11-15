@@ -795,7 +795,7 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "資料缺口",
-      "prompt": "她曾幻想完美作品與愛人，還要了解？",
+      "prompt": "E12 她說自己常整晚想著整座城市都在談她。還需要了解什麼？",
       "options": [
         {
           "id": "evidence",
@@ -805,7 +805,7 @@ export const LEARNING_TASKS = {
         },
         {
           "id": "alternative",
-          "text": "是否接受有氣泡的玻璃。",
+          "text": "她喜歡哪一種建材。",
           "feedback": "物件完美與否不直接驗證自戀型準則。",
           "correct": false
         },
@@ -819,7 +819,7 @@ export const LEARNING_TASKS = {
     },
     {
       "kind": "新案例",
-      "prompt": "獲獎建築師自信介紹作品，也願意平等聽回饋。現有資料？",
+      "prompt": "一位得獎的建築師很有自信地介紹作品，也願意平等地聽別人的意見。這樣的資料能說明什麼？",
       "options": [
         {
           "id": "evidence",
@@ -837,6 +837,84 @@ export const LEARNING_TASKS = {
           "id": "inference",
           "text": "願意聽一次就能排除所有場域的問題。",
           "feedback": "一次良好互動仍不足以全面排除。",
+          "correct": false
+        }
+      ]
+    },
+  {
+      "event": 5,
+      "key": "admire",
+      "kind": "處理優先",
+      "prompt": "E05 她落選後要你說「評審錯了」。哪個回應比較合適？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "承認她的作品好、也看見她很失望，但不說自己不相信的話；她因此生氣離開，也不追上去改口。",
+          "feedback": "A4 是需要過度的讚美。用假話滿足她，當下最省事，卻會讓你們的關係只剩下附和。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "說評審錯了，讓她今晚好過一點。",
+          "feedback": "這是本幕的陷阱：好感會上升，但你也開始替她說假話，接著她會要你在更多人面前這樣說。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "直接告訴她，她就是太自戀才會這樣。",
+          "feedback": "你是鄰居，不是她的治療者；貼標籤只會讓她更受傷、更防衛。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 7,
+      "key": "exploit",
+      "kind": "處理優先",
+      "prompt": "E07 她要助理沒有加班費地做完，還說能替她工作就夠了。你在旁邊，怎麼做比較合適？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "直接說出該做的事：他做的圖要有他的名字、加班要付錢，並讓助理自己決定要不要留下來做。",
+          "feedback": "針對具體的剝削行為說清楚，比勸她「體諒一下別人」有用。她當下會生氣，但這是讓她開始尊重你的方式。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "她這麼有才華，助理能跟著學已經很幸運了。",
+          "feedback": "才華不能抵銷剝削；這樣說等於幫她說服受影響的人。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "你留下來幫助理把圖做完，大家就不用吵了。",
+          "feedback": "你替她扛下工作，只會讓她學到總會有人接手；遊戲裡她也會順勢把工作塞給你。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 11,
+      "key": "envy",
+      "kind": "辨識線索",
+      "prompt": "E11 她沒看作品，就要撤掉另一位建築師的海報。這段怎麼整理？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "她認定對方靠關係、看到別人有演講就要撤掉，可以討論 A8（嫉妒別人）；工作人員說她以前也這樣，是反覆出現的線索，但仍需要更多情境。",
+          "feedback": "一次的不甘心很常見；要看是不是反覆、跨情境出現，並造成實際影響。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "她說得對，對方可能真的是靠關係。",
+          "feedback": "她連作品都沒看，這是沒有根據的認定。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "只要她最後沒撤海報，就代表沒有問題。",
+          "feedback": "行為有改變是好事，但不代表之前的模式就不存在。",
           "correct": false
         }
       ]
