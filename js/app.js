@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=56';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=58';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=56';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=56';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=56';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=56';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=56';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=56';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=58';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=58';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=58';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=58';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=58';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=58';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=56';
+} from './data/eventTreeEngine.js?v=58';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=56';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=56';
+} from './data/characterPrompts.js?v=58';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=58';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -1406,8 +1406,9 @@ class EdgeOfLoveGame {
     return Boolean(t?.safetyLock?.some(n=>cs.choiceScores[`${n}_1`]&&cs.choiceScores[`${n}_1`].healthy===false));
   }
 
-  formatText(text = '') {
-    return String(text).replaceAll('{player}', this.state.player.name);
+  formatText(text = '', keepLinks = false) {
+    const t=String(text).replaceAll('{player}', this.state.player.name);
+    return keepLinks ? t : t.replace(/\[([^\]\n]+)\]\((https:\/\/[^)\s]+)\)/g, '$1');
   }
 
   showToast(msg) {
@@ -2871,8 +2872,9 @@ class EdgeOfLoveGame {
   }
 
   renderProse(value, narrative = true) {
-    const paragraphs = this.formatText(value || '').split(/\n\s*\n/).filter(Boolean);
-    return `<div class="dialogue-text ${narrative ? 'narrative-text' : 'spoken-text'}">${paragraphs.map(p => `<p>${escapeHtml(p).replaceAll('\n','<br>')}</p>`).join('')}</div>`;
+    const paragraphs = this.formatText(value || '', true).split(/\n\s*\n/).filter(Boolean);
+    const linkify = html => html.replace(/\[([^\]\n]+)\]\((https:\/\/[^)\s"'<>]+)\)/g, '<a class="story-link" href="$2" target="_blank" rel="noopener noreferrer">$1 ↗</a>');
+    return `<div class="dialogue-text ${narrative ? 'narrative-text' : 'spoken-text'}">${paragraphs.map(p => `<p>${linkify(escapeHtml(p)).replaceAll('\n','<br>')}</p>`).join('')}</div>`;
   }
 
   renderInteractionAnalysis(char, event, node, outcome) {

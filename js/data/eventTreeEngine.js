@@ -1,5 +1,5 @@
 // Narrative, observed evidence and case-study disclosure are deliberately separate.
-import { STORY_ROUTES, buildRouteEvents, CONTENT_VERSION } from './storyContent.js?v=56';
+import { STORY_ROUTES, buildRouteEvents, CONTENT_VERSION } from './storyContent.js?v=58';
 export { CONTENT_VERSION };
 export const CHARACTER_EXTENDED_LORE = Object.fromEntries(Object.entries(STORY_ROUTES).map(([id,r]) => [id, {
   scheduleLocations: [r.location,'cafe','archive',r.location], trioPartner1:r.partners[0],trioPartner2:r.partners[1],

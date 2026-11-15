@@ -25,6 +25,7 @@ const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-sty
  bai_xiaolu:{second:'trueEnd',reasoning:'codependentEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
  han_xiao:{second:'codependentEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'normalEnd'},
  xia_le:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
+ ruri:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
  wen_yan:{second:'trueEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 // 一路挑戰對多數角色是「讓對方想保持距離」；韓梟例外（挑戰讓他尊重你），改用一路戀愛攻略
@@ -95,7 +96,7 @@ test('ordinary interaction has no clinical judgment panel or fabricated score di
 });
 
 test('uncertain experiences stay uncertain through save restoration and do not become counted evidence',()=>{
- for(const [id,key,event] of [['ruri','F21-A2',3],['su_fei','F60.3-A9',12]]){
+ for(const [id,key,event] of [['su_fei','F60.3-A9',12]]){
   const g=game();for(let e=1;e<=event;e++)playEvent(g,id,e);
   const cs=g.state.characters[id];assert.ok(!cs.unlockedCriteria.includes(key));assert.ok(cs.uncertainCriteria.includes(key));assert.equal(cs.evidenceLog[key][0].status,'uncertain');
   g.state=g.migrateState(JSON.parse(JSON.stringify(g.state)));
@@ -565,6 +566,7 @@ const ENDING_EXAMPLES={
  shen_mo:{trueEnd:'1133213132004|0',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'1111114114141|0',triggerEnd:'2034032442003|4'},
  gu_qingcheng:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3400340443414|3',triggerEnd:'3232222220343|3'},
  xia_le:{trueEnd:'3410300231003|0',friendEnd:'0324230101444|1',normalEnd:'2220430233214|4',codependentEnd:'2034032442003|4',triggerEnd:'0444444414340|1'},
+ ruri:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'3410300231003|0',codependentEnd:'1412114141114|0',triggerEnd:'2034032442003|4'},
  wen_yan:{trueEnd:'0101303104044|0',friendEnd:'4121111110241|1',normalEnd:'3410300231003|0',codependentEnd:'0044044100313|3',triggerEnd:'2034032442003|4'},
  han_xiao:{trueEnd:'3314333333334|3',friendEnd:'4133233344333|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'4131321344441|3'},
  bai_xiaolu:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'2220430233214|4'}};
