@@ -1,7 +1,7 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=32';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=37';
 export {DIALOGUE_REVISION,DECLINED_INVITATIONS,PAUSED_CLOSURES,DISTANCE_LINES};
-import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=32';
-export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=32';
+import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=37';
+export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=37';
 // Revised narrative source: evidence belongs to an observed scene, never an array index.
 // Dialogue is fictional. Case notes describe teaching hypotheses, not player diagnoses.
 export const CONTENT_VERSION = 6;
@@ -18,10 +18,12 @@ export const CLINICAL_SOURCES = [
 function S(title, context, line, criteria, actions, note, effects = {}) {
   return { title, context, line, criteria, actions, note, ...effects };
 }
-export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS } from './learningContent.js?v=32';
+export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=37';
 
-import { STORY_ROUTES } from './routeStories.js?v=32';
+import { STORY_ROUTES } from './routeStories.js?v=37';
 export { STORY_ROUTES };
+import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=37';
+export { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning };
 
 // Each case may leave criteria unobserved. These are learning questions, not romance scores.
 export function makeStudySummary(points, title = '觀察與限制') {
@@ -45,6 +47,30 @@ const APPROACH_NOTES={
  reasoning:'你用能核對的資訊整理問題；分析有助理解，但不代替本人感受或同意。',
  romantic:'你把想靠近放進一個具體邀請，對方仍能拒絕、需要時間或只談眼前的事。'
 };
+const TUNED_EXPRESSIONS={empathy:'warm',friend:'soft',challenge:'hurt',solve:'pensive',romance:'warm'};
+// Tuned characters: stats come from character × style × phase, traps sit on the realistic trap style.
+export function getTunedStats(id,number,style){
+ const t=getTuning(id);if(!t)return null;
+ const trap=t.traps?.[number]===style;
+ const v=trap?(t.trapStatsByScene?.[number]||t.trapStats):(t.sceneOverrides?.[number]?.[style]||(number>=10&&t.lateBase?.[style])||t.styleBase[style]);
+ return {stats:{affection:v[0],security:v[1],boundary:v[2]},trap};
+}
+function buildTunedChoices(lines,scene,id,number,daily,t){
+ return lines.map((line,index)=>{
+  const style=STYLE_CODES[index];
+  const {stats,trap}=getTunedStats(id,number,style);
+  const pressure=!daily&&trap;
+  const status=index===0?'committed':index===2?'unsettled':'deferred';
+  const note=(!daily&&t.sceneNotes?.[number]?.[style])||t.styleNotes?.[style]||APPROACH_NOTES[style]||scene.note;
+  const extra=!daily&&[7,10,11].includes(number)&&t.contentWarnings?.[number]?(' '+HELP_RESOURCES+(number===10?' '+STALKING_RESOURCES:'')):'';
+  return {...line,style,styleLabel:STYLE_LABELS[style],stats,healthy:!pressure,ethicalRisk:false,
+   psychNote:note+extra,interactionAnalysis:note+extra,
+   devaluedReply:!daily?t.devaluedReplies?.[number]?.[style]||null:null,
+   decision:!daily&&scene.task?{task:scene.task,label:scene.taskLabel,status,...(index===0?{}:{summary:line.reply})}:null,
+   memory:!daily&&scene.memory&&!pressure?scene.memory:null,
+   expression:index===0?(scene.portrait?.responses?.[0]||TUNED_EXPRESSIONS[style]):TUNED_EXPRESSIONS[style]};
+ });
+}
 export function buildSceneChoices(scene,id,number,{daily=false}={}) {
  const variants=DIALOGUE_VARIANTS[id]?.[number];
  if(!variants)throw new Error(`Missing authored dialogue: ${id} E${number}`);
@@ -54,6 +80,7 @@ export function buildSceneChoices(scene,id,number,{daily=false}={}) {
   const index=[2,6,13].indexOf(number),d=STORY_ROUTES[id].ordinary[index],extra=DAILY_VARIANTS[id][index];
   lines=[{text:d.dailyChoices[0],reply:extra.supportReply},{text:d.dailyChoices[1],reply:extra.everydayReply},...extra.alternatives];
  }
+ const tuning=getTuning(id);if(tuning)return buildTunedChoices(lines,scene,id,number,daily,tuning);
  return lines.map((line,index)=>{
   const profile=PROFILES[index],pressure=!daily&&index===2&&PRESSURE_SCENES[id].includes(number);
   const stats=pressure?{affection:2,security:0,boundary:-4}:{...profile.stats};
@@ -71,7 +98,7 @@ function ordinaryScene(route,index){
  return S(d.title,d.context,d.line,[],d.actions,'日常的喜好、互惠與分歧不作為症狀證據。',{portrait:d.portrait,memory:`ordinary_${index}`});
 }
 
-import { TRIO_PAIRS } from './sharedScenes.js?v=32';
+import { TRIO_PAIRS } from './sharedScenes.js?v=37';
 
 export function buildRouteEvents(id) {
  const r=STORY_ROUTES[id];if(!r)return [];
@@ -102,7 +129,8 @@ export function buildRouteEvents(id) {
     {text:`「${anxious[0]}」`,reply:anxious[1],relationshipIntent:'romantic',style:'anxious',stats:{affection:1,security:1,boundary:1}},
     {text:`「${romantic[0]}」`,reply:romantic[1],relationshipIntent:'romantic',style:'romantic',stats:{affection:2,security:2,boundary:2}}
    ];
-   ev.nodes=[{speaker:'narrator',expression:'neutral',text:r.closureContext},{speaker:'char',expression:'pensive',text:line,choices:confessionLines.map(choice=>({...choice,healthy:true,ethicalRisk:false,expression:choice.style==='anxious'?'anxious':'soft',psychNote:'這裡表達的是你的關係意願；對方的答覆仍須另行確認。',interactionAnalysis:'這次邀請與既有工作分開，選擇關係方向不代表同意其他接觸。'}))}];
+   if(getTuning(id)){const map=['empathy','friend','solve','challenge','romance'],st=[[1,2,2],[0,2,3],[0,1,4],[0,1,3],[2,2,2]];confessionLines.forEach((c,i)=>{c.style=map[i];c.styleLabel=STYLE_LABELS[map[i]];c.stats={affection:st[i][0],security:st[i][1],boundary:st[i][2]};});}
+   ev.nodes=[{speaker:'narrator',expression:'neutral',text:r.closureContext},{speaker:'char',expression:'pensive',text:line,choices:confessionLines.map(choice=>({...choice,healthy:true,ethicalRisk:false,expression:choice.style==='anxious'||choice.style==='challenge'?'pensive':'soft',psychNote:'這裡表達的是你的關係意願；對方的答覆仍須另行確認。',interactionAnalysis:'這次邀請與既有工作分開，選擇關係方向不代表同意其他接觸。'}))}];
    ev.studySummary=makeStudySummary(['關係方向不由診斷、分數或學習答案決定。角色也能拒絕或要求時間。']);
   }else if(number===15){
    ev.title=`${code}｜${r.task}之後`;ev.type='ending';
@@ -118,6 +146,7 @@ export function buildRouteEvents(id) {
    if(scene.spec)ev.unlockSpecifiers=['F07.0-TYPES'];
    if(number===13)ev.unlockBackstoryOnComplete=true;
   }
+  const tw=getTuning(id)?.contentWarnings?.[number];if(tw)ev.contentWarning=tw+' '+HELP_RESOURCES+(number===10?' '+STALKING_RESOURCES:'');
   Object.assign(ev, getEpisodePlace(id,number,ev.sharedSceneKey));
   ev.ambience=`展覽第 ${[1,2,2,2,3,3,3,3,4,4,5,5,6,7,7][number-1]} 週・${ev.phaseName}${ev.type==='trio'?'・平行視角中的同場情節':''}`;
   for(const node of ev.nodes){
@@ -140,11 +169,12 @@ export function makeScenario(id){
   normalEnd:ending(`【開放結局】${r.task}之後`,'保留距離，或還需要時間',r.endings[2]),
   codependentEnd:ending(`【界線重議】${r.task}的另一種分工`,'暫不開始戀愛',`「${r.task}」還有沒談好的分工。${r.slow}
 
-必要工作回到各自負責的人手裡，私人邀請先停。下一次是否見面還沒決定，今天不靠一句喜歡，就當那些分歧都處理好了。`),
-  triggerEnd:ending(`【暫停結局】先交接${r.task}`,'暫停互動，保留各自的未來',`幾次談不攏的期待之後，訊息只剩必要交接。${r.name}把「${r.task}」的必要事項交給窗口，你收回自己的東西。
+工作仍由各自負責的人處理，私下先不約。你們還沒決定下次要不要見面；就算彼此喜歡，之前沒談好的問題也還在。`),
+  triggerEnd:ending(`【暫停結局】先交接${r.task}`,'暫停互動，保留各自的未來',`幾次談到彼此的期待，都沒能達成共識。後來的訊息，就只剩工作交接。${r.name}把「${r.task}」的必要事項交給窗口，你收回自己的東西。
 
-你們先停止私人來往，各自處理工作，也能找原來的支持。道歉不等於對方必須見面，沒有任何一個人需要為了好看的結局改口。`)
+你們先停止私下來往，各自處理工作，也可以找熟悉的人商量。即使有人道歉，對方仍可以不見面，不必勉強答應再試一次。`)
  }};
+ const tunedEndings=getTuning(id)?.endings;if(tunedEndings)for(const [key,[title,subtitle,text]] of Object.entries(tunedEndings))scenario.endings[key]=ending(title,subtitle,text);
  for(const [key,data]of Object.entries(scenario.endings)){const n=expandEnding(id,key,data.romanticText);data.romanticText=n.text;data.soulmateText=n.text;data.narrativeCore=n.narrativeCore;data.narrativeAdditions=n.narrativeAdditions;}
  return scenario;
 }

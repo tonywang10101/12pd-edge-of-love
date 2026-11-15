@@ -1,6 +1,6 @@
 // Character identity and diagnosis references are independent of observed evidence.
-import { DSM_REFERENCE } from './dsmReference.js?v=32';
-import { STORY_ROUTES, buildRouteEvents } from './storyContent.js?v=32';
+import { DSM_REFERENCE } from './dsmReference.js?v=37';
+import { STORY_ROUTES, buildRouteEvents, getTuning } from './storyContent.js?v=37';
 export const LOCATIONS = [
   {
     "id": "rooftop",
@@ -114,7 +114,7 @@ const IDENTITIES = {
     "locationId": "rooftop",
     "themeColor": "#6366f1",
     "ecgType": "vigilant",
-    "tagline": "「我很會查證，卻還在練習分清事實和自己的猜測。」",
+    "tagline": "「查證我很拿手。可是碰到自己的事，就常常分不清是事實，還是我想太多。」",
     "avatar": {
       "skin": "#f1dca7",
       "hairColor": "#1e1b4b",
@@ -184,7 +184,7 @@ const IDENTITIES = {
     "locationId": "atelier",
     "themeColor": "#c084fc",
     "ecgType": "mystic_wave",
-    "tagline": "「這句是在寫詩。真正讓我害怕的部分，我想慢慢說清楚。」",
+    "tagline": "「剛才那句是在寫詩。至於真的讓我害怕的事……讓我慢慢說。」",
     "avatar": {
       "skin": "#fef3c7",
       "hairColor": "#581c87",
@@ -219,7 +219,7 @@ const IDENTITIES = {
     "locationId": "lounge",
     "themeColor": "#ef4444",
     "ecgType": "thrill_seeker",
-    "tagline": "「看穿一份合約不算贏，答應的責任還是要做到。」",
+    "tagline": "「合約看得再透也沒用，答應的事，還是得做。」",
     "avatar": {
       "skin": "#e6c29f",
       "hairColor": "#111827",
@@ -254,7 +254,7 @@ const IDENTITIES = {
     "locationId": "atelier",
     "themeColor": "#ec4899",
     "ecgType": "erratic_spike",
-    "tagline": "「我還是會怕，但正在學著讓害怕之外也有選擇。」",
+    "tagline": "「我還是會怕啊。只是我想試試，怕的時候，能不能不要每次都做一樣的事。」",
     "avatar": {
       "skin": "#fde8e8",
       "hairColor": "#be185d",
@@ -322,7 +322,7 @@ const IDENTITIES = {
     "locationId": "studio",
     "themeColor": "#eab308",
     "ecgType": "proud_pulse",
-    "tagline": "「這張圖有我的想法，也該留著每個一起畫它的名字。」",
+    "tagline": "「這張圖是我的想法沒錯，但一起做的人，名字都該留著。」",
     "avatar": {
       "skin": "#fefce8",
       "hairColor": "#1c1917",
@@ -460,7 +460,7 @@ const IDENTITIES = {
     "locationId": "atelier",
     "themeColor": "#f59e0b",
     "ecgType": "irregular_rebirth",
-    "tagline": "「過去和現在都是我。今天需要怎麼幫忙，由我告訴你。」",
+    "tagline": "「過去和現在都是我。今天要你幫什麼，我會自己說。」",
     "avatar": {
       "skin": "#fef3c7",
       "hairColor": "#78350f",
@@ -520,5 +520,5 @@ export const CHARACTERS = Object.values(IDENTITIES).map(identity => {
     const ev = events.find(e => e.unlockCriteria?.includes(id) || e.candidateCriteria?.includes(id));
     return { id, code: '參照 '+key, stage: 'reference', evidenceStatus: ev?.candidateCriteria?.includes(id)?'uncertain':'discuss', title: text.replace(/^[A-Z0-9]+\.\s*/, ''), desc: text, targetEvent: ev?.code || '本案例未直接呈現', behavioralAnchor: ev ? {eventCode: ev.code, eventTitle: ev.title, quote: ev.nodes.find(n=>n.speaker==='char').text, behavior: ev.studySummary.points[0]} : null };
   });
-  return { ...identity, shortBio: r.bio, clinicalOverview: ref.intro+' 症狀項數之外仍需病程、文化、功能與排除評估；作者案例說明不等於玩家確診。', differentialNote: r.differential, strategyHint: '詢問對方與自己的需要；支持、拒絕和暫停都可協商。不以伴侶身分代替專業評估與治療。', initialStats: {affection:8,security:8,boundary:42}, minThreshold: ({'F60.0':4,'F60.1':4,'F21':5,'F60.2':3,'F60.3':5,'F60.4':5,'F60.81':5,'F60.6':4,'F60.7':5,'F60.5':4})[identity.dsmCode] || 0, thresholdLabel: identity.cluster === 'OTHER' ? '此類另有適用條件，不能靠項數判定。' : ref.lead+' 此為教材參考，非集點診斷。', criteria, specifiers: identity.id === 'lu_qinglan' ? [{id:'F07.0-TYPES',code:'正式註明類型',title:'合併型：易變型與去抑制型',desc:'作者案例的醫療評估設定；F07.0 可依主要表現註明類型，需與動作、認知與不自主情感表達分開評估。',behavioralAnchor:{eventCode:'E12',eventTitle:events[11].title,quote:events[11].nodes[1].text,behavior:events[11].studySummary.points[0]}}] : [], comorbidities: [] };
+  return { ...identity, shortBio: r.bio, clinicalOverview: ref.intro+' 症狀項數之外仍需病程、文化、功能與排除評估；作者案例說明不等於玩家確診。', differentialNote: r.differential, strategyHint: '詢問對方與自己的需要；支持、拒絕和暫停都可協商。不以伴侶身分代替專業評估與治療。', initialStats: getTuning(identity.id)?.initial || {affection:8,security:8,boundary:42}, minThreshold: ({'F60.0':4,'F60.1':4,'F21':5,'F60.2':3,'F60.3':5,'F60.4':5,'F60.81':5,'F60.6':4,'F60.7':5,'F60.5':4})[identity.dsmCode] || 0, thresholdLabel: identity.cluster === 'OTHER' ? '此類另有適用條件，不能靠項數判定。' : ref.lead+' 此為教材參考，非集點診斷。', criteria, specifiers: identity.id === 'lu_qinglan' ? [{id:'F07.0-TYPES',code:'正式註明類型',title:'合併型：易變型與去抑制型',desc:'作者案例的醫療評估設定；F07.0 可依主要表現註明類型，需與動作、認知與不自主情感表達分開評估。',behavioralAnchor:{eventCode:'E12',eventTitle:events[11].title,quote:events[11].nodes[1].text,behavior:events[11].studySummary.points[0]}}] : [], comorbidities: [] };
 });

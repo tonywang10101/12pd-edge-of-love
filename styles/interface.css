@@ -607,3 +607,7 @@ body:has(#modal-root .modal-window) { overflow: hidden; }
 .loading-welcome-note { margin: 18px 0; }
 
 }
+
+/* 內容提醒（蘇緋 E07 / E10 / E11）與倫理提醒 */
+.content-warning{margin:0 0 .75rem;padding:.6rem .8rem;border-left:4px solid #c0563f;background:rgba(192,86,63,.10);color:inherit;font-size:.92rem;line-height:1.6;border-radius:6px}
+.ethics-note{margin:.6rem 0 0;padding:.5rem .7rem;background:rgba(80,110,160,.10);border-radius:6px;font-size:.88rem;line-height:1.6}

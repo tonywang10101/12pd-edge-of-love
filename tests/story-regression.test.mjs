@@ -18,9 +18,12 @@ const ctx={...engine,...content,CHARACTERS,LOCATIONS,CLUSTERS,DSM_REFERENCE,ALL_
 vm.createContext(ctx);vm.runInContext(body+'\nthis.Game=EdgeOfLoveGame;',ctx);
 function game(){const g=new ctx.Game();for(const key of ['render','autoSave','showToast','renderAchievementModal','renderRouteUnlockModal'])g[key]=noop;g.state.initialized=true;g.state.unlockedRoutes=CHARACTERS.map(c=>c.id);return g;}
 function playEvent(g,id,num,pick=()=>0){g.startEvent(id,num);let limit=0;while(g.activeScene?.mode==='event'&&limit++<30){const sc=g.activeScene,n=sc.eventData.nodes[sc.nodeIndex];if(n.choices?.length&&!sc.awaitingNextAfterChoice)g.handleChoiceSelect(pick(n,sc));else g.handleNextNode();}assert.ok(limit<30);}
+// 調整過的角色：單一風格不會走到真結局，'romantic' 改走設計路線
+const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
+const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 function route(id,kind){
- const g=game();
- for(let e=1;e<=13;e++)playEvent(g,id,e,()=>kind==='second'?1:kind==='reasoning'?3:kind==='romance-style'?4:kind==='pause'?2:0);
+ const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
+ for(let e=1;e<=13;e++)playEvent(g,id,e,()=>designed?designed[e-1]:kind==='second'?1:kind==='reasoning'?3:kind==='romance-style'?4:kind==='pause'?2:0);
  if(kind==='boundary'){
   const ev=g.getEventsForChar(id).find(e=>e.nodes[1]?.choices.some(c=>!c.healthy));
   for(let n=0;n<12;n++)playEvent(g,id,ev.eventNumber,()=>2);
@@ -37,8 +40,8 @@ test('all scenes have explicit, valid evidence and three untagged daily scenes',
  }
 });
 for(const c of CHARACTERS){test(c.name+': consent, multiple good choices, five endings, and no unearned evidence',()=>{
- for(const [policy,end]of [['romantic','trueEnd'],['second','trueEnd'],['reasoning','trueEnd'],['romance-style','trueEnd'],['friend','friendEnd'],['distance','normalEnd'],['boundary','codependentEnd'],['pause','triggerEnd']]){
-  const g=route(c.id,policy),cs=g.state.characters[c.id];assert.equal(g.activeScene.endingKey,end,policy);assert.equal(cs.eventCompleted,15);assert.equal(cs.caseStudyUnlocked,true);assert.equal(cs.diagnosed,undefined);assert.equal(cs.perfectAchieved,['romantic','second','reasoning','romance-style','friend','distance'].includes(policy));
+ for(let [policy,end]of [['romantic','trueEnd'],['second','trueEnd'],['reasoning','trueEnd'],['romance-style','trueEnd'],['friend','friendEnd'],['distance','normalEnd'],['boundary','codependentEnd'],['pause','triggerEnd']]){
+  end=expectEnd(c.id,policy,end);const g=route(c.id,policy),cs=g.state.characters[c.id];assert.equal(g.activeScene.endingKey,end,policy);assert.equal(cs.eventCompleted,15);assert.equal(cs.caseStudyUnlocked,true);assert.equal(cs.diagnosed,undefined);if(!TUNED_ENDS[c.id])assert.equal(cs.perfectAchieved,['romantic','second','reasoning','romance-style','friend','distance'].includes(policy));
   const actual=new Set(g.getEventsForChar(c.id).flatMap(e=>e.unlockCriteria||[]));assert.deepEqual([...cs.unlockedCriteria].sort(),[...actual].sort());
   const before=JSON.stringify(cs);g.showEndingForCharacter(c.id,'trueEnd');assert.equal(JSON.stringify(cs),before,'preview must not mutate saved outcome');assert.equal(g.activeScene.preview,true);g.showEndingForCharacter(c.id);assert.equal(g.activeScene.endingKey,end);
   assert.ok(!g.renderEndingScene(c,cs,g.getRouteType(c),g.getDiagnosisDisplay(c)).includes('[object Object]'));
@@ -219,8 +222,8 @@ test('all three relationship metrics influence the relationship definition and w
 
 test('documented historical interference retains its consequences without labelling new insecurity as misconduct',()=>{
  for(const c of CHARACTERS){const g=route(c.id,'boundary'),cs=g.state.characters[c.id];
- assert.equal(g.activeScene.endingKey,'codependentEnd');assert.equal(cs.ethicsIncidents.length,0);
- g.applyStats(c.id,{boundary:-15});
+ assert.equal(g.activeScene.endingKey,expectEnd(c.id,'boundary','codependentEnd'));assert.equal(cs.ethicsIncidents.length,0);
+ g.applyStats(c.id,{boundary:-Math.max(15,cs.boundary-20)});
  g.recordBoundaryConsequence(c.id,{text:'「未經同意代寄私人資料。」',ethicalRisk:true,stats:{boundary:-1}},{code:'legacy:E10',title:'舊版明確干預紀錄'});
  assert.ok(cs.ethicsIncidents.length);assert.equal(g.getEthicsInfo(c.id).active,true);
  const h=game();h.state=h.migrateState(JSON.parse(JSON.stringify(g.state)));
@@ -438,9 +441,10 @@ test('every conversation offers five approaches without repeated spoken choices 
  for(const c of CHARACTERS){
   for(const ev of content.buildRouteEvents(c.id))if(ev.nodes[1]){
    const options=ev.nodes[1].choices;assert.equal(options.length,5);
-   assert.deepEqual(options.map(x=>x.style).sort(),['anxious','everyday','reasoning','romantic','supportive']);
+   if(content.getTuning(c.id)){assert.deepEqual(options.map(x=>x.style).sort(),[...content.STYLE_CODES].sort());assert.equal(options.find(x=>x.style==='empathy').healthy,true);assert.equal(options.find(x=>x.style==='friend').healthy,true);}
+   else{assert.deepEqual(options.map(x=>x.style).sort(),['anxious','everyday','reasoning','romantic','supportive']);
    assert.equal(options.find(x=>x.style==='supportive').healthy,true);
-   assert.equal(options.find(x=>x.style==='everyday').healthy,true);
+   assert.equal(options.find(x=>x.style==='everyday').healthy,true);}
    options.forEach((x,i)=>check(x,`${c.id} ${ev.code} ${i}`));
   }
   all[c.id].dailyTalks.forEach((d,i)=>{assert.equal(d.choices.length,5);d.choices.forEach((x,j)=>check(x,`${c.id} daily${i} ${j}`));});
@@ -464,8 +468,10 @@ test('unplayed late daily scenes cannot appear by repeatedly opening optional co
 
 test('rejected reassurance requests never become completed takeovers in later scenes',()=>{
  for(const c of CHARACTERS){const g=game();for(let e=1;e<=5;e++)playEvent(g,c.id,e,()=>e===3?2:0);
-  const selected=g.getEventsForChar(c.id)[2].nodes[1].choices[2];g.startEvent(c.id,6);
-  assert.ok(g.activeScene.eventData.continuityText.includes(selected.reply));
+  // 承接只接最接近的一幕（E05），不再回頭引用 E03
+  const nearest=g.getEventsForChar(c.id)[4].nodes[1].choices[0],selected=g.getEventsForChar(c.id)[2].nodes[1].choices[2];g.startEvent(c.id,6);
+  assert.ok(g.activeScene.eventData.continuityText.includes((nearest.replyCore||nearest.reply).split('\n\n')[0]));
+  assert.ok(!g.activeScene.eventData.continuityText.includes(selected.reply));
   assert.ok(!g.activeScene.eventData.continuityText.includes('還沒交還'));
   assert.equal(g.getTaskDecision(c.id,'firstAgreement',6).status,'unsettled');
   assert.equal(g.state.characters[c.id].ethicsIncidents.length,0);

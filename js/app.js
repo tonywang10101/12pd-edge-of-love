@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=32';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=37';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=32';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=32';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=32';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=32';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=32';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=32';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=37';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=37';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=37';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=37';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=37';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=37';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=32';
+} from './data/eventTreeEngine.js?v=37';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=32';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=32';
+} from './data/characterPrompts.js?v=37';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=37';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -135,6 +135,7 @@ class EdgeOfLoveGame {
         dailyTalkIndex: 0,
         choiceScores: {}, // 每個抉擇節點最近一次選擇的 {affection, security, boundary}（用於尊重與協商判定）
         perfectAchieved: false,
+        tuningFlags: { idealized: false, devaluedAt: null, repairStreak: 0 },
         diary: []
       };
     });
@@ -728,6 +729,10 @@ class EdgeOfLoveGame {
     return '本作透過虛構故事認識人格障礙症，希望帶來理解，避免標籤與污名。主角是具有心理學背景的公寓新房客；相處與協助不取代評估、治療。在真實的專業實務中，不應利用治療或評估關係發展戀愛。';
   }
 
+  getEthicsNote() {
+    return '雙重關係與心理師倫理：遊戲中的房客是你的鄰居，不是你的個案。助人技巧可以用在生活中，但對朋友或伴侶下診斷、當對方的治療師，都不是好做法。真實實務中，心理師不與個案發展親密、金錢或其他私人關係；若已有私人關係，也不接對方為個案，而是轉介給其他專業人員。';
+  }
+
   isSaveExpired(payload, now = Date.now()) {
     let timestamp = Number(payload.savedAtMs);
     if (!Number.isFinite(timestamp) || timestamp <= 0) {
@@ -745,7 +750,7 @@ class EdgeOfLoveGame {
   showConsentModal() {
     const root = document.getElementById('modal-root');
     if (!root || !this.pendingNewGame) return;
-    root.innerHTML = `<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="consent-title"><div class="modal-header"><h2 id="consent-title">💡 溫馨備註</h2></div><div class="modal-body"><p>${this.getWelcomeNote()}</p><p>請確認你已閱讀並同意以上敘述，再開始故事。</p><div class="welcome-actions"><button class="nav-btn" data-action="decline-consent">不同意，返回選角</button><button class="btn-primary-large" data-action="accept-consent">我已閱讀並同意</button></div></div></section></div>`;
+    root.innerHTML = `<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="consent-title"><div class="modal-header"><h2 id="consent-title">💡 溫馨備註</h2></div><div class="modal-body"><p>${this.getWelcomeNote()}</p><p class="ethics-note">${this.getEthicsNote()}</p><p>請確認你已閱讀並同意以上敘述，再開始故事。</p><div class="welcome-actions"><button class="nav-btn" data-action="decline-consent">不同意，返回選角</button><button class="btn-primary-large" data-action="accept-consent">我已閱讀並同意</button></div></div></section></div>`;
     document.getElementById('app-root').inert = true;
     root.querySelector('[data-action="decline-consent"]')?.focus();
   }
@@ -1171,23 +1176,29 @@ class EdgeOfLoveGame {
       const n=expandEnding(charId,key,core);Object.assign(data,{romanticText:n.text,soulmateText:n.text,narrativeCore:core,narrativeAdditions:n.narrativeAdditions});
     }
     if(!preview&&key==='triggerEnd'&&!Object.values(cs.choiceScores).some(choice=>!choice.healthy)){
-      const core=`展覽結束，你們還沒熟到想繼續私人來往。${r.name}把「${r.task}」交給負責人，你也回到自己的安排。今天先不約，不用為了湊一個好看的結局答應。以後若想再見，得兩個人都重新願意。`;
+      const core=`展覽結束，你們還沒熟到想繼續私人來往。${r.name}把「${r.task}」交給負責人，你也回到自己的安排。今天先不約，誰也不用勉強答應。以後如果還想見面，就再問問對方，到時候兩個人都想見，再另外約。`;
       const narration=expandEnding(charId,key,core);Object.assign(data,{title:'【未完結局】還需要一些時間',subtitle:'保留距離，各自生活',romanticText:narration.text,soulmateText:narration.text,narrativeCore:core,narrativeAdditions:narration.narrativeAdditions});
     }
     if(!preview&&key==='codependentEnd'&&this.getEthicsInfo(charId).active){data.title=`【爭議結局】${r.task}`;data.subtitle='靠近之後，仍須面對越界的代價';}
     return data;
   }
 
+  getEndingThresholds(charId){
+    const th=getTuning(charId)?.thresholds;
+    if(!th)return {pauseS:22,pauseA:20,boundary:45,friendS:0,trueA:20,trueS:36};
+    return {pauseS:th.pause?.security??20,pauseA:th.pause?.affection??15,boundary:th.boundaryEnd??45,friendS:25,trueA:0,trueS:th.trueEndSecurity??40};
+  }
+
   showEndingForCharacter(charId, forcedEndingKey = null) {
     const char=CHARACTERS.find(c=>c.id===charId),cs=this.state.characters[charId];
     if(!char||!cs||cs.eventCompleted<14){this.showToast('先完成 E14 的關係選擇，才能閱讀結局。');return;}
-    let endingKey;
+    let endingKey;const endTh=this.getEndingThresholds(charId);
     if(cs.relationshipIntent==='distance'||!cs.relationshipIntent)endingKey='normalEnd';
-    else if(cs.security<22||cs.affection<20||cs.characterConsent==='distance')endingKey='triggerEnd';
-    else if(cs.boundary<45)endingKey='codependentEnd';
-    else if(cs.relationshipIntent==='friendship')endingKey='friendEnd';
+    else if(cs.security<endTh.pauseS||cs.affection<endTh.pauseA||cs.characterConsent==='distance')endingKey='triggerEnd';
+    else if(cs.boundary<endTh.boundary)endingKey='codependentEnd';
+    else if(cs.relationshipIntent==='friendship')endingKey=cs.security>=endTh.friendS?'friendEnd':'normalEnd';
     else if(cs.characterConsent!=='romantic')endingKey='normalEnd';
-    else if(cs.affection>=20&&cs.security>=36)endingKey='trueEnd';
+    else if(cs.affection>=endTh.trueA&&cs.security>=endTh.trueS)endingKey='trueEnd';
     else endingKey='normalEnd';
     // Alternative endings are explicitly previews and never alter progress, consent or earned endings.
     const preview=Boolean(forcedEndingKey);
@@ -1328,11 +1339,13 @@ class EdgeOfLoveGame {
   handleChoiceSelect(choiceIndex) {
     const sc=this.activeScene;if(!sc||sc.mode!=='event'||sc.awaitingNextAfterChoice)return;
     const {charId,eventData,nodeIndex}=sc;const cs=this.state.characters[charId],char=CHARACTERS.find(c=>c.id===charId);
-    const node=eventData.nodes[nodeIndex],choice=node?.choices?.[choiceIndex];if(!choice||!cs)return;
+    const node=eventData.nodes[nodeIndex],rawChoice=node?.choices?.[choiceIndex];if(!rawChoice||!cs)return;
     const key=`${sc.eventNumber}_${nodeIndex}`;
     const replay=cs.eventCompleted>=sc.eventNumber;
-    const requestedStats=Object.fromEntries(Object.entries(choice.stats||{}).map(([k,v])=>[k,replay&&v>0?Math.max(1,Math.round(v*0.35)):v]));
-    const stats=this.applyStats(charId,requestedStats);
+    const baseStats=Object.fromEntries(Object.entries(rawChoice.stats||{}).map(([k,v])=>[k,replay&&v>0?Math.max(1,Math.round(v*0.35)):v]));
+    const tuned=this.applyCharacterTuning(charId,sc.eventNumber,rawChoice,baseStats,replay);
+    const choice=tuned.reply!==rawChoice.reply?{...rawChoice,reply:tuned.reply,replyCore:tuned.reply,expression:tuned.devalued?'triggered':rawChoice.expression}:rawChoice;
+    const stats=this.applyStats(charId,tuned.stats);
     cs.choiceScores[key]={choiceIndex,...(choice.stats||{}),healthy:choice.healthy===true,ethicalRisk:choice.ethicalRisk===true};
     this.recordBoundaryConsequence(charId,choice,{code:eventData.code,title:eventData.title});
     cs.choiceEffects[key]=choice.decision || choice.setFlag || null;
@@ -1358,6 +1371,31 @@ class EdgeOfLoveGame {
     sc.lastChoiceOutcome={choiceIndex,choiceText:log.choiceText,reply:log.reply,replyCore:this.formatText(choice.replyCore||choice.reply),psychNote:choice.psychNote||'',stats,criterionBasis:bases[0]||null,criteriaBasis:bases,studySummary:eventData.studySummary};
     cs.diary.unshift({id:`${eventData.code}_${nodeIndex}_${Date.now()}`,type:'event',code:eventData.code,title:eventData.title,context:observed,choiceText:log.choiceText,reaction:log.reply,dsmJudgment:choice.psychNote||'',criterionBasis:bases[0]||null,criteriaBasis:bases,evidence:eventData.evidence,clinical:Boolean(bases.length||eventData.type==='caseStudy'||eventData.unlockSpecifiers?.length),stats,recordedAt:new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})});
     this.autoSave();this.render();
+  }
+
+  applyCharacterTuning(charId,number,choice,requested,replay){
+    const t=getTuning(charId),cs=this.state.characters[charId];
+    if(!t||choice.relationshipIntent)return {stats:requested,reply:choice.reply};
+    const f=cs.tuningFlags=cs.tuningFlags||{idealized:false,devaluedAt:null,repairStreak:0};
+    const mult=(k,v)=>{const vol=t.volatility?.[k];if(!vol||!v)return v;return Math.round(v*(v>0?vol.gain:vol.loss));};
+    const stats=Object.fromEntries(Object.entries(requested).map(([k,v])=>[k,mult(k,v)]));
+    let reply=choice.reply,devalued=false,repaired=false;
+    if(t.special==='splitting'&&!replay&&choice.style){
+      if(f.idealized&&['challenge','solve'].includes(choice.style)){
+        stats.affection=(stats.affection||0)-8;stats.security=(stats.security||0)-6;f.idealized=false;f.devaluedAt=number;f.repairStreak=0;devalued=true;
+        if(choice.devaluedReply)reply=choice.devaluedReply;
+      }else if(f.devaluedAt&&number>=10&&['friend','empathy'].includes(choice.style)){
+        f.repairStreak+=1;
+        if(f.repairStreak>=2){stats.security=(stats.security||0)+4;f.devaluedAt=null;f.repairStreak=0;repaired=true;if(t.repairLine)reply=`${reply}\n\n${t.repairLine}`;}
+      }else if(f.devaluedAt)f.repairStreak=0;
+      if((stats.affection||0)>=6||(number<8&&cs.affection+(stats.affection||0)>=45))f.idealized=true;
+    }
+    return {stats,reply,devalued,repaired};
+  }
+
+  isSafetyLocked(charId){
+    const t=getTuning(charId),cs=this.state.characters[charId];
+    return Boolean(t?.safetyLock?.some(n=>cs.choiceScores[`${n}_1`]&&cs.choiceScores[`${n}_1`].healthy===false));
   }
 
   formatText(text = '') {
@@ -1872,7 +1910,7 @@ class EdgeOfLoveGame {
     if(cs.eventCompleted>=3&&cs.boundary<45&&cs.affection>=20)return status('🥀 曖昧失衡・分寸模糊','#c084fc');
     if(cs.relationshipIntent==='friendship'&&cs.security>=22&&cs.boundary>=45&&cs.affection>=20)return status('🌿 完整友情','#34d399','');
     if(cs.relationshipIntent==='romantic'){
-      if(cs.characterConsent==='romantic'&&cs.affection>=20&&cs.security>=36&&cs.boundary>=45)return status('💗 雙方願意・嘗試戀愛','#f472b6','');
+      if(cs.characterConsent==='romantic'&&cs.affection>=20&&cs.security>=(getTuning(char.id)?.thresholds?.trueEndSecurity??36)&&cs.boundary>=(getTuning(char.id)?.thresholds?.boundaryEnd??45))return status('💗 雙方願意・嘗試戀愛','#f472b6','');
       return status('🍃 尚未共同同意');
     }
     if(cs.affection>=32&&cs.security>=30&&cs.boundary>=45)return status('💞 曖昧漸生','#f9a8d4','');
@@ -2084,7 +2122,7 @@ class EdgeOfLoveGame {
             </p>
           </div>
 
-          <aside class="loading-welcome-note"><h2>💡 溫馨備註</h2><p>${this.getWelcomeNote()}</p></aside>
+          <aside class="loading-welcome-note"><h2>💡 溫馨備註</h2><p>${this.getWelcomeNote()}</p><p class="ethics-note">${this.getEthicsNote()}</p></aside>
 
           <div class="loading-progress-panel">
             <div class="loading-progress-meta">
@@ -2666,7 +2704,7 @@ class EdgeOfLoveGame {
   }
 
   learningTask(charId,taskId){
-    for(const stage of [3,8,12,15]){const task=getLearningTasks(charId,stage).find(t=>t.id===taskId);if(task)return {...task,stage};}
+    for(const stage of LEARNING_STAGES){const task=getLearningTasks(charId,stage).find(t=>t.id===taskId);if(task)return {...task,stage};}
     return null;
   }
 
@@ -2715,7 +2753,7 @@ class EdgeOfLoveGame {
   renderLearningModal(charId){
     const c=CHARACTERS.find(c=>c.id===charId),root=document.getElementById('modal-root');if(!c||!root||!this.isRouteUnlocked(charId))return;
     this.learningModalChar=charId;
-    root.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal-window learning-modal"><div class="modal-header"><h2>${escapeHtml(c.name)}｜學習回顧</h2><button class="btn-close" data-action="close-modal" aria-label="關閉學習回顧">✕</button></div><div class="modal-body"><p>首次與重試分開保存。完成或答對不代表已驗證學習成效，也不影響相處與結局。</p>${[3,8,12,15].map(stage=>this.renderLearningPrompt(charId,{eventNumber:stage})).join('')}${this.renderLearningArchive(charId)}</div></div></div>`;
+    root.innerHTML=`<div class="modal-backdrop" data-action="close-modal"><div class="modal-window learning-modal"><div class="modal-header"><h2>${escapeHtml(c.name)}｜學習回顧</h2><button class="btn-close" data-action="close-modal" aria-label="關閉學習回顧">✕</button></div><div class="modal-body"><p>首次與重試分開保存。完成或答對不代表已驗證學習成效，也不影響相處與結局。</p>${LEARNING_STAGES.map(stage=>this.renderLearningPrompt(charId,{eventNumber:stage})).join('')}${this.renderLearningArchive(charId)}</div></div></div>`;
   }
 
   renderEvidenceChecklist(char) {
@@ -2743,10 +2781,22 @@ class EdgeOfLoveGame {
     return `<details class="ending-continuity"><summary>相處片段與未完的事</summary>${tasks}${memories?`<details><summary>你們實際選擇過的日常</summary><ul>${memories}</ul></details>`:''}<p>你的意願：${{romantic:'想嘗試戀愛',friendship:'希望做朋友',distance:'需要距離'}[cs.relationshipIntent]||'尚未表達'}；對方目前：${{romantic:'願意嘗試約會',friendship:cs.relationshipIntent==='friendship'?'願意做朋友':'暫不交往，保留朋友的可能',distance:'需要暫停私人互動'}[cs.characterConsent]||'未確認'}。</p></details>`;
   }
 
+  getPreviousSceneLine(charId,eventNumber) {
+    const cs=this.state.characters[charId];
+    for(let n=eventNumber-1;n>=1;n--){
+      const score=cs.choiceScores?.[`${n}_1`];if(!score)continue;
+      const ev=this.getEventsForChar(charId).find(e=>e.eventNumber===n);
+      const choice=ev?.nodes?.[1]?.choices?.[score.choiceIndex];if(!choice)return '';
+      const core=(choice.replyCore||choice.reply||'').split('\n\n')[0];
+      return core?`上次見面：${core}`:'';
+    }
+    return '';
+  }
+
   getTaskSummary(charId,decision,eventNumber=15) {
     const r=STORY_ROUTES[charId],cs=this.state.characters[charId];
     if(decision.task==='repairPlan'&&charId==='you_ziqian'&&eventNumber>=13&&cs.eventCompleted>=12)return r.letterAfterReply;
-    if(decision.summary)return `上次談到這裡：${decision.summary}`;
+    if(decision.summary)return eventNumber>=13?`先前安排的紀錄：${decision.summary}`:`上次談到這裡：${decision.summary}`;
     const summary=r.checkpoints[decision.task]?.[decision.status]||'這項安排還沒有確認，仍由本人決定。';
     return eventNumber>=13?`先前安排的紀錄：${summary}`:summary;
   }
@@ -2760,6 +2810,13 @@ class EdgeOfLoveGame {
     const cs=this.state.characters[charId];
     const picks=Object.entries(cs.choiceScores).filter(([key])=>Number(key.split('_')[0])<14).map(([,value])=>value);
     const harmful=picks.filter(x=>!x.healthy).length;
+    const tuning=getTuning(charId);
+    if(tuning){
+      const th=tuning.thresholds||{},c=th.consent||{affection:30,security:35,boundary:50};
+      if(harmful>=7||cs.security<(th.pause?.security??20))return 'distance';
+      if(this.isSafetyLocked(charId)||harmful>=3||cs.affection<c.affection||cs.security<c.security||cs.boundary<c.boundary||Object.keys(cs.memories).length<2)return 'friendship';
+      return 'romantic';
+    }
     if(harmful>=7||cs.security<22)return 'distance';
     if(harmful>=3||cs.affection<20||cs.security<30||cs.boundary<45||Object.keys(cs.memories).length<2)return 'friendship';
     return 'romantic';
@@ -2789,15 +2846,16 @@ class EdgeOfLoveGame {
 
   getContinuityText(charId,eventNumber) {
     const r=STORY_ROUTES[charId],lines=[];
-    const task=eventNumber===6?'firstAgreement':eventNumber===11?'repairPlan':null;
-    if(task){const d=this.getTaskDecision(charId,task,eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}
-    if(eventNumber===13){for(const name of ['firstAgreement','repairPlan']){const d=this.getTaskDecision(charId,name,eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}}
+    // 承接只接最接近的一幕：E06 接 E05、E11 接 E10 的安排、E13 接 E12，再附上 E10 的安排紀錄
+    if(eventNumber===6||eventNumber===13){const last=this.getPreviousSceneLine(charId,eventNumber);if(last)lines.push(last);}
+    if(eventNumber===11){const d=this.getTaskDecision(charId,'repairPlan',eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}
+    if(eventNumber===13){const d=this.getTaskDecision(charId,'repairPlan',eventNumber);if(d)lines.push(this.getTaskSummary(charId,d,eventNumber));}
     if([6,11,13].includes(eventNumber)&&this.getEthicsInfo(charId).active)lines.push(r.ethicsContext);
     return lines.join('\n\n');
   }
 
   renderFooter() {
-    return `<footer class="game-footer" aria-label="遊戲備註與提示"><p><strong>💡 溫馨備註</strong>　本作透過虛構故事認識人格障礙症，希望帶來理解，避免標籤與污名。主角是具有心理學背景的公寓新房客；相處與協助不取代評估、治療。在真實的專業實務中，不應利用治療或評估關係發展戀愛。</p>${this.state.legacyArchive?'<p>舊版相處紀錄已封存。<button class="nav-btn" data-action="view-legacy-archive">閱讀舊版紀錄</button></p>':''}</footer>`;
+    return `<footer class="game-footer" aria-label="遊戲備註與提示"><p><strong>💡 溫馨備註</strong>　${this.getWelcomeNote()}</p><p class="ethics-note">${this.getEthicsNote()}</p>${this.state.legacyArchive?'<p>舊版相處紀錄已封存。<button class="nav-btn" data-action="view-legacy-archive">閱讀舊版紀錄</button></p>':''}</footer>`;
   }
 
   renderProse(value, narrative = true) {
@@ -2847,7 +2905,7 @@ class EdgeOfLoveGame {
     if(sc.mode==='daily')return this.renderDailyScene(char,cs,route,diag);
     const ev=sc.eventData,node=ev.nodes[sc.nodeIndex],out=sc.lastChoiceOutcome;
     const text=this.renderProse(node.text,node.speaker==='narrator');
-    return `<section class="vn-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><div class="vn-loc-info"><span class="vn-chap-badge">${ev.code} / E15</span><strong>${escapeHtml(ev.title.replace(/^E\d+\s*[｜|]\s*/,''))}</strong><small>${escapeHtml(ev.locationName||'')}・${escapeHtml(ev.ambience)}</small></div>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid ${ev.partnerId?'ensemble-scene':''}"><div class="vn-portrait-column">${this.renderScenePortraits(char,sc)}</div><div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner"><strong>${node.speaker==='char'?escapeHtml(char.name):node.speaker==='ensemble'?'同場對話':'旁白'}</strong><span>STEP ${sc.nodeIndex+1} / ${ev.nodes.length}</span></div>${text}${ev.continuityText?`<details class="scene-continuity"><summary>先前的安排</summary>${this.renderProse(ev.continuityText)}</details>`:''}${sc.awaitingNextAfterChoice&&out?`<div class="choice-outcome-box"><p>你的回應：${escapeHtml(out.choiceText)}</p>${this.renderProse(out.reply)}${this.formatStatDeltas(out.stats)}</div>${this.state.studyMode?this.renderInteractionAnalysis(char,ev,node,out):''}${this.state.studyMode?this.renderLearningPrompt(char.id,ev):''}<button class="btn-vn-continue" data-action="next-node">繼續下一段劇情 ▶</button>`:node.choices?.length?`<div class="vn-choices-list">${this.getChoiceOrder(node).map((index,pos)=>`<button class="vn-choice-btn" data-action="select-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${escapeHtml(this.formatText(node.choices[index].text))}</span></button>`).join('')}</div>`:'<button class="btn-vn-continue" data-action="next-node">下一段對話 ▶</button>'}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
+    return `<section class="vn-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><div class="vn-loc-info"><span class="vn-chap-badge">${ev.code} / E15</span><strong>${escapeHtml(ev.title.replace(/^E\d+\s*[｜|]\s*/,''))}</strong><small>${escapeHtml(ev.locationName||'')}・${escapeHtml(ev.ambience)}</small></div>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid ${ev.partnerId?'ensemble-scene':''}"><div class="vn-portrait-column">${this.renderScenePortraits(char,sc)}</div><div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner"><strong>${node.speaker==='char'?escapeHtml(char.name):node.speaker==='ensemble'?'同場對話':'旁白'}</strong><span>STEP ${sc.nodeIndex+1} / ${ev.nodes.length}</span></div>${ev.contentWarning?`<p class="content-warning" role="note">${escapeHtml(ev.contentWarning)}</p>`:''}${text}${ev.continuityText?`<details class="scene-continuity"><summary>先前的安排</summary>${this.renderProse(ev.continuityText)}</details>`:''}${sc.awaitingNextAfterChoice&&out?`<div class="choice-outcome-box"><p>你的回應：${escapeHtml(out.choiceText)}</p>${this.renderProse(out.reply)}${this.formatStatDeltas(out.stats)}</div>${this.state.studyMode?this.renderInteractionAnalysis(char,ev,node,out):''}${this.state.studyMode?this.renderLearningPrompt(char.id,ev):''}<button class="btn-vn-continue" data-action="next-node">繼續下一段劇情 ▶</button>`:node.choices?.length?`<div class="vn-choices-list">${this.getChoiceOrder(node).map((index,pos)=>`<button class="vn-choice-btn" data-action="select-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${escapeHtml(this.formatText(node.choices[index].text))}</span></button>`).join('')}</div>`:'<button class="btn-vn-continue" data-action="next-node">下一段對話 ▶</button>'}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
   renderDailyScene(char, cs, route, diag) {

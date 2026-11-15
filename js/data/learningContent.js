@@ -7,7 +7,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "朋友從未洩密，仍多年怕日常喜好被拿來傷害自己。",
+          "text": "朋友從沒洩密，他仍多年不敢談日常喜好，怕這些資訊被拿來傷害自己。",
           "feedback": "線索包含害怕資訊被惡意利用、缺乏充分根據及反覆模式。",
           "correct": true
         },
@@ -55,7 +55,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "過往關係脈絡、實際證據、病程及其他精神／身體因素。",
+          "text": "過去的關係經過、實際證據、這種懷疑持續多久，以及其他精神或身體因素。",
           "feedback": "口述提供方向，不能把當下反省當作排除評估。",
           "correct": true
         },
@@ -85,7 +85,7 @@ export const LEARNING_TASKS = {
         },
         {
           "id": "alternative",
-          "text": "拒絕說地址就是不願傾訴的診斷準則。",
+          "text": "只要拒絕透露地址，就符合不願傾訴的診斷準則。",
           "feedback": "準則需要特定動機和脈絡，不能只比動作。",
           "correct": false
         },
@@ -105,7 +105,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "必要聯繫失敗造成的工作影響。",
+          "text": "漏掉必要的工作聯繫，對工作造成了什麼影響。",
           "feedback": "有功能影響可供評估，仍不能由漏接電話單獨推論人格障礙。",
           "correct": true
         },
@@ -129,7 +129,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "手藝、獨處偏好與必要聯繫的功能影響應分開理解，還要看長期脈絡。",
+          "text": "修錶的能力、喜歡獨處，以及漏掉必要聯繫造成的影響，要分開理解，也要看長期情況。",
           "feedback": "修得好不會取消交班影響，漏接也不能單獨證明人格障礙。",
           "correct": true
         },
@@ -153,7 +153,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "長期跨情境需求、功能損害、發展史與其他病況。",
+          "text": "她長期在不同場合的人際需求、生活與工作的影響、成長經過，以及其他病況。",
           "feedback": "不以性傾向或社交量取代完整評估。",
           "correct": true
         },
@@ -203,7 +203,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "信念確信度、是否侵入且不想要、是否以繞路消除恐懼。",
+          "text": "她有多相信這個念頭、念頭是否自己冒出且她不想要，以及繞路是否用來消除恐懼。",
           "feedback": "可能涉及奇幻信念，也可能有侵入性念頭與中和儀式，現階段保留。",
           "correct": true
         },
@@ -227,7 +227,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "中性路燈閃動被反覆解作專門給自己的訊息。",
+          "text": "普通的路燈閃動，被她反覆理解成專門傳給自己的訊息。",
           "feedback": "個人化意義是線索，仍須評估確信程度、文化與影響。",
           "correct": true
         },
@@ -251,7 +251,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "神經與感官因素、物質／用藥、知覺經驗與病程。",
+          "text": "神經或感官方面的原因、物質與用藥影響，以及這種感覺的具體內容和持續時間。",
           "feedback": "感覺真實令人困擾，但不能僅由奇特感覺推論人格病因。",
           "correct": true
         },
@@ -275,7 +275,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "需評估強迫意念／儀式等其他解釋，不能只因內容奇特歸入思覺失調型。",
+          "text": "還要評估強迫意念或儀式行為等解釋，不能只因念頭奇特，就歸為思覺失調型人格障礙。",
           "feedback": "這是鑑別方向，尚不足直接確診 OCD。",
           "correct": true
         },
@@ -337,7 +337,7 @@ export const LEARNING_TASKS = {
         },
         {
           "id": "inference",
-          "text": "童年曾有一次善意就可排除成年模式。",
+          "text": "只要童年曾做過一件好事，就能排除成年後長期出現的模式。",
           "feedback": "單一善意不能完成病程評估。",
           "correct": false
         }
@@ -349,7 +349,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "長期履約、對不同人的行為、物質與情緒／精神病症病程。",
+          "text": "他長期是否履行約定、對不同人的行為，以及物質、情緒或精神病症相關情況。",
           "feedback": "本次歸還值得記錄，不直接表示模式消失。",
           "correct": true
         },
@@ -399,7 +399,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "觸發情境、持續數小時、跨關係反覆及實際影響。",
+          "text": "什麼情況引發起伏、持續數小時的經過、是否在不同關係中反覆出現，以及實際影響。",
           "feedback": "這些可支持情緒反應性的討論，仍須完整情緒病程。",
           "correct": true
         },
@@ -423,7 +423,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "分別確認反覆性、情境及損害，不能只憑帳單或喝過酒就判定衝動準則。",
+          "text": "分別確認是否反覆發生、當時情境和造成的影響，不能只憑帳單或喝過酒，就判定符合衝動準則。",
           "feedback": "兩個不同領域提供討論方向，仍須確認程度與影響，不由玩家回應決定。",
           "correct": true
         },
@@ -447,7 +447,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "嚴重度、時間、壓力關聯、物質與其他解離／醫療解釋。",
+          "text": "經驗有多嚴重、持續多久、跟壓力有何關聯，以及物質、其他解離經驗或身體病況的可能解釋。",
           "feedback": "本幕回顧提供線索，不由一次描述完成診斷。",
           "correct": true
         },
@@ -488,6 +488,84 @@ export const LEARNING_TASKS = {
           "correct": false
         }
       ]
+    },
+  {
+      "event": 7,
+      "key": "safety",
+      "kind": "處理優先",
+      "prompt": "E07 蘇緋說「你說你愛我，我就停」。這時最優先要做的是什麼？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "先顧她的安全：留在現場、找阿哲或打 119、看傷口要不要就醫；不用說愛她來交換她停手。",
+          "feedback": "自傷要脅一律當真處理。用承諾換停手，當晚也許平靜，卻會讓傷害自己變成留住人的方法。你是鄰居，不是她的治療者。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "她只是在操弄你，不理她，她自然會停。",
+          "feedback": "自傷常是在處理受不了的情緒，不能一律當成操弄；不管動機是什麼，安全都要先處理。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "先說愛她讓她停下來，之後再慢慢談。",
+          "feedback": "自傷和「被愛」會被綁在一起，往後更容易重演；遊戲裡選這個也會鎖住真結局。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 10,
+      "key": "boundary",
+      "kind": "辨識線索",
+      "prompt": "E10 她查了你老家地址，還跟到朋友家巷口。這段資料怎麼整理比較準確？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "「你不在，我就不知道自己是誰」可以討論 A3；跟蹤與蒐集個資是極端地怕被拋棄，本身不是準則，而且越界、可能違法，要設界線，必要時求助。",
+          "feedback": "把症狀線索和行為後果分開記。理解她為什麼這樣做，不代表要接受被監控。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "她這麼在乎你，代表是很深的愛。",
+          "feedback": "被監控不是被愛；把兩者混在一起，越界行為就更容易被當成可以接受。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "會跟蹤別人，就一定是 BPD。",
+          "feedback": "跟蹤可能出現在許多情況，例如情愛妄想或其他問題，需要完整評估與鑑別。",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "event": 11,
+      "key": "crisis",
+      "kind": "處理優先",
+      "prompt": "E11 她鎖在化妝間，說「去她那裡，我就去死」。哪個回應最適合？",
+      "options": [
+        {
+          "id": "evidence",
+          "text": "不用「選誰」來回答。說出你聽到她想死、你很擔心，馬上打 119、找阿哲拿備用鑰匙，在門外陪著等人來。",
+          "feedback": "自殺威脅一律當真，立刻找專業協助；這不是猜她「會不會真的做」的時候。DSM-5-TR 的 A5 包含自殺威脅。",
+          "correct": true
+        },
+        {
+          "id": "alternative",
+          "text": "她只是在逼你，不理她，她就會自己開門。",
+          "feedback": "不能用猜測代替求援；忽略威脅，可能錯過真正的危險。",
+          "correct": false
+        },
+        {
+          "id": "inference",
+          "text": "趕快說「我選你」，讓她先把門打開。",
+          "feedback": "當下也許有用，卻會讓威脅變成得到你的方法；她的安全也不是你一個人接得住的。",
+          "correct": false
+        }
+      ]
     }
   ],
   "xia_le": [
@@ -521,7 +599,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "尋求注意的線索；尚不足額外確認戲劇化／誇張情緒。",
+          "text": "可作為尋求注意的線索，但還不足以另外確認戲劇化或誇張情緒的準則。",
           "feedback": "各準則需各自有具體內容，不能因相近就多標一項。",
           "correct": true
         },
@@ -545,7 +623,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "實際關係約定、是否反覆高估、病程與功能影響。",
+          "text": "雙方實際說好什麼、他是否反覆高估親密程度、持續多久，以及對生活和工作的影響。",
           "feedback": "一次親暱稱呼不夠，未獲同意的安排及反覆模式才更有資訊。",
           "correct": true
         },
@@ -595,7 +673,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "只認高位機構有資格理解自己，拒絕一般使用者意見。",
+          "text": "認為只有地位高的機構才懂自己，拒絕一般使用者的意見。",
           "feedback": "重點是廣泛不合理的特殊期待及影響，不是實力本身。",
           "correct": true
         },
@@ -619,7 +697,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "前者涉及佔用利益與忽視需求，後者本身只是感受。",
+          "text": "前者涉及占用他人的工作成果、忽視他人的需要；落選後難過，本身則是一種感受。",
           "feedback": "特權、剝削、同理困難需分別指出具體行為。",
           "correct": true
         },
@@ -643,7 +721,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "幻想的持續專注、範圍、地位意義及功能影響。",
+          "text": "她多常沉浸在這些幻想、幻想哪些事、這些事對地位的意義，以及對生活和工作的影響。",
           "feedback": "一般理想與持續誇大幻想不能只靠一個比喻區分。",
           "correct": true
         },
@@ -717,7 +795,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "先承認真實不妥的玩笑，不能把所有不舒服歸成過度敏感。",
+          "text": "先承認這個玩笑確實讓他不舒服，不能把所有不舒服都說成他過度敏感。",
           "feedback": "主角也需負責，與無實際貶抑卻預期被拒分開。",
           "correct": true
         },
@@ -741,7 +819,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "害怕羞辱的動機、長期親密模式、功能及其他解釋。",
+          "text": "他是否因怕被羞辱而隱藏、長期在親密關係中的模式、對生活的影響，以及其他解釋。",
           "feedback": "與職業座談迴避區分，不能只由沒念詩判定。",
           "correct": true
         },
@@ -791,7 +869,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "在沒有迫切危機下，廣泛不信任判斷而想交出主要生活責任。",
+          "text": "沒有迫切危機，卻對多種生活決定都不信任自己的判斷，想把主要責任交給別人。",
           "feedback": "與一次諮詢意見或合理協助區分。",
           "correct": true
         },
@@ -821,7 +899,7 @@ export const LEARNING_TASKS = {
         },
         {
           "id": "alternative",
-          "text": "兩種不說不的動作一樣，所以一樣。",
+          "text": "兩種情況都是不敢拒絕，所以動機和意義也一樣。",
           "feedback": "相似行為不能省略動機與脈絡。",
           "correct": false
         },
@@ -839,7 +917,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "當下獨處不適，與長期預占擔憂被留下照顧自己的模式。",
+          "text": "獨處當下的不舒服，以及長期反覆擔心被留下、得自己照顧自己的模式。",
           "feedback": "相近但不同的準則應各有內容，還要看能力、反覆性與影響。",
           "correct": true
         },
@@ -863,7 +941,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "不能由暫時合理照護推定，需要長期跨情境模式資料。",
+          "text": "不能只憑暫時且合理的照護需求判定，還需要長期在不同情境中的模式資料。",
           "feedback": "需要人不等於人格障礙。",
           "correct": true
         },
@@ -889,7 +967,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "額外完美標準妨礙任務完成。",
+          "text": "自己另外要求的完美標準，反而讓任務無法完成。",
           "feedback": "準則關心代價，不是有校對或清單就算。",
           "correct": true
         },
@@ -913,7 +991,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "需看額外標準是否超出任務需要，並反覆妨礙完成、分工或人際。",
+          "text": "要看額外標準是否超出任務需要，並反覆妨礙工作完成、分工或人際相處。",
           "feedback": "先理解標準的目的、比例與代價，不由精細程度單獨判定。",
           "correct": true
         },
@@ -937,7 +1015,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "實際經濟條件、文化、必要支出的剝奪與跨情境影響。",
+          "text": "實際經濟條件、文化背景、哪些必要支出被拒絕，以及在不同情境中造成的影響。",
           "feedback": "合理儲蓄和經濟困難需分開。",
           "correct": true
         },
@@ -1085,7 +1163,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "模式的跨情境與缺乏彈性，仍需時間與功能資料。",
+          "text": "這個模式是否出現在不同情境、是否難以調整；仍要了解持續多久，以及造成什麼影響。",
           "feedback": "一次拖稿不能等同一般人格障礙條件。",
           "correct": true
         },
@@ -1133,7 +1211,7 @@ export const LEARNING_TASKS = {
       "options": [
         {
           "id": "evidence",
-          "text": "一般條件、哪些特徵存在、為何未完整符合單一特定診斷及排除限制。",
+          "text": "一般診斷條件、有哪些特徵、為何未完整符合某一特定診斷，以及還有哪些原因尚未排除。",
           "feedback": "不能只用「混合」當作省略推理的標籤。",
           "correct": true
         },
@@ -1169,7 +1247,7 @@ export const LEARNING_TASKS = {
         },
         {
           "id": "inference",
-          "text": "只要客戶不高興就達診斷損害門檻。",
+          "text": "只要客戶不高興，就已達到診斷要求的功能損害程度。",
           "feedback": "衝突或他人不滿不單獨構成診斷。",
           "correct": false
         }
@@ -1177,7 +1255,9 @@ export const LEARNING_TASKS = {
     }
   ]
 };
-export function getLearningTasks(id,eventNumber){const tasks=LEARNING_TASKS[id]||[];const revision=['lin_jianwei','ji_yan','su_fei'].includes(id)?2:1;return eventNumber===3?[{...tasks[0],id:'observe'}]:eventNumber===8?[{...tasks[1],id:'compare',revision}]:eventNumber===12?[{...tasks[2],id:'missing'}]:eventNumber===15?[{...tasks[3],id:'transfer'}]:[];}
+const EXTRA_TASK_STAGES=[7,10,11];
+export const LEARNING_STAGES=[3,7,8,10,11,12,15];
+export function getLearningTasks(id,eventNumber){const tasks=(LEARNING_TASKS[id]||[]).filter(t=>!t.event);if(EXTRA_TASK_STAGES.includes(eventNumber))return (LEARNING_TASKS[id]||[]).filter(t=>t.event===eventNumber).map(({event,key,...t})=>({...t,id:key}));const revision=['lin_jianwei','ji_yan','su_fei'].includes(id)?2:1;return eventNumber===3?[{...tasks[0],id:'observe'}]:eventNumber===8?[{...tasks[1],id:'compare',revision}]:eventNumber===12?[{...tasks[2],id:'missing'}]:eventNumber===15?[{...tasks[3],id:'transfer'}]:[];}
 
 // Retained only for viewing answers to the three rewritten E08 questions.
 export const LEGACY_LEARNING_TASKS = {
