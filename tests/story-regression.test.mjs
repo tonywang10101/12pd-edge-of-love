@@ -24,7 +24,8 @@ const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-sty
  gu_qingcheng:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
  bai_xiaolu:{second:'trueEnd',reasoning:'codependentEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
  han_xiao:{second:'codependentEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'normalEnd'},
- xia_le:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'}};
+ xia_le:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
+ wen_yan:{second:'trueEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 // 一路挑戰對多數角色是「讓對方想保持距離」；韓梟例外（挑戰讓他尊重你），改用一路戀愛攻略
 const pauseKind=id=>({han_xiao:'romance-style',xia_le:'romance-style'})[id]||'pause';
@@ -72,7 +73,7 @@ test('daily choices make small changes once per selection without manufacturing 
  }
 });
 test('privacy decisions have visible later consequences',()=>{const g=game(),id='shen_mo';for(let e=1;e<=10;e++)playEvent(g,id,e);g.startEvent(id,11);assert.match(g.activeScene.eventData.continuityText,/拍/);assert.match(g.activeScene.eventData.continuityText,/隱私界線還是有效|隱私界線仍然有效/);});
-test('replay uses raw decision quality but diminishes numeric gains',()=>{const g=route('wen_yan','romantic');g.state.characters.wen_yan.affection=10;playEvent(g,'wen_yan',1);assert.equal(g.state.characters.wen_yan.affection,11);assert.equal(g.state.characters.wen_yan.choiceScores['1_1'].affection,3);assert.equal(g.getPerfectInfo('wen_yan').isPerfect,true);});
+test('replay uses raw decision quality but diminishes numeric gains',()=>{const g=route('wen_yan','romantic');g.state.characters.wen_yan.affection=10;playEvent(g,'wen_yan',1);assert.equal(g.state.characters.wen_yan.affection,11);assert.equal(g.state.characters.wen_yan.choiceScores['1_1'].affection,1);assert.equal(g.getPerfectInfo('wen_yan').isPerfect,true);});
 
 test('current saves restore pending choices, learning answers, evidence, and earned friendship',()=>{
  const g=game(),id='ruri';for(let e=1;e<=7;e++)playEvent(g,id,e);g.startEvent(id,8);g.handleNextNode();g.handleChoiceSelect(0);
@@ -564,6 +565,7 @@ const ENDING_EXAMPLES={
  shen_mo:{trueEnd:'1133213132004|0',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'1111114114141|0',triggerEnd:'2034032442003|4'},
  gu_qingcheng:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3400340443414|3',triggerEnd:'3232222220343|3'},
  xia_le:{trueEnd:'3410300231003|0',friendEnd:'0324230101444|1',normalEnd:'2220430233214|4',codependentEnd:'2034032442003|4',triggerEnd:'0444444414340|1'},
+ wen_yan:{trueEnd:'0101303104044|0',friendEnd:'4121111110241|1',normalEnd:'3410300231003|0',codependentEnd:'0044044100313|3',triggerEnd:'2034032442003|4'},
  han_xiao:{trueEnd:'3314333333334|3',friendEnd:'4133233344333|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'4131321344441|3'},
  bai_xiaolu:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'2220430233214|4'}};
 test('every ending of a tuned character can actually be reached',()=>{
