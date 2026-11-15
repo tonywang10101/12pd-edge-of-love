@@ -22,14 +22,13 @@ import {
   getSceneBackground
 } from './data/characterPrompts.js?v=32';
 import { renderCharacterSVG } from './ui/avatarRenderer.js?v=31';
-import { audio } from './ui/audioEngine.js?v=34';
+import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
   resolveAssetUrl,
-  areAllAssetsPreloaded,
   getAllGameImageAssets,
   formatBytesMB
-} from './ui/assetPreloader.js?v=31';
+} from './ui/assetPreloader.js?v=35';
 
 const ALL_SCENARIOS = {
   ...SCENARIOS_CLUSTER_A,
@@ -176,6 +175,7 @@ class EdgeOfLoveGame {
         if (loadedState && loadedState.initialized && loadedState.characters) {
           this.state = this.migrateState(loadedState);
           this.activeScene = this.sanitizeActiveScene(parsed.activeScene);
+          this.staleSavePending = this.isSaveExpired(parsed);
           if (parsed.savedAt) {
             this.lastSavedTime = parsed.savedAt;
           }
@@ -186,7 +186,7 @@ class EdgeOfLoveGame {
     }
 
     window.addEventListener('beforeunload', () => {
-      if (this.state.initialized) {
+      if (this.state.initialized && !this.staleSavePending) {
         this.autoSave();
       }
       this.trackRetention('unload');
@@ -204,12 +204,8 @@ class EdgeOfLoveGame {
     });
 
     this.bindGlobalEvents();
-    this.render();
-
-    // 若玩家帶著舊存檔重整進入遊戲，於背景靜默預載剩餘立繪與背景，減少後續切換等待
-    if (this.state.initialized && !areAllAssetsPreloaded()) {
-      preloadAllAssets({ concurrency: 4 });
-    }
+    if (this.staleSavePending) this.render();
+    else this.beginPreloadAndStart();
   }
 
   trackRetention(reason = 'check') {
@@ -335,6 +331,7 @@ class EdgeOfLoveGame {
   }
 
   autoSave() {
+    if (this.staleSavePending) return;
     try {
       const nowStr = new Date().toLocaleTimeString('zh-TW', {
         hour: '2-digit',
@@ -345,6 +342,7 @@ class EdgeOfLoveGame {
       if (this.activeScene) this.activeScene.contentVersion = CONTENT_VERSION;
       const payload = JSON.stringify({
         savedAt: new Date().toLocaleString('zh-TW'),
+        savedAtMs: Date.now(),
         state: this.state,
         activeScene: this.activeScene
       });
@@ -359,6 +357,7 @@ class EdgeOfLoveGame {
     const key = `edge_of_love_slot_${slotIndex}`;
     const payload = {
       savedAt: new Date().toLocaleString('zh-TW'),
+        savedAtMs: Date.now(),
       state: this.state,
       activeScene: this.activeScene
     };
@@ -661,56 +660,95 @@ class EdgeOfLoveGame {
 
     audio.playSelect();
 
-    if (areAllAssetsPreloaded()) {
-      this.finalizeNewGameStart(pendingGame);
-      return;
-    }
-
-    this.beginPreloadAndStart(pendingGame);
+    this.consentAccepted = false;
+    this.pendingNewGame = pendingGame;
+    this.showConsentModal();
   }
 
-  async beginPreloadAndStart(pendingGame) {
-    const totalAssets = getAllGameImageAssets().length;
-    this.loadingState = {
-      active: true,
-      pendingGame,
-      failedAssets: [],
-      snapshot: {
-        totalCount: totalAssets,
-        loadedCount: 0,
-        failedCount: 0,
-        completedCount: 0,
-        loadedBytes: 0,
-        percent: 0,
-        currentLabel: '正在連結公寓記憶檔案…',
-        done: false
-      }
+  async beginPreloadAndStart() {
+    const loading = this.loadingState = {
+      active: true, failedAssets: [],
+      snapshot: { totalCount: getAllGameImageAssets().length, loadedCount: 0,
+        loadedBytes: 0, percent: 0, done: false, currentLabel: '正在準備圖片與音樂…' }
     };
     this.render();
+    const result = await preloadAllAssets({ concurrency: 6, onProgress: snapshot => {
+      if (this.loadingState !== loading) return;
+      loading.snapshot = snapshot;
+      this.updateLoadingProgressUI(snapshot);
+    }});
+    if (this.loadingState !== loading) return;
+    loading.snapshot = result;
+    loading.failedAssets = result.failedAssets || [];
+    this.render();
+  }
 
-    const result = await preloadAllAssets({
-      concurrency: 6,
-      onProgress: (snapshot) => {
-        if (!this.loadingState) return;
-        this.loadingState.snapshot = snapshot;
-        this.updateLoadingProgressUI(snapshot);
-      }
-    });
+  finishPreloading() {
+    if (!this.loadingState?.snapshot.done || this.loadingState.failedAssets.length) return;
+    this.loadingState = null;
+    this.render();
+    document.querySelector('[data-action="continue-stale-save"], #player-name-input')?.focus();
+  }
 
-    if (!this.loadingState) return;
-    this.loadingState.snapshot = result;
-    this.updateLoadingProgressUI(result);
+  getWelcomeNote() {
+    return '本作透過虛構故事認識人格障礙症，希望帶來理解，避免標籤與污名。主角是具有心理學背景的公寓新房客；相處與協助不取代評估、治療。在真實的專業實務中，不應利用治療或評估關係發展戀愛。';
+  }
 
-    if (result.failedAssets && result.failedAssets.length > 0) {
-      this.loadingState.failedAssets = result.failedAssets;
-      this.render();
-      return;
+  isSaveExpired(payload, now = Date.now()) {
+    let timestamp = Number(payload.savedAtMs);
+    if (!Number.isFinite(timestamp) || timestamp <= 0) {
+      // 舊存檔使用 zh-TW 日期（含上午／下午），避免依賴瀏覽器的地區解析。
+      const match = String(payload.savedAt || '').match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})\s*(上午|下午)?\s*(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+      if (match) {
+        const [, y, m, d, period, h, minute, second = '0'] = match;
+        const hour = period ? Number(h) % 12 + (period === '下午' ? 12 : 0) : Number(h);
+        timestamp = new Date(Number(y), Number(m) - 1, Number(d), hour, Number(minute), Number(second)).getTime();
+      } else timestamp = Date.parse(payload.savedAt);
     }
+    return Number.isFinite(timestamp) && now - timestamp > 72 * 60 * 60 * 1000;
+  }
 
-    setTimeout(() => {
-      if (!this.loadingState) return;
-      this.finalizeNewGameStart(pendingGame);
-    }, 320);
+  showConsentModal() {
+    const root = document.getElementById('modal-root');
+    if (!root || !this.pendingNewGame) return;
+    root.innerHTML = `<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="consent-title"><div class="modal-header"><h2 id="consent-title">💡 溫馨備註</h2></div><div class="modal-body"><p>${this.getWelcomeNote()}</p><p>請確認你已閱讀並同意以上敘述，再開始故事。</p><div class="welcome-actions"><button class="nav-btn" data-action="decline-consent">不同意，返回選角</button><button class="btn-primary-large" data-action="accept-consent">我已閱讀並同意</button></div></div></section></div>`;
+    document.getElementById('app-root').inert = true;
+    root.querySelector('[data-action="decline-consent"]')?.focus();
+  }
+
+  startEntranceTransition() {
+    if (!this.pendingNewGame || this.entranceActive) return;
+    this.consentAccepted = true;
+    this.closeModals();
+    this.entranceActive = true;
+    this.render();
+    document.querySelector('[data-action="skip-entrance"]')?.focus();
+    this.entranceTimer = setTimeout(() => this.finishEntranceTransition(),
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 2600);
+  }
+
+  finishEntranceTransition() {
+    if (!this.entranceActive || !this.consentAccepted) return;
+    clearTimeout(this.entranceTimer);
+    this.entranceActive = false;
+    const pending = this.pendingNewGame;
+    this.pendingNewGame = null;
+    this.finalizeNewGameStart(pending);
+  }
+
+  resetForNewGame() {
+    this.staleSavePending = false;
+    this.pendingNewGame = null;
+    this.consentAccepted = false;
+    this.state = this.getDefaultState();
+    this.activeScene = null;
+    this.activeMainTab = 'locations';
+    this.activeLocationId = 'apartment';
+    this.selectedFirstCharId = null;
+    this.lastSavedTime = null;
+    this.closeModals();
+    this.autoSave();
+    this.beginPreloadAndStart();
   }
 
   updateLoadingProgressUI(snapshot) {
@@ -721,19 +759,20 @@ class EdgeOfLoveGame {
     const bytesEl = document.getElementById('loading-bytes');
     const currentEl = document.getElementById('loading-current-item');
 
+    document.querySelector('.loading-progress-track')?.setAttribute('aria-valuenow', snapshot.percent);
     if (fillEl) fillEl.style.width = `${snapshot.percent}%`;
     if (percentEl) percentEl.textContent = `${snapshot.percent}%`;
-    if (countEl) countEl.textContent = `${snapshot.loadedCount} / ${snapshot.totalCount} 張圖片`;
+    if (countEl) countEl.textContent = `${snapshot.loadedCount} / ${snapshot.totalCount} 項資源`;
     if (bytesEl) bytesEl.textContent = `${formatBytesMB(snapshot.loadedBytes)} MB`;
     if (currentEl) {
       currentEl.textContent = snapshot.done && snapshot.failedCount === 0
-        ? '✨ 所有人物立繪與場景記憶已就緒，正在推開大門…'
+        ? '✨ 圖片與背景音樂已就緒，請閱讀備註後繼續。'
         : `正在下載：${snapshot.currentLabel}`;
     }
   }
 
   finalizeNewGameStart(pendingGame) {
-    if (!pendingGame) return;
+    if (!pendingGame || !this.consentAccepted) return;
     const { fresh, firstChar, selectionMode } = pendingGame;
 
     this.loadingState = null;
@@ -1313,6 +1352,15 @@ class EdgeOfLoveGame {
       if (this.dsmWidgetOpen) this.render();
     });
     document.addEventListener('keydown', (e) => {
+      if (this.pendingNewGame && !this.consentAccepted) {
+        if (e.key === 'Escape') { e.preventDefault(); return; }
+        if (e.key === 'Tab') {
+          const buttons = [...document.querySelectorAll('#modal-root button')];
+          const first = buttons[0], last = buttons.at(-1);
+          if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+          else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+        }
+      }
       if (e.key === 'Escape') {
         if (this.pendingRouteUnlock) {
           this.acknowledgeAchievement();
@@ -1376,18 +1424,29 @@ class EdgeOfLoveGame {
           this.startNewGameFromForm();
           break;
         case 'retry-preload':
-          if (this.loadingState?.pendingGame) {
-            this.beginPreloadAndStart(this.loadingState.pendingGame);
-          }
+          this.beginPreloadAndStart();
           break;
-        case 'force-enter-game':
-          if (this.loadingState?.pendingGame) {
-            this.finalizeNewGameStart(this.loadingState.pendingGame);
-          }
+        case 'finish-preload':
+          this.finishPreloading();
           break;
-        case 'cancel-loading-to-cover':
-          this.loadingState = null;
-          this.render();
+        case 'accept-consent':
+          this.startEntranceTransition();
+          break;
+        case 'decline-consent':
+          this.pendingNewGame = null;
+          this.closeModals();
+          document.getElementById('btn-start-game')?.focus();
+          break;
+        case 'skip-entrance':
+          this.finishEntranceTransition();
+          break;
+        case 'continue-stale-save':
+          this.staleSavePending = false;
+          this.autoSave();
+          this.beginPreloadAndStart();
+          break;
+        case 'new-from-stale-save':
+          this.resetForNewGame();
           break;
         case 'select-first-char':
           this.setFirstCharSelection(target.dataset.charId);
@@ -1587,9 +1646,11 @@ class EdgeOfLoveGame {
           break;
         case 'clear-all-saves':
         case 'restart-game':
-          if (confirm('確定要重新開始遊戲嗎？（將重置目前故事進度，並返回初始創角畫面重新開始）')) {
+          if (confirm('確定要重新開始遊戲嗎？（將重置目前故事進度，重新載入資源後進入選角畫面）')) {
             [
               STORAGE_KEY_AUTOSAVE,
+              'edge_of_love_browser_save_v5',
+              'edge_of_love_browser_save_v4',
               'edge_of_love_browser_save_v3',
               'edge_of_love_browser_save_v2',
               ...(action === 'clear-all-saves'
@@ -1598,21 +1659,15 @@ class EdgeOfLoveGame {
             ].forEach((k) => localStorage.removeItem(k));
             [
               STORAGE_KEY_SESSION,
+              'edge_of_love_session_save_v5',
+              'edge_of_love_session_save_v4',
               'edge_of_love_session_save_v3',
               'edge_of_love_session_save_v2',
               ...(action === 'clear-all-saves'
                 ? ['edge_of_love_slot_1', 'edge_of_love_slot_2', 'edge_of_love_slot_3']
                 : [])
             ].forEach((k) => sessionStorage.removeItem(k));
-            this.state = this.getDefaultState();
-            this.activeScene = null;
-            this.autoSave(); // An uninitialized v6 save prevents silently re-importing legacy progress after restart.
-            this.activeMainTab = 'locations';
-            this.activeLocationId = 'apartment';
-            this.selectedFirstCharId = null;
-            this.closeModals();
-            this.render();
-            this.showToast('🔄 已重新開始遊戲，請設定主角資訊！');
+            this.resetForNewGame();
           }
           break;
         case 'toggle-audio': {
@@ -1652,6 +1707,9 @@ class EdgeOfLoveGame {
   }
 
   closeModals() {
+    if (this.pendingNewGame && !this.consentAccepted) return;
+    const appRoot = document.getElementById('app-root');
+    if (appRoot) appRoot.inert = false;
     this.learningModalChar=null;
     const modalRoot = document.getElementById('modal-root');
     if (modalRoot) modalRoot.innerHTML = '';
@@ -1776,6 +1834,14 @@ class EdgeOfLoveGame {
       return;
     }
 
+    if (this.staleSavePending) {
+      appRoot.innerHTML = `${bgLayer}<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="return-title"><div class="modal-header"><h2 id="return-title">歡迎回到公寓</h2></div><div class="modal-body"><p>距離上次存檔已超過 72 小時，你想從哪裡開始？</p><p>重新開始會重置自動存檔，手動存檔會保留。</p><div class="welcome-actions"><button class="btn-primary-large" data-action="continue-stale-save">繼續上次存檔紀錄</button><button class="nav-btn" data-action="new-from-stale-save">重新開始新的遊戲</button></div></div></section></div>`;
+      return;
+    }
+    if (this.entranceActive) {
+      appRoot.innerHTML = `<main class="entrance-screen" aria-label="推開門，走進公寓"><div class="entrance-view" style="background-image:url('${resolveAssetUrl('./assets/backgrounds/apartment.jpg')}')"></div><div class="entrance-frame" aria-hidden="true"><div class="entrance-door"><span class="entrance-door-number">愛的邊緣<br><small>歡迎入住</small></span><span class="entrance-handle"></span></div></div><p class="entrance-caption" role="status">推開門，讓故事從這裡開始。</p><button class="nav-btn entrance-skip" data-action="skip-entrance">略過動畫</button></main>`;
+      return;
+    }
     if (!this.state.initialized) {
       appRoot.innerHTML = `
         ${bgLayer}
@@ -1891,9 +1957,6 @@ class EdgeOfLoveGame {
       currentLabel: '正在準備所有人物立繪與場景背景…',
       done: false
     };
-    const pending = ls.pendingGame;
-    const firstChar = pending?.firstChar;
-    const playerName = escapeHtml(pending?.fresh?.player?.name || '林予安');
     const failedAssets = ls.failedAssets || [];
     const hasFailed = failedAssets.length > 0;
 
@@ -1911,44 +1974,18 @@ class EdgeOfLoveGame {
             <span class="creator-badge">✦ 記憶預載中 ✦</span>
             <h1>愛的邊緣 <small style="font-size:1.05rem; font-weight:400; display:block; margin-top:4px;">Edge of Love</small></h1>
             <p>
-              ${playerName}，正在為你將全數人物雙層立繪與公寓場景保存至本機記憶，<br/>
+              正在為你下載人物立繪、公寓場景與背景音樂，<br/>
               確保稍後翻開故事的每一頁都能即時呈現、無須等待網路下載。
             </p>
           </div>
 
-          ${
-            firstChar && pending?.selectionMode === 'manual'
-              ? `
-                <div class="loading-partner-preview" style="--char-color: ${firstChar.themeColor}">
-                  <img
-                    class="loading-partner-avatar"
-                    src="${resolveAssetUrl(`./assets/characters/${firstChar.id}.png`)}"
-                    alt="${escapeHtml(firstChar.name)}"
-                  />
-                  <div class="loading-partner-meta">
-                    <span class="loading-partner-tag">✨ 指定開場對象</span>
-                    <strong>即將推開門遇見「${escapeHtml(firstChar.name)}」</strong>
-                    <small>共預載 12 位角色常態與情緒立繪 ＋ 7 處公寓場景</small>
-                  </div>
-                </div>
-              `
-              : `
-                <div class="loading-partner-preview is-mystery">
-                  <div class="loading-partner-mystery-icon" aria-hidden="true">🚪</div>
-                  <div class="loading-partner-meta">
-                    <span class="loading-partner-tag">🎲 命運隨機邂逅</span>
-                    <strong>門後的第一位房客正等待與你相遇</strong>
-                    <small>共預載 12 位角色常態與情緒立繪 ＋ 7 處公寓場景</small>
-                  </div>
-                </div>
-              `
-          }
+          <aside class="loading-welcome-note"><h2>💡 溫馨備註</h2><p>${this.getWelcomeNote()}</p></aside>
 
           <div class="loading-progress-panel">
             <div class="loading-progress-meta">
               <span class="loading-percent" id="loading-percent">${snap.percent}%</span>
               <span class="loading-counts">
-                <span id="loading-count">${snap.loadedCount} / ${snap.totalCount} 張圖片</span>
+                <span id="loading-count">${snap.loadedCount} / ${snap.totalCount} 項資源</span>
                 <span class="loading-dot-sep">‧</span>
                 <span id="loading-bytes">${formatBytesMB(snap.loadedBytes)} MB</span>
               </span>
@@ -1965,9 +2002,9 @@ class EdgeOfLoveGame {
               <span class="loading-current-item" id="loading-current-item">
                 ${
                   hasFailed
-                    ? `⚠️ 有 ${failedAssets.length} 張圖片下載失敗`
+                    ? `⚠️ 有 ${failedAssets.length} 項資源下載失敗`
                     : snap.done
-                      ? '✨ 所有人物立繪與場景記憶已就緒，正在推開大門…'
+                      ? '✨ 圖片與背景音樂已就緒，請閱讀備註後繼續。'
                       : `正在下載：${escapeHtml(snap.currentLabel)}`
                 }
               </span>
@@ -1978,29 +2015,24 @@ class EdgeOfLoveGame {
             hasFailed
               ? `
                 <div class="loading-error-box" id="loading-error-box">
-                  <p class="loading-error-title">⚠️ 部分圖檔因網路不穩未能完成下載（${failedAssets.length} 張）</p>
+                  <p class="loading-error-title">⚠️ 部分圖片或音樂未能完成下載（${failedAssets.length} 項）</p>
                   <ul class="loading-error-list">
                     ${failedAssets.map((item) => `<li>${escapeHtml(item.label)}</li>`).join('')}
                   </ul>
                   <div class="loading-error-actions">
                     <button type="button" class="btn-primary-large" data-action="retry-preload">
-                      🔄 重新下載失敗的圖片（${failedAssets.length} 張）
-                    </button>
-                    <button type="button" class="nav-btn" data-action="force-enter-game">
-                      略過並進入遊戲
-                    </button>
-                    <button type="button" class="nav-btn" data-action="cancel-loading-to-cover">
-                      返回封面
+                      🔄 重新下載失敗的資源（${failedAssets.length} 項）
                     </button>
                   </div>
                 </div>
               `
               : `
                 <p class="loading-atmosphere-tip">
-                  「雨聲漸歇，門縫裡漏出一線暖黃的燈光——所有圖檔載入完成後將自動開啟第一頁故事。」
+                  ${snap.done ? '圖片與音樂已準備完成，閱讀備註後即可繼續。' : '正在準備公寓的故事，請稍候並閱讀上方備註。'}
                 </p>
               `
           }
+          ${snap.done && !hasFailed ? `<button class="btn-primary-large" data-action="finish-preload">${this.state.initialized ? '繼續故事 →' : '前往選擇人物 →'}</button>` : ''}
         </div>
       </section>
     `;

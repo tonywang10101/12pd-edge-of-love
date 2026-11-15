@@ -1,11 +1,11 @@
-// 《愛的邊緣》(Edge of Love) — 全遊戲圖片預載與本地 Blob 記憶體快取管理器
-// 在玩家點擊「開始」時確保所有角色常態/情緒立繪與場景背景皆已完整下載並解碼至本地記憶體，
-// 並透過 blob: Object URL 確保切換場景或情緒時零網路延遲、不重複向伺服器請求。
+// 《愛的邊緣》— 選角前預載圖片與背景音樂，並以 Blob URL 共用本機記憶體快取。
+// 圖片下載後完成解碼；音樂完整下載後仍需由玩家互動解鎖播放。
 
 import { CHARACTERS } from '../data/characters.js?v=32';
 import { CHARACTER_PROMPTS, SCENE_BACKGROUNDS } from '../data/characterPrompts.js?v=32';
 
 const blobUrlCache = new Map();
+export const MUSIC_ASSET = './assets/audio/apartment-at-dusk.mp3';
 const decodedImageCache = new Map();
 let activePreloadPromise = null;
 const progressSubscribers = new Set();
@@ -50,6 +50,7 @@ export function getAllGameImageAssets() {
     pushAsset(emoPath, `${char.name}・情緒立繪`, 'character-emotional');
   });
 
+  pushAsset(MUSIC_ASSET, '背景音樂・黃昏公寓', 'audio');
   return list;
 }
 
@@ -148,7 +149,7 @@ async function loadSingleAsset(asset, onAssetProgress) {
       }
 
       const objectUrl = URL.createObjectURL(blob);
-      const img = await decodeImageElement(objectUrl);
+      const img = asset.category === 'audio' ? {} : await decodeImageElement(objectUrl);
       img._byteSize = byteLength || blob.size;
 
       blobUrlCache.set(asset.key, objectUrl);
@@ -161,6 +162,11 @@ async function loadSingleAsset(asset, onAssetProgress) {
         await waitMs(attempt * 350);
       }
     }
+  }
+
+  if (asset.category === 'audio') {
+    onAssetProgress(1, 0);
+    return { ok: false, asset, error: lastError };
   }
 
   // Fallback: 若 fetch 被特殊環境阻擋，退回直接用 <img> 載入瀏覽器快取
@@ -260,7 +266,7 @@ export function preloadAllAssets({ concurrency = 6, onProgress } = {}) {
   activePreloadPromise = Promise.all(Array.from({ length: workerCount }, () => runWorker()))
     .then(() => {
       currentLabel =
-        failedAssets.length === 0 ? '所有人物立繪與場景記憶已就緒 ✨' : `有 ${failedAssets.length} 張圖片載入失敗`;
+        failedAssets.length === 0 ? '圖片與背景音樂已就緒 ✨' : `有 ${failedAssets.length} 項資源載入失敗`;
       return emitProgress(true);
     })
     .finally(() => {

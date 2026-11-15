@@ -81,7 +81,7 @@
 .ethics-reputation small {display: block; margin-top: .35rem; font-size: .8rem; line-height: 1.7;}
 
 .game-footer p {margin: 0 0 .75rem;}
-.game-footer p:last-child {margin-bottom: 0;}
+.game-footer p:last-child {margin-bottom: 0; padding-right: 120px;}
 .game-footer strong {color: #e3d0e9;}
 @media (max-width: 700px) { .story-current-body .relationship-meters { grid-template-columns: 1fr; gap: .7rem; } .game-footer { margin: 1.5rem .7rem 0; } }
 .vn-top-bar .relationship-meters {width: min(100%, 480px); grid-template-columns: repeat(3,minmax(0,1fr)); gap: .75rem; margin: 0;}
@@ -218,7 +218,24 @@ button:focus-visible, summary:focus-visible, input:focus-visible,
 .dsm-side-launcher-tab {pointer-events: auto; position: fixed; border-right: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: right 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s ease, box-shadow 0.2s ease; z-index: 152; top: auto; bottom: 20px; right: 16px; transform: none; flex-direction: row; padding: 10px 14px; border: 1px solid var(--gold-border); border-radius: 99px; background: #3a254f; box-shadow: 0 4px 18px #140c20;}
 .dsm-side-launcher-tab .launcher-text {writing-mode: horizontal-tb; letter-spacing: 0;}
 .dsm-side-launcher-tab:hover {box-shadow: -8px 8px 30px rgba(244, 114, 182, 0.65); padding-right: 14px;}
-.game-footer {position: relative;margin: 2rem auto 0;padding: 1.3rem 1.2rem 2rem;border-top: 1px solid rgba(209,174,218,.22);color: #cdbed3;font-size: .8rem;line-height: 1.9;background: rgba(22,14,31,.65);padding-bottom: 88px;width:calc(100% - var(--page-gutter) * 2); max-width:var(--content-width);}
+.game-footer {
+  position: relative;
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: var(--content-width);
+  margin: 2rem auto 0;
+  padding: 20px 20px max(20px, env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(209,174,218,.22);
+  background: rgba(22,14,31,.65);
+  color: #cdbed3;
+  font-size: .8rem;
+  line-height: 1.9;
+}
+/* Keep the footer at the viewport bottom on short pages, without a blank tail. */
+#app-root { display: flex; flex-direction: column; min-height: 100dvh; }
+#app-root > .game-footer { flex-shrink: 0; margin-top: auto; }
+@media (max-width: 768px) {
+  .game-footer p:last-child { padding-right: 52px; }
+}
 .save-danger-zone {display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 12px; padding-top: 20px; border-top: 1px solid rgba(250,132,146,.3);}
 .save-danger-zone p {width: 100%; font-size: .85rem; color: #edc2cb;}
 
@@ -507,3 +524,25 @@ body:has(#modal-root .modal-window) { overflow: hidden; }
   .ending-stage .diary-drawer-body { max-height: 65dvh; }
   .evidence-modal .modal-header h2, .learning-modal .modal-header h2 { font-size: 1.05rem; }
 }
+
+/* Arrival flow: readable notice, responsive doorway and explicit choices. */
+.loading-welcome-note { text-align: left; margin: 24px 0; padding: clamp(18px,4vw,30px); border: 1px solid #e7bd8280; border-radius: 18px; background: #fff5df0d; }
+.loading-welcome-note h2 { font-size: 1.2rem; color: #ffe0a5; margin: 0 0 14px; }
+.loading-welcome-note p, .welcome-dialog .modal-body p { line-height: 1.95; font-size: clamp(1rem,2.8vw,1.1rem); overflow-wrap: anywhere; }
+.welcome-dialog { width: min(640px,calc(100vw - 32px)); }
+.welcome-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; }
+.welcome-actions button { flex: 1 1 220px; white-space: normal; min-height: 48px; }
+.loading-card > [data-action="finish-preload"] { margin-top: 20px; max-width: 100%; white-space: normal; }
+.entrance-screen { position: fixed; inset: 0; min-height: 100svh; overflow: hidden; background: #21192b; perspective: 1000px; }
+.entrance-view { position: absolute; inset: 0; background-size: cover; background-position: center; animation: entrance-approach 2.6s ease-in forwards; }
+.entrance-frame { position: absolute; width: min(88vw,520px); height: 115%; left: 50%; top: -5%; transform: translateX(-50%); border: clamp(12px,3vw,25px) solid #332331; box-shadow: 0 0 0 100vmax #1d1825; perspective: 1000px; }
+.entrance-door { width: 100%; height: 100%; position: relative; background: repeating-linear-gradient(90deg,#5b3d3b 0,#67443e 5%,#573936 10%); border: 5px solid #987050; transform-origin: left center; animation: entrance-open 2.6s cubic-bezier(.45,0,.25,1) forwards; box-shadow: inset 0 0 70px #21151b; }
+.entrance-door-number { position: absolute; top: 26%; left: 50%; transform: translateX(-50%); width: 70%; color: #ffe1a1; border: 1px solid #e6b976; padding: 20px 10px; text-align: center; font-size: clamp(1.2rem,5vw,2rem); letter-spacing: .15em; background: #291e2aa0; }
+.entrance-door-number small { font-size: .65em; }
+.entrance-handle { position: absolute; right: 8%; top: 55%; width: 12%; height: 12px; border-radius: 10px; background: linear-gradient(#ffdfa0,#a87b40); }
+.entrance-caption { position: absolute; bottom: max(14%,70px); width: 100%; text-align: center; padding: 0 20px; color: #fff2dc; text-shadow: 0 2px 8px #000; font-size: clamp(1rem,4vw,1.4rem); }
+.entrance-skip { position: absolute; bottom: max(24px,env(safe-area-inset-bottom)); right: 24px; background: #21192be6; }
+@keyframes entrance-open { 0%,15% { transform: rotateY(0); } 85%,100% { transform: rotateY(-105deg); } }
+@keyframes entrance-approach { 0%,25% { transform: scale(1); filter: brightness(.5); } 100% { transform: scale(1.12); filter: brightness(1); } }
+@media (prefers-reduced-motion: reduce) { .entrance-door,.entrance-view { animation: none; } .entrance-frame { display: none; } }
+@media (max-width: 480px) { .welcome-actions { flex-direction: column; } .welcome-actions button { flex: auto; width: 100%; } .loading-welcome-note { margin: 18px 0; } }

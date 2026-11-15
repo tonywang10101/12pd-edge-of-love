@@ -1,3 +1,5 @@
+import { resolveAssetUrl, MUSIC_ASSET } from './assetPreloader.js?v=35';
+
 // Shared low-volume background music and Web Audio interaction effects.
 
 class AudioEngine {
@@ -25,7 +27,7 @@ class AudioEngine {
   startMusic() {
     if (!this.enabled || !this.unlocked || !this.visible || typeof Audio === 'undefined') return;
     if (!this.music) {
-      this.music = new Audio(new URL('../../assets/audio/apartment-at-dusk.mp3', import.meta.url).href);
+      this.music = new Audio(resolveAssetUrl(MUSIC_ASSET) === MUSIC_ASSET ? new URL('../../assets/audio/apartment-at-dusk.mp3', import.meta.url).href : resolveAssetUrl(MUSIC_ASSET));
       this.music.id = 'background-music';
       this.music.hidden = true;
       this.music.setAttribute?.('aria-hidden', 'true');
