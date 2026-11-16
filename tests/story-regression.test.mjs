@@ -147,18 +147,16 @@ test('character refusal, player refusal and relationship quality are independent
 });
 
 test('learning records first attempts and feedback without delayed review or relationship rewards',()=>{
- const g=game(),id='ruri',cs=g.state.characters[id];assert.equal(g.answerLearning(id,'observe','evidence'),false,'no future task before reading');
+ const g=game(),id='ruri',cs=g.state.characters[id];assert.equal(g.answerLearning(id,'e03_bricks','evidence'),false,'no future quiz before reading');
  for(let e=1;e<=3;e++)playEvent(g,id,e);
  const before=JSON.stringify([cs.affection,cs.security,cs.boundary,cs.unlockedCriteria,cs.uncertainCriteria]);
- assert.equal(g.answerLearning(id,'observe','alternative'),true);assert.equal(cs.knowledge.observe.firstCorrect,false);assert.equal(g.answerLearning(id,'observe','alternative'),false);
- assert.equal(g.answerLearning(id,'observe','evidence'),true);assert.equal(cs.knowledge.observe.correct,true);assert.equal(cs.knowledge.observe.firstCorrect,false);assert.equal(cs.knowledge.observe.attempts.length,2);
+ assert.equal(g.answerLearning(id,'e03_bricks','alternative'),true);assert.equal(cs.knowledge.e03_bricks.firstCorrect,false);assert.equal(g.answerLearning(id,'e03_bricks','alternative'),false);
+ assert.equal(g.answerLearning(id,'e03_bricks','evidence'),true);assert.equal(cs.knowledge.e03_bricks.correct,true);assert.equal(cs.knowledge.e03_bricks.firstCorrect,false);assert.equal(cs.knowledge.e03_bricks.attempts.length,2);
  assert.equal(JSON.stringify([cs.affection,cs.security,cs.boundary,cs.unlockedCriteria,cs.uncertainCriteria]),before);
  for(let e=4;e<=14;e++)playEvent(g,id,e);
- assert.equal(g.answerLearning(id,'transfer','alternative'),true);assert.equal(g.answerLearning(id,'review','evidence'),false,'review really locked for 24 hours');
- assert.equal(cs.knowledge.transfer.reviewDueAt,undefined);
- assert.equal(g.answerLearning(id,'review','evidence'),false);
- const restored=g.migrateState(JSON.parse(JSON.stringify(g.state)));assert.equal(restored.characters[id].knowledge.observe.firstCorrect,false);assert.equal(restored.characters[id].knowledge.review,undefined);
- g.showEndingForCharacter(id,'normalEnd');assert.equal(g.answerLearning(id,'missing','evidence'),false,'preview is not a new learning context');
+ assert.equal(g.answerLearning(id,'transfer','alternative'),true);assert.equal(cs.knowledge.transfer.reviewDueAt,undefined);assert.equal(cs.knowledge.transfer.revision,content.LEARNING_REVISION);
+ const restored=g.migrateState(JSON.parse(JSON.stringify(g.state)));assert.equal(restored.characters[id].knowledge.e03_bricks.firstCorrect,false);assert.equal(restored.characters[id].knowledge.transfer.firstCorrect,false);
+ g.showEndingForCharacter(id,'normalEnd');assert.equal(g.answerLearning(id,'e12_smile','evidence'),false,'preview is not a new learning context');
 });
 
 test('all lesson options have specific feedback; all chapters render without missing content',()=>{
@@ -170,9 +168,9 @@ test('all lesson options have specific feedback; all chapters render without mis
    }
   }
   assert.ok(!g.renderActiveScene().includes('undefined'));
-  for(const stage of [3,8,12,15])for(const t of content.getLearningTasks(c.id,stage)){questions.push(t.prompt);assert.equal(t.options.filter(x=>x.correct).length,1);assert.equal(new Set(t.options.map(x=>x.feedback)).size,3);assert.ok(t.options.every(x=>x.feedback.length>8));}
+  for(const stage of content.LEARNING_STAGES)for(const t of content.getLearningTasks(c.id,stage)){questions.push(t.prompt);assert.equal(t.options.filter(x=>x.correct).length,1);assert.equal(new Set(t.options.map(x=>x.feedback)).size,3);assert.ok(t.options.every(x=>x.feedback.length>8));}
  }
- assert.equal(questions.length,48);assert.equal(new Set(questions).size,48);
+ assert.equal(questions.length,96);assert.equal(new Set(questions).size,96);
 });
 
 test('v5 archive preserves previous archives; chapter picker and completed home offer real replay',()=>{
@@ -197,7 +195,7 @@ test('teaching mode changes presentation without changing choices, records or pr
  g.startEvent(id,3);g.handleNextNode();g.handleChoiceSelect(0);
  const before=JSON.stringify(g.state.characters[id]),scene=JSON.stringify(g.activeScene);
  g.state.studyMode=false;const story=g.renderActiveScene();
- assert.ok(!story.includes('outcome-dsm-judgment-panel'));assert.ok(!story.includes('learning-prompt'));assert.ok(story.includes('vn-live-stats'));assert.ok(story.includes('delta-badge'));
+ assert.ok(!story.includes('outcome-dsm-judgment-panel'));assert.ok(story.includes('learning-prompt'),'quizzes stay visible with teaching mode off');assert.ok(story.includes('隨堂小考'));assert.ok(story.includes('vn-live-stats'));assert.ok(story.includes('delta-badge'));
  for(const label of ['好感度','安全感','邊界感'])assert.ok(story.includes(label));
  g.state.studyMode=true;const teaching=g.renderActiveScene();
  for(const marker of ['outcome-dsm-judgment-panel','learning-prompt','vn-live-stats'])assert.ok(teaching.includes(marker),marker);
@@ -314,9 +312,9 @@ test('completion dossier belongs only to the completed character and is availabl
  const g=route('wen_yan','romantic');const html=g.renderActiveScene();assert.ok(!html.includes('觀察與限制'));assert.ok(!html.includes('dsm-char-pill'));assert.ok(html.includes('completed-case-dossier'));
 });
 
-test('episode analysis quotes the current dialogue, selected reply and observed reaction',()=>{
+test('episode teaching quotes the current dialogue, selected reply and every option',()=>{
  const g=game();g.state.studyMode=true;g.startEvent('lin_jianwei',1);g.handleNextNode();g.handleChoiceSelect(1);
- const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節互動解析'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes(esc(sc.eventData.nodes[1].choices[1].interactionAnalysis)));
+ const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節教學：心理病理學觀點'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes(esc(sc.eventData.nodes[1].choices[1].interactionAnalysis)));
 });
 
 
@@ -518,10 +516,8 @@ test('scene addresses and memories no longer invent an insult, a film mistake or
  assert.ok(wen.nodes[1].choices[0].text.startsWith('「傾城，'));assert.ok(wen.nodes[1].choices[1].text.startsWith('「傾城，'));
  assert.ok(!content.buildRouteEvents('shen_mo')[7].nodes[1].text.includes('你裝反底片'));
  assert.ok(!content.buildRouteEvents('lin_jianwei')[13].nodes[0].text.includes('兩把椅子都空著'));
- for(const c of CHARACTERS){const tasks=content.getLearningTasks(c.id,8);assert.equal(tasks.length,1);}
- assert.ok(!content.getLearningTasks('ji_yan',8)[0].prompt.includes('無價值物品'));
- assert.ok(!content.getLearningTasks('lin_jianwei',8)[0].prompt.includes('溫言'));
- assert.ok(!JSON.stringify(content.getLearningTasks('su_fei',8)).includes('自傷'));
+ // 隨堂小考的題目與選項不寫準則代號，準則只在作答後的解釋出現。
+ for(const c of CHARACTERS)for(const stage of content.LEARNING_STAGES)for(const q of content.getLearningTasks(c.id,stage))for(const s of [q.prompt,...q.options.map(o=>o.text)]){assert.ok(!/(^|[^A-Za-z0-9])A\d/.test(s),`${c.id} ${q.id} ${s}`);assert.ok(!s.includes('準則'),`${c.id} ${q.id} ${s}`);}
 });
 
 test('randomized choice order stays stable while reading one scene and indexes remain attached to their text',()=>{
@@ -549,17 +545,18 @@ test('rewritten learning questions archive their old answers without resetting s
  for(const id of ['lin_jianwei','ji_yan','su_fei','shen_mo']){
   saved.characters[id].eventCompleted=15;saved.characters[id].affection=52;
   saved.characters[id].knowledge.compare={attempts:[{optionId:'alternative',correct:false},{optionId:'evidence',correct:true}],firstCorrect:false,correct:true};
+  saved.characters[id].knowledge.observe={attempts:[{optionId:'evidence',correct:true}],firstCorrect:true,correct:true,revision:1};
  }
  g.state=g.migrateState(saved);
- for(const id of ['lin_jianwei','ji_yan','su_fei']){
+ for(const id of ['lin_jianwei','ji_yan','su_fei','shen_mo']){
   const cs=g.state.characters[id];assert.equal(cs.eventCompleted,15);assert.equal(cs.affection,52);
-  assert.equal(cs.knowledge.compare,undefined);assert.equal(cs.knowledgeArchive['compare:1'].record.firstCorrect,false);
+  assert.equal(cs.knowledge.compare,undefined);assert.equal(cs.knowledge.observe,undefined);
+  assert.equal(cs.knowledgeArchive['compare:1'].record.firstCorrect,false);assert.ok(cs.knowledgeArchive['observe:1'].task.prompt);
   assert.match(g.renderLearningArchive(id),/改寫前的題目與作答/);
-  assert.equal(g.answerLearning(id,'compare','evidence'),true);assert.equal(cs.knowledge.compare.revision,2);
+  assert.equal(g.answerLearning(id,'transfer','evidence'),true);assert.equal(cs.knowledge.transfer.revision,content.LEARNING_REVISION);
  }
- assert.equal(g.state.characters.shen_mo.knowledge.compare.correct,true);
- const next=g.migrateState(g.state);for(const id of ['lin_jianwei','ji_yan','su_fei']){
-  assert.equal(next.characters[id].knowledge.compare.revision,2);assert.equal(Object.keys(next.characters[id].knowledgeArchive).length,1);
+ const next=g.migrateState(g.state);for(const id of ['lin_jianwei','ji_yan','su_fei','shen_mo']){
+  assert.equal(next.characters[id].knowledge.transfer.revision,content.LEARNING_REVISION);assert.equal(Object.keys(next.characters[id].knowledgeArchive).length,2);
  }
 });
 
@@ -591,4 +588,39 @@ test('both people in a shared scene change to their emotional portrait together'
  const original=ctx.renderCharacterSVG,seen=[];ctx.renderCharacterSVG=(person,expression)=>{seen.push([person.id,expression]);return '';};
  try{g.renderActiveScene();}finally{ctx.renderCharacterSVG=original;}
  assert.deepEqual(seen,[['su_fei','hurt'],['bai_xiaolu','hurt']]);
+});
+
+test('every main and daily choice carries its own psychopathology teaching, and every quote in teaching is verbatim DSM text',()=>{
+ const gold=fs.readFileSync(new URL('../dsm-5-tr-zh.txt',import.meta.url),'utf8');
+ for(const c of CHARACTERS){
+  for(const ev of content.buildRouteEvents(c.id).filter(e=>e.eventNumber<15)){
+   assert.ok(ev.teaching?.focus,`${c.id} E${ev.eventNumber} focus`);assert.ok(ev.teaching?.counsel,`${c.id} E${ev.eventNumber} counsel`);
+   const node=ev.nodes.find(n=>n.choices);assert.equal(node.choices.length,5);
+   const texts=node.choices.map(ch=>ch.teaching);assert.ok(texts.every(Boolean),`${c.id} E${ev.eventNumber} options`);assert.equal(new Set(texts).size,5);
+   for(const s of [ev.teaching.focus,ev.teaching.counsel,...texts])for(const m of s.matchAll(/「([^「」]+)」/g))assert.ok(gold.includes(m[1]),`${c.id} E${ev.eventNumber} quote ${m[1]}`);
+  }
+  for(const talk of content.makeScenario(c.id).dailyTalks){assert.ok(talk.teaching?.focus);assert.ok(talk.choices.every(ch=>ch.teaching),`${c.id} daily ${talk.title}`);}
+ }
+});
+
+test('teaching panel lists all five options with their teaching and a counselling note',()=>{
+ const g=game();g.state.studyMode=true;g.startEvent('su_fei',1);g.handleNextNode();g.handleChoiceSelect(2);
+ const sc=g.activeScene,html=g.renderActiveScene();
+ for(const ch of sc.eventData.nodes[1].choices)assert.ok(html.includes(esc(ch.teaching)));
+ assert.ok(html.includes('諮商觀點'));assert.ok(html.includes('每個選項會帶來什麼'));assert.ok(html.includes('你的選擇'));
+ g.state.studyMode=false;assert.ok(!g.renderActiveScene().includes('本節教學'));
+});
+
+test('every character has eight quizzes tied to episodes, each with one correct option and a teaching point, and answers show their explanation',()=>{
+ for(const c of CHARACTERS){
+  const tasks=content.LEARNING_STAGES.flatMap(stage=>content.getLearningTasks(c.id,stage));assert.equal(tasks.length,8,c.id);
+  for(const t of tasks){assert.equal(t.options.filter(o=>o.correct).length,1);assert.ok(t.teach,`${c.id} ${t.id} teach`);assert.ok(t.type);assert.ok(t.options.every(o=>o.feedback));}
+  assert.equal(content.getLearningTasks(c.id,15).length,1,`${c.id} transfer at the ending`);
+ }
+ const g=game(),cs=g.state.characters.lin_jianwei;cs.eventCompleted=15;
+ const task={...content.getLearningTasks('lin_jianwei',1)[0],stage:1},wrong=task.options.find(o=>!o.correct),right=task.options.find(o=>o.correct);
+ assert.ok(g.answerLearning('lin_jianwei',task.id,wrong.id));let html=g.renderLearningTask('lin_jianwei',task);
+ assert.ok(html.includes('隨堂小考'));assert.ok(html.includes(esc(wrong.feedback)));assert.ok(!html.includes('教學重點'));
+ assert.ok(g.answerLearning('lin_jianwei',task.id,right.id));html=g.renderLearningTask('lin_jianwei',task);
+ assert.ok(html.includes(esc(right.feedback)));assert.ok(html.includes('教學重點'));assert.ok(html.includes(esc(task.teach)));
 });

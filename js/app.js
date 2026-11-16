@@ -1,7 +1,7 @@
 import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=60';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=60';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, PREVIOUS_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=60';
 import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=60';
 import { DSM_REFERENCE } from './data/dsmReference.js?v=60';
 import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=60';
@@ -310,11 +310,16 @@ class EdgeOfLoveGame {
       for (const key of ['diary','unlockedEndings','ethicsIncidents']) if (!Array.isArray(cs[key])) cs[key] = [];
       for (const key of ['evidenceLog','choiceScores','choiceEffects','knowledge','memories']) if (!cs[key] || typeof cs[key] !== 'object' || Array.isArray(cs[key])) cs[key] = {};
       if(!cs.knowledgeArchive||typeof cs.knowledgeArchive!=='object'||Array.isArray(cs.knowledgeArchive))cs.knowledgeArchive={};
-      const revisedTask=getLearningTasks(c.id,8)[0],oldAnswer=cs.knowledge[revisedTask.id];
-      if(oldAnswer&&Number(oldAnswer.revision||1)<Number(revisedTask.revision||1)){
-        const key=`${revisedTask.id}:${oldAnswer.revision||1}`;
-        cs.knowledgeArchive[key]={task:LEGACY_LEARNING_TASKS[c.id],record:oldAnswer};
-        delete cs.knowledge[revisedTask.id];
+      // 改寫過的隨堂小考：舊作答移到學習回顧的封存區，不影響故事進度與其他作答。
+      const currentTasks=new Map(LEARNING_STAGES.flatMap(stage=>getLearningTasks(c.id,stage)).map(t=>[t.id,t]));
+      for(const [taskId,oldAnswer] of Object.entries(cs.knowledge)){
+        const current=currentTasks.get(taskId),oldRevision=Number(oldAnswer?.revision||1);
+        if(current&&oldRevision>=Number(current.revision||1))continue;
+        if(!current&&!PREVIOUS_LEARNING_TASKS[c.id]?.[taskId]&&taskId!=='compare')continue;
+        const key=`${taskId}:${oldRevision}`;
+        const oldTask=taskId==='compare'&&oldRevision<2&&LEGACY_LEARNING_TASKS[c.id]?LEGACY_LEARNING_TASKS[c.id]:PREVIOUS_LEARNING_TASKS[c.id]?.[taskId]||null;
+        cs.knowledgeArchive[key]={task:oldTask,record:oldAnswer};
+        delete cs.knowledge[taskId];
       }
       const events=this.getEventsForChar(c.id);
       if(cs.boundary<30&&!cs.ethicsIncidents.length){
@@ -530,6 +535,13 @@ class EdgeOfLoveGame {
   }
 
   // 隨機順序：每次進入一個選擇節點時產生一次，避免玩家用位置記答案
+  // 教學面板只讀取已顯示過的選項順序，不寫入場景狀態。
+  peekChoiceOrder(node) {
+    const sc = this.activeScene, n = node?.choices?.length || 0;
+    const key = `${sc?.eventNumber ?? 'daily'}_${sc?.nodeIndex ?? 0}`;
+    return sc?.choiceOrder?.key === key && sc.choiceOrder.order.length === n ? sc.choiceOrder.order.slice() : Array.from({ length: n }, (_, i) => i);
+  }
+
   getChoiceOrder(node) {
     const sc = this.activeScene;
     const n = node?.choices?.length || 0;
@@ -1830,8 +1842,8 @@ class EdgeOfLoveGame {
           this.focusControl('[data-action="toggle-study-mode"]');
           this.showToast(
             this.state.studyMode
-              ? '🎓 教學模式 ON：顯示線索解析與練習題。'
-              : '教學模式 OFF：收起解析與練習題，相處數值照常顯示。'
+              ? '🎓 教學模式 ON：選擇後顯示心理病理學教學。隨堂小考不論開關都會出現。'
+              : '教學模式 OFF：收起心理病理學教學；隨堂小考與相處數值照常顯示。'
           );
           break;
         }
@@ -2081,7 +2093,7 @@ class EdgeOfLoveGame {
             class="nav-btn ${this.state.studyMode ? 'btn-accent' : ''}"
             data-action="toggle-study-mode"
             aria-pressed="${Boolean(this.state.studyMode)}"
-            title="ON：隨劇情顯示解析與練習；OFF：收起教學。兩者都顯示相處數值。"
+            title="ON：選擇後顯示心理病理學教學；OFF：收起教學。隨堂小考與相處數值兩者都會顯示。"
           >
             🎓 教學模式：${this.state.studyMode ? 'ON' : 'OFF'}
           </button>
@@ -2740,13 +2752,20 @@ class EdgeOfLoveGame {
   }
 
   renderLearningTask(charId,task){
-    const record=this.state.characters[charId].knowledge[task.id],last=record?.attempts?.at(-1);
+    const record=this.state.characters[charId].knowledge[task.id],attempts=record?.attempts||[],last=attempts.at(-1);
     const allowed=this.canAnswerLearning(charId,task);
-    if(!allowed)return `<p>${escapeHtml(task.kind)}：閱讀至 E${String(task.stage).padStart(2,'0')} 後開放。</p>`;
+    const ep=task.stage>=15?'E15 結局':`E${String(task.stage).padStart(2,'0')}`;
+    if(!allowed)return `<p class="learning-locked">📝 隨堂小考（${ep}）：讀完 ${ep} 後開放。</p>`;
     const seed=Number(CHARACTERS.find(c=>c.id===charId).number)+task.stage,offset=seed%task.options.length;
     const ordered=task.options.slice(offset).concat(task.options.slice(0,offset));
-    const feedback=last?`<div role="status" class="learning-feedback"><strong>${last.correct?'推理方向合適':'再看另一種可能'}</strong><p>${escapeHtml(task.options.find(o=>o.id===last.optionId)?.feedback||'')}</p><small>首次作答：${record.firstCorrect?'推理方向合適':'需要補充'}；後續嘗試保留，不計入關係分數。</small></div>`:'';
-    return `<section class="learning-prompt"><h3>📓 ${escapeHtml(task.kind)}</h3><p>${escapeHtml(task.prompt)}</p>${feedback}${last?.correct?`<details><summary>比較各選項的理由</summary>${ordered.map(o=>`<p><strong>${escapeHtml(o.text)}</strong><br>${escapeHtml(o.feedback)}</p>`).join('')}</details>`:ordered.map(o=>`<button class="nav-btn learning-option" data-action="answer-learning" data-char-id="${charId}" data-task-id="${task.id}" data-option-id="${o.id}" ${record?.attempts?.some(x=>x.optionId===o.id)?'disabled':''}>${escapeHtml(o.text)}</button>`).join('')}<p class="learning-scope">這裡檢查證據推理，不替角色或現實人物下診斷。可先繼續故事，之後從學習回顧補做。</p></section>`;
+    const solved=Boolean(last?.correct),exhausted=attempts.length>=task.options.length;
+    // 每次點擊後立即顯示該選項的對錯與解釋。
+    const results=attempts.map(at=>{const o=task.options.find(x=>x.id===at.optionId);if(!o)return '';return `<div role="status" class="learning-option-result ${o.correct?'is-correct':'is-wrong'}"><strong>${o.correct?'✔ 推理方向合適':'✗ 再看另一種可能'}</strong>：${escapeHtml(o.text)}<p>${escapeHtml(o.feedback||'')}</p></div>`;}).join('');
+    const teach=(solved||exhausted)&&task.teach?`<div class="learning-teach-point"><strong>📘 教學重點</strong><p>${escapeHtml(task.teach)}</p></div>`:'';
+    const compare=solved||exhausted?`<details class="learning-compare" open><summary>比較各選項的理由</summary>${ordered.map(o=>`<p><strong>${o.correct?'✔':'✗'} ${escapeHtml(o.text)}</strong><br>${escapeHtml(o.feedback)}</p>`).join('')}</details>`:'';
+    const buttons=solved?'':ordered.map(o=>`<button class="nav-btn learning-option" data-action="answer-learning" data-char-id="${charId}" data-task-id="${task.id}" data-option-id="${o.id}" ${attempts.some(x=>x.optionId===o.id)?'disabled':''}>${escapeHtml(o.text)}</button>`).join('');
+    const note=record?`<small>首次作答：${record.firstCorrect?'推理方向合適':'需要補充'}；後續嘗試保留，不計入關係分數。</small>`:'';
+    return `<section class="learning-prompt"><h3>📝 隨堂小考<small>${escapeHtml(ep)}・${escapeHtml(task.type||task.kind||'')}</small></h3><p>${escapeHtml(String(task.prompt).replace(/^E\d{2}\s*/,''))}</p>${results}${!solved&&last?'<p class="learning-retry">可以再選一次，比較不同推理的差別。</p>':''}${buttons}${teach}${compare}${note}<p class="learning-scope">這裡檢查證據推理，不替角色或現實人物下診斷。可先繼續故事，之後從學習回顧補做。</p></section>`;
   }
 
   renderLearningPrompt(charId,eventData){
@@ -2879,14 +2898,45 @@ class EdgeOfLoveGame {
     return `<div class="dialogue-text ${narrative ? 'narrative-text' : 'spoken-text'}">${paragraphs.map(p => `<p>${linkify(escapeHtml(p)).replaceAll('\n','<br>')}</p>`).join('')}</div>`;
   }
 
-  renderInteractionAnalysis(char, event, node, outcome) {
-    const choice=node.choices?.find(c=>this.formatText(c.text)===outcome.choiceText);
-    const status=choice?.decision?.status;
-    const consequence=status?{committed:'你們說好要做什麼。是否做完，得看後續。',deferred:'你把時間或能幫的部分說清楚，其他事還沒答應。',takenOver:'你曾提出代為處理，但仍需核對對方是否同意及實際交接。',unsettled:'這次不安有被說出來，但請求與分工還沒有談定。',ruptured:'這句冷淡的話讓對方不想再談。必要工作還是得交代。'}[status]:choice?.relationshipIntent?'這裡記錄的是你表達的關係方向；對方有自己的答案，原本的分數不替任何人承諾。':choice?.healthy?'這次回應保留了可以討論的範圍，先看對方實際如何接話，而不把一次順利當成整體改變。':'本次反應已顯示這種回覆的代價；承諾、批評或代替他人決定，需要和當事人的需要分開看。';
+  teachingStatText(stats={}) {
+    const labels={affection:'好感',security:'安全感',boundary:'邊界感'};
+    return Object.entries(labels).map(([k,l])=>{const v=Number(stats?.[k]||0);return `${l} ${v>0?'+':v<0?'−':'±'}${Math.abs(v)}`;}).join('・');
+  }
+
+  // 教學面板：情境、玩家所選的回應、每個選項的心理病理學觀點與諮商觀點。
+  renderTeachingOptions(choices, order, pickedIndex, {daily=false}={}) {
+    const scale=v=>daily?Math.sign(v)*Math.min(2,Math.ceil(Math.abs(v)/3)):v;
+    return `<ol class="teaching-option-list">${order.map((index,pos)=>{const c=choices[index];if(!c)return '';const stats=Object.fromEntries(Object.entries(c.stats||{}).map(([k,v])=>[k,scale(v)]));const picked=index===pickedIndex;
+      return `<li class="teaching-option${picked?' is-picked':''}"><p class="teaching-option-text"><strong>${String.fromCharCode(65+pos)}. ${escapeHtml(this.formatText(c.text))}</strong>${picked?'<span class="teaching-picked-tag">你的選擇</span>':''}</p><p class="teaching-option-reply">對方的回應：${escapeHtml(this.formatText(c.replyCore||c.reply||''))}</p><p class="teaching-option-view"><strong>心理病理學觀點：</strong>${escapeHtml(c.teaching||c.interactionAnalysis||'')}</p><p class="teaching-option-stats">遊戲基準數值：${escapeHtml(this.teachingStatText(stats))}</p></li>`;}).join('')}</ol>`;
+  }
+
+  renderPathologyTeaching(char, event, node, outcome) {
+    const choices=node.choices||[];
+    let pickedIndex=Number.isInteger(outcome.choiceIndex)?outcome.choiceIndex:-1;
+    if(!choices[pickedIndex]||this.formatText(choices[pickedIndex].text)!==outcome.choiceText)pickedIndex=choices.findIndex(c=>this.formatText(c.text)===outcome.choiceText);
+    const choice=choices[pickedIndex];
+    const t=event.teaching||{};
     const core=outcome.replyCore||choice?.replyCore||outcome.reply.split('\n\n')[0];
-    const reactionFocus=status?consequence:choice?.relationshipIntent?'這是本次表達方向後的實際回覆，不能由親近分數替代；之後的接觸仍需再次詢問。':event.type==='caseStudy'?'這次資料分享只涵蓋本人同意的內容，不能補成尚未親見的經驗，也不讓閱讀本身成為診斷。':(outcome.criteriaBasis?.length?'回覆中已發生的動作與安排可以記錄，仍不能單憑一次順利或不順利，證明長期模式已改變或診斷成立。':'這裡呈現的是一次具體互動，沒有新增診斷準則。共同完成什麼、還有什麼未答應，需照當下反應分開留下。');
     const bases=outcome.criteriaBasis||[];
-    return `<details class="outcome-dsm-judgment-panel interaction-analysis-panel"><summary>📓 本節互動解析</summary><section><h4>對方說了什麼</h4><blockquote>${escapeHtml(this.formatText(node.text))}</blockquote><p>${escapeHtml(event.studySummary?.points?.[0]||'先把這次互動的具體需要與一般喜好分開看。')}</p></section><section><h4>你這樣回答之後</h4><blockquote>${escapeHtml(outcome.choiceText)}</blockquote><p>${escapeHtml(choice?.interactionAnalysis||(outcome.psychNote===event.studySummary?.points?.[0]?consequence:outcome.psychNote)||consequence)}</p></section><section><h4>對方怎麼回應</h4><blockquote>${escapeHtml(core)}</blockquote><p>${escapeHtml(reactionFocus)}</p></section>${bases.length?`<section><h4>本節的學習線索</h4>${bases.map(cr=>{const evidence=event.evidence?.[cr.id];return `<p><strong>${escapeHtml(cr.code)}｜${escapeHtml(cr.title)}</strong></p><p>${escapeHtml(evidence?.basis||cr.behavioralAnchor?.behavior||'')}</p><p>資料來源：${escapeHtml((evidence?.sources||[]).join('、'))}。${escapeHtml(evidence?.limitation||'仍須結合其他情境與病程。')}</p><button class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="criterion" data-item-id="${cr.id}">查看本節紀錄</button>`;}).join('')}</section>`:''}</details>`;
+    const order=this.peekChoiceOrder(node);
+    return `<details class="outcome-dsm-judgment-panel interaction-analysis-panel pathology-teaching-panel" open><summary>📓 本節教學：心理病理學觀點</summary>
+      <section><h4>情境</h4><blockquote>${escapeHtml(this.formatText(node.text))}</blockquote>${t.focus?`<p>${escapeHtml(t.focus)}</p>`:''}</section>
+      <section class="teaching-picked"><h4>你選的回應</h4><blockquote>${escapeHtml(outcome.choiceText)}</blockquote><p class="teaching-option-reply">對方的回應：${escapeHtml(core)}</p><p><strong>心理病理學觀點：</strong>${escapeHtml(choice?.teaching||choice?.interactionAnalysis||'')}</p></section>
+      <section><h4>每個選項會帶來什麼</h4><p class="teaching-note">遊戲的數值反映角色當下的反應，不等於臨床上的好壞；請對照病理學觀點一起看。</p>${this.renderTeachingOptions(choices,order,pickedIndex)}</section>
+      ${t.counsel?`<section class="teaching-counsel"><h4>諮商觀點</h4><p>${escapeHtml(t.counsel)}</p></section>`:''}
+      ${bases.length?`<section><h4>本節的學習線索</h4>${bases.map(cr=>{const evidence=event.evidence?.[cr.id];return `<p><strong>${escapeHtml(cr.code)}｜${escapeHtml(cr.title)}</strong></p><p>${escapeHtml(evidence?.basis||cr.behavioralAnchor?.behavior||'')}</p><p>資料來源：${escapeHtml((evidence?.sources||[]).join('、'))}。${escapeHtml(evidence?.limitation||'仍須結合其他情境與病程。')}</p><button class="btn-evidence-anchor" data-action="open-evidence-modal" data-char-id="${char.id}" data-item-type="criterion" data-item-id="${cr.id}">查看本節紀錄</button>`;}).join('')}</section>`:''}
+      <p class="teaching-scope">這是教材中的虛構案例；心理病理學觀點用來練習推理，不替角色或現實人物下診斷。</p></details>`;
+  }
+
+  renderDailyTeaching(talk, picked) {
+    const choices=talk.choices||[];
+    let pickedIndex=Number.isInteger(picked.choiceIndex)?picked.choiceIndex:choices.findIndex(c=>this.formatText(c.text)===picked.text);
+    const choice=choices[pickedIndex],t=talk.teaching||{};
+    return `<details class="outcome-dsm-judgment-panel interaction-analysis-panel pathology-teaching-panel" open><summary>📓 本節教學：心理病理學觀點</summary>
+      <section><h4>情境</h4><blockquote>${escapeHtml(this.formatText(talk.response||talk.prompt||''))}</blockquote>${t.focus?`<p>${escapeHtml(t.focus)}</p>`:''}</section>
+      <section class="teaching-picked"><h4>你選的回應</h4><blockquote>${escapeHtml(picked.text)}</blockquote><p><strong>心理病理學觀點：</strong>${escapeHtml(choice?.teaching||'')}</p></section>
+      <section><h4>每個選項會帶來什麼</h4><p class="teaching-note">日常回看的數值每項最多變動 2 點；日常互動不作為症狀證據。</p>${this.renderTeachingOptions(choices,this.peekChoiceOrder(talk),pickedIndex,{daily:true})}</section>
+      ${t.counsel?`<section class="teaching-counsel"><h4>諮商觀點</h4><p>${escapeHtml(t.counsel)}</p></section>`:''}</details>`;
   }
 
   renderCompletedCaseDossier(char) {
@@ -2897,7 +2947,7 @@ class EdgeOfLoveGame {
       .replace('<details class="ending-continuity"><summary>相處片段與未完的事</summary>', '<section class="ending-continuity"><h5>相處片段與未完的事</h5>')
       .replace(/<\/details>$/, '</section>');
     return `<details class="ending-clinical-box completed-case-dossier">
-      <summary>角色案例解析</summary><div class="case-dossier-content">
+      <summary>角色案例教學</summary><div class="case-dossier-content">
       <header class="case-dossier-header"><span class="case-eyebrow">角色故事已完成</span><h3>${escapeHtml(char.name)}</h3><p class="case-diagnosis">${escapeHtml(char.dsmTitle)} <span>${escapeHtml(char.dsmCode)}</span></p><p>分開閱讀本人的說法、作者案例設定，以及這一輪的線索。</p></header>
       <nav class="case-section-nav" aria-label="角色案例區段">${[['self','自我理解'],['background','案例背景'],['evidence','準則與證據'],['resources','延伸與回顧']].map(([key,label])=>`<button class="nav-btn" data-action="jump-case-section" data-section="${id(key)}">${label}</button>`).join('')}</nav>
       <section id="${id('self')}" tabindex="-1" class="case-section case-self-understanding"><div class="case-section-heading"><span aria-hidden="true">01</span><h4>本人分享的自我理解</h4></div><p>${escapeHtml(r.memory)}</p></section>
@@ -2921,7 +2971,7 @@ class EdgeOfLoveGame {
     if(sc.mode==='daily')return this.renderDailyScene(char,cs,route,diag);
     const ev=sc.eventData,node=ev.nodes[sc.nodeIndex],out=sc.lastChoiceOutcome;
     const text=this.renderProse(node.text,node.speaker==='narrator');
-    return `<section class="vn-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><div class="vn-loc-info"><span class="vn-chap-badge">${ev.code} / E15</span><strong>${escapeHtml(ev.title.replace(/^E\d+\s*[｜|]\s*/,''))}</strong><small>${escapeHtml(ev.locationName||'')}・${escapeHtml(ev.ambience)}</small></div>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid ${ev.partnerId?'ensemble-scene':''}"><div class="vn-portrait-column">${this.renderScenePortraits(char,sc)}</div><div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner"><strong>${node.speaker==='char'?escapeHtml(char.name):node.speaker==='ensemble'?'同場對話':'旁白'}</strong><span>STEP ${sc.nodeIndex+1} / ${ev.nodes.length}</span></div>${ev.contentWarning?`<p class="content-warning" role="note">${escapeHtml(ev.contentWarning)}</p>`:''}${text}${ev.continuityText?`<details class="scene-continuity"><summary>先前的安排</summary>${this.renderProse(ev.continuityText)}</details>`:''}${sc.awaitingNextAfterChoice&&out?`<div class="choice-outcome-box"><p>你的回應：${escapeHtml(out.choiceText)}</p>${this.renderProse(out.reply)}${this.formatStatDeltas(out.stats)}</div>${this.state.studyMode?this.renderInteractionAnalysis(char,ev,node,out):''}${this.state.studyMode?this.renderLearningPrompt(char.id,ev):''}<button class="btn-vn-continue" data-action="next-node">繼續下一段劇情 ▶</button>`:node.choices?.length?`<div class="vn-choices-list">${this.getChoiceOrder(node).map((index,pos)=>`<button class="vn-choice-btn" data-action="select-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${escapeHtml(this.formatText(node.choices[index].text))}</span></button>`).join('')}</div>`:'<button class="btn-vn-continue" data-action="next-node">下一段對話 ▶</button>'}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
+    return `<section class="vn-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><div class="vn-loc-info"><span class="vn-chap-badge">${ev.code} / E15</span><strong>${escapeHtml(ev.title.replace(/^E\d+\s*[｜|]\s*/,''))}</strong><small>${escapeHtml(ev.locationName||'')}・${escapeHtml(ev.ambience)}</small></div>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid ${ev.partnerId?'ensemble-scene':''}"><div class="vn-portrait-column">${this.renderScenePortraits(char,sc)}</div><div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner"><strong>${node.speaker==='char'?escapeHtml(char.name):node.speaker==='ensemble'?'同場對話':'旁白'}</strong><span>STEP ${sc.nodeIndex+1} / ${ev.nodes.length}</span></div>${ev.contentWarning?`<p class="content-warning" role="note">${escapeHtml(ev.contentWarning)}</p>`:''}${text}${ev.continuityText?`<details class="scene-continuity"><summary>先前的安排</summary>${this.renderProse(ev.continuityText)}</details>`:''}${sc.awaitingNextAfterChoice&&out?`<div class="choice-outcome-box"><p>你的回應：${escapeHtml(out.choiceText)}</p>${this.renderProse(out.reply)}${this.formatStatDeltas(out.stats)}</div>${this.state.studyMode?this.renderPathologyTeaching(char,ev,node,out):''}${this.renderLearningPrompt(char.id,ev)}<button class="btn-vn-continue" data-action="next-node">繼續下一段劇情 ▶</button>`:node.choices?.length?`<div class="vn-choices-list">${this.getChoiceOrder(node).map((index,pos)=>`<button class="vn-choice-btn" data-action="select-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${escapeHtml(this.formatText(node.choices[index].text))}</span></button>`).join('')}</div>`:'<button class="btn-vn-continue" data-action="next-node">下一段對話 ▶</button>'}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
   renderDailyScene(char, cs, route, diag) {
@@ -2930,7 +2980,7 @@ class EdgeOfLoveGame {
     return `<section class="vn-stage" style="--char-color:${char.themeColor}">
       <div class="vn-top-bar daily-top-bar"><div class="daily-heading"><button class="nav-btn" data-action="exit-scene">← 返回故事</button><strong>日常回看・${text(talk.title)}</strong></div>${this.renderRelationshipMeters(char)}</div>
       <div class="vn-main-grid"><div class="vn-portrait-column"><div class="vn-portrait-frame">${renderCharacterSVG(char,expression || 'smile','portrait')}</div></div>
-      <div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner">${text(char.name)}・已走過的相處片段</div>${this.renderProse(talk.prompt)}${talk.response?this.renderProse(talk.response,false):''}${picked?`<div class="choice-outcome-box"><p>你：${text(picked.text)}</p>${this.renderProse(picked.reply)}${this.formatStatDeltas(picked.stats)}</div>`:''}
+      <div class="vn-dialogue-column"><div class="vn-dialogue-box"><div class="speaker-banner">${text(char.name)}・已走過的相處片段</div>${this.renderProse(talk.prompt)}${talk.response?this.renderProse(talk.response,false):''}${picked?`<div class="choice-outcome-box"><p>你：${text(picked.text)}</p>${this.renderProse(picked.reply)}${this.formatStatDeltas(picked.stats)}</div>${this.state.studyMode?this.renderDailyTeaching(talk,picked):''}`:''}
       ${picked?'<button class="btn-vn-continue" data-action="next-node">完成日常互動 ▶</button>':`<div class="vn-choices-list">${this.getChoiceOrder(talk).map((index,pos)=>`<button class="vn-choice-btn" data-action="daily-choice" data-choice-index="${index}"><span class="choice-idx">${String.fromCharCode(65+pos)}</span><span class="choice-text">${text(talk.choices[index].text)}</span></button>`).join('')}</div>`}</div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
@@ -2939,7 +2989,7 @@ class EdgeOfLoveGame {
     let text=preview?endingData.romanticText:(cs.relationshipIntent==='romantic'&&endingKey==='trueEnd'?endingData.romanticText:endingData.soulmateText);
 
     const earned=cs.endingKey||'normalEnd';
-    return `<section class="vn-stage ending-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><strong>${preview?'其他結局預覽（不代表這一輪結果）':'E15｜這一輪的故事結局'}・${escapeHtml(char.name)}</strong><small>${escapeHtml(this.activeScene.locationName||'展覽之後')}</small>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid"><div class="vn-portrait-column"><div class="vn-portrait-frame">${renderCharacterSVG(char,this.activeScene.expression,'portrait')}</div></div><div class="vn-dialogue-column"><div class="vn-dialogue-box ending-card"><h2>${escapeHtml(endingData.title)}</h2><p>${escapeHtml(endingData.subtitle)}</p>${this.renderProse(text)}${!preview&&this.getEthicsInfo(char.id).active?`<details class="ending-ethics"><summary>還沒處理完的爭議</summary>${this.renderProse(STORY_ROUTES[char.id].ethicsEnding)}</details>`:''}${preview?'':this.renderCompletedCaseDossier(char)}<details class="ending-switcher"><summary>比較其他結局（僅預覽，不改變這一輪選擇）</summary><div class="ending-options">${Object.entries(ALL_SCENARIOS[char.id].endings).map(([key,end])=>`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}" data-ending-key="${key}">${escapeHtml(end.title)}</button>`).join('')}</div></details>${preview?`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}">回到這一輪的結局：${escapeHtml(ALL_SCENARIOS[char.id].endings[earned].title)}</button>`:''}<button class="btn-vn-continue" data-action="exit-scene">返回公寓繼續邂逅其他角色 ▶</button></div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
+    return `<section class="vn-stage ending-stage" style="--char-color:${char.themeColor}"><div class="vn-top-bar"><strong>${preview?'其他結局預覽（不代表這一輪結果）':'E15｜這一輪的故事結局'}・${escapeHtml(char.name)}</strong><small>${escapeHtml(this.activeScene.locationName||'展覽之後')}</small>${this.renderRelationshipMeters(char)}</div><div class="vn-main-grid"><div class="vn-portrait-column"><div class="vn-portrait-frame">${renderCharacterSVG(char,this.activeScene.expression,'portrait')}</div></div><div class="vn-dialogue-column"><div class="vn-dialogue-box ending-card"><h2>${escapeHtml(endingData.title)}</h2><p>${escapeHtml(endingData.subtitle)}</p>${this.renderProse(text)}${!preview&&this.getEthicsInfo(char.id).active?`<details class="ending-ethics"><summary>還沒處理完的爭議</summary>${this.renderProse(STORY_ROUTES[char.id].ethicsEnding)}</details>`:''}${preview?'':this.renderLearningPrompt(char.id,{eventNumber:15})}${preview?'':this.renderCompletedCaseDossier(char)}<details class="ending-switcher"><summary>比較其他結局（僅預覽，不改變這一輪選擇）</summary><div class="ending-options">${Object.entries(ALL_SCENARIOS[char.id].endings).map(([key,end])=>`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}" data-ending-key="${key}">${escapeHtml(end.title)}</button>`).join('')}</div></details>${preview?`<button class="nav-btn" data-action="show-ending" data-char-id="${char.id}">回到這一輪的結局：${escapeHtml(ALL_SCENARIOS[char.id].endings[earned].title)}</button>`:''}<button class="btn-vn-continue" data-action="exit-scene">返回公寓繼續邂逅其他角色 ▶</button></div>${this.renderDiaryEntry(char,cs)}</div></div></section>`;
   }
 
   // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格障礙症診斷準則手冊 ====================

@@ -18,7 +18,7 @@ export const CLINICAL_SOURCES = [
 function S(title, context, line, criteria, actions, note, effects = {}) {
   return { title, context, line, criteria, actions, note, ...effects };
 }
-export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=60';
+export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, PREVIOUS_LEARNING_TASKS, LEARNING_STAGES, LEARNING_REVISION } from './learningContent.js?v=62';
 
 import { STORY_ROUTES } from './routeStories.js?v=60';
 export { STORY_ROUTES };
@@ -99,6 +99,10 @@ function ordinaryScene(route,index){
 }
 
 import { TRIO_PAIRS } from './sharedScenes.js?v=60';
+import { getSceneTeaching, getOptionTeaching } from './teaching/index.js?v=62';
+export { PATHOLOGY_TEACHING, getSceneTeaching, getOptionTeaching } from './teaching/index.js?v=62';
+// 教學內容取代舊的通用解析：psychNote 與 interactionAnalysis 都改為該選項的心理病理學觀點。
+const withTeaching=(choice,teaching)=>teaching?{...choice,teaching,psychNote:teaching,interactionAnalysis:teaching}:choice;
 
 export function buildRouteEvents(id) {
  const r=STORY_ROUTES[id];if(!r)return [];
@@ -151,8 +155,9 @@ export function buildRouteEvents(id) {
   ev.ambience=`展覽第 ${[1,2,2,2,3,3,3,3,4,4,5,5,6,7,7][number-1]} 週・${ev.phaseName}${ev.type==='trio'?'・平行視角中的同場情節':''}`;
   for(const node of ev.nodes){
    if(node.speaker==='narrator')Object.assign(node,makeNarration(id,number,node.text,ev.sharedSceneKey));
-   if(node.choices)node.choices=node.choices.map((choice,index)=>expandChoiceReply(id,number,choice,index,ev.sharedSceneKey));
+   if(node.choices)node.choices=node.choices.map((choice,index)=>withTeaching(expandChoiceReply(id,number,choice,index,ev.sharedSceneKey),getOptionTeaching(id,number,index)));
   }
+  ev.teaching=getSceneTeaching(id,number);
   events.push(ev);
  }
  return events;
@@ -162,7 +167,8 @@ export function makeScenario(id){
  const scenario={chapters:[],dailyTalks:r.ordinary.map((d,i)=>{
   const number=[2,6,13][i],scene=ordinaryScene(r,i),place=getEpisodePlace(id,number);
   return {title:scene.title,sourceEvent:number,...place,prompt:d.context,narrativeCore:d.context,narrativeAdditions:[],response:d.line,
-   choices:buildSceneChoices(scene,id,number,{daily:true}).map((c,j)=>expandChoiceReply(id,number,c,j))};
+   teaching:getSceneTeaching(id,number,{daily:true}),
+   choices:buildSceneChoices(scene,id,number,{daily:true}).map((c,j)=>withTeaching(expandChoiceReply(id,number,c,j),getOptionTeaching(id,number,j,{daily:true})))};
  }),endings:{
   trueEnd:ending(`【戀愛結局】${r.confession[0]}`,'雙方願意，慢慢相處',r.endings[0]),
   friendEnd:ending(`【友情結局】${r.ordinary[0].title}`,'友情有自己的生活',r.endings[1]),
