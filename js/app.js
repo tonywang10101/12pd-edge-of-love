@@ -2038,7 +2038,7 @@ class EdgeOfLoveGame {
       <header class="top-navbar ${this.mobileNavOpen ? 'nav-open' : ''}">
         <div class="navbar-top-row">
           <div class="brand-group">
-            <span class="brand-logo">🌸</span>
+            <a class="brand-logo brand-guide-link" href="https://docs.google.com/document/d/1hk1zOEpY6kfTqzYOpZ0jh4hD9hdxDnY3EkOBxhKHL0Q/edit?tab=t.0" target="_blank" rel="noopener noreferrer" aria-label="🌸">🌸</a>
             <div>
               <h1 class="brand-title">愛的邊緣 <span class="brand-sub">EDGE OF LOVE</span></h1>
               <p class="brand-meta">
