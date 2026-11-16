@@ -1,7 +1,7 @@
 // 《愛的邊緣》角色立繪與情緒特效渲染器
 
-import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=58';
-import { resolveAssetUrl } from './assetPreloader.js?v=58';
+import { CHARACTER_PROMPTS } from '../data/characterPrompts.js?v=60';
+import { resolveAssetUrl } from './assetPreloader.js?v=60';
 
 export function renderCharacterSVG(char, expression = 'neutral', mode = 'portrait') {
   const promptData = CHARACTER_PROMPTS[char.id];

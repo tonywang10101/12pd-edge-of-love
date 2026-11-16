@@ -4,6 +4,7 @@
 export const DSM_REFERENCE = {
   GENERAL: {
     code: 'GENERAL',
+    chip: '通用',
     title: '一般人格障礙症',
     en: 'General Personality Disorder',
     intro: '一般人格障礙症通用診斷準則：',

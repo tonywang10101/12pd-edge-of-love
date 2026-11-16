@@ -1,12 +1,12 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=58';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS} from './data/dialogueChoices.js?v=60';
 // 《愛的邊緣》2.5 — 平行角色故事、具體後果、雙方關係意願與獨立學習紀錄
 
-import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=58';
-import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=58';
-import { DSM_REFERENCE } from './data/dsmReference.js?v=58';
-import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=58';
-import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=58';
-import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=58';
+import { getTuning, DIALOGUE_REVISION, STORY_ROUTES, CLINICAL_SOURCES, CONTENT_VERSION, getLearningTasks, LEGACY_LEARNING_TASKS, LEARNING_STAGES, getEndingPlace, composeNarrative, makeNarration, expandChoiceReply, expandEnding, OPENING_NARRATIVE } from './data/storyContent.js?v=60';
+import { LOCATIONS, CLUSTERS, CHARACTERS } from './data/characters.js?v=60';
+import { DSM_REFERENCE } from './data/dsmReference.js?v=60';
+import { SCENARIOS_CLUSTER_A } from './data/scenarios_cluster_a.js?v=60';
+import { SCENARIOS_CLUSTER_B } from './data/scenarios_cluster_b.js?v=60';
+import { SCENARIOS_CLUSTER_C_OTHER } from './data/scenarios_cluster_c_other.js?v=60';
 import {
   CHARACTER_EXTENDED_LORE,
   TRIO_SCENES_DATA,
@@ -17,12 +17,12 @@ import {
   getDiagnosisRevealEvent,
   getPerfectScoreTable,
   getPerfectProgress
-} from './data/eventTreeEngine.js?v=58';
+} from './data/eventTreeEngine.js?v=60';
 import {
   CHARACTER_PROMPTS,
   getSceneBackground
-} from './data/characterPrompts.js?v=58';
-import { renderCharacterSVG } from './ui/avatarRenderer.js?v=58';
+} from './data/characterPrompts.js?v=60';
+import { renderCharacterSVG } from './ui/avatarRenderer.js?v=60';
 import { audio } from './ui/audioEngine.js?v=35';
 import {
   preloadAllAssets,
@@ -2804,7 +2804,6 @@ class EdgeOfLoveGame {
 
   getTaskSummary(charId,decision,eventNumber=15) {
     const r=STORY_ROUTES[charId],cs=this.state.characters[charId];
-    if(decision.task==='repairPlan'&&charId==='you_ziqian'&&eventNumber>=13&&cs.eventCompleted>=12)return r.letterAfterReply;
     if(decision.summary)return eventNumber>=13?`先前安排的紀錄：${decision.summary}`:`上次談到這裡：${decision.summary}`;
     const summary=r.checkpoints[decision.task]?.[decision.status]||'這項安排還沒有確認，仍由本人決定。';
     return eventNumber>=13?`先前安排的紀錄：${summary}`:summary;
@@ -2942,7 +2941,7 @@ class EdgeOfLoveGame {
 
   // ==================== 側邊懸浮小工具：隨時叫出 DSM-5-TR 人格障礙症診斷準則手冊 ====================
   getDsmReferenceOptions() {
-    return Object.entries(DSM_REFERENCE).filter(([code])=>code!=='GENERAL').map(([code,ref])=>({code,...ref}));
+    return Object.entries(DSM_REFERENCE).map(([code,ref])=>({code,...ref}));
   }
 
   selectDsmReference(code) {
@@ -2958,7 +2957,7 @@ class EdgeOfLoveGame {
     const options=this.getDsmReferenceOptions();
     const selected=options.find(ref=>ref.code===this.selectedDsmRefCode);
     const list=items=>`<ul class="dsm-ref-list">${items.map(item=>`<li>${escapeHtml(item).replaceAll('\n','<br>')}</li>`).join('')}</ul>`;
-    return `<details class="dsm-reference-picker" ${!selected ? 'open' : ''}><summary>${selected ? `切換準則：${escapeHtml(selected.title)}` : '選擇要閱讀的準則'}</summary><div class="dsm-ref-chips" role="group" aria-label="選擇診斷">${options.map(ref=>`<button class="dsm-ref-chip ${selected?.code===ref.code?'active':''}" data-action="select-dsm-reference" data-code="${ref.code}" aria-pressed="${selected?.code===ref.code}"><strong>${escapeHtml(ref.code)}</strong><span>${escapeHtml(ref.title)}</span></button>`).join('')}</div></details><div class="dsm-reference-content">${selected?`<section class="dsm-ref-block" data-reference-code="${selected.code}" role="region" aria-labelledby="selected-reference-title"><h4 id="selected-reference-title">${escapeHtml(selected.title)} <small>${escapeHtml(selected.code)}</small></h4><p class="dsm-ref-en">${escapeHtml(selected.en)}</p><p>${escapeHtml(selected.intro)}</p><p class="dsm-ref-lead"><strong>${escapeHtml(selected.lead)}</strong></p>${list(selected.criteria)}${selected.extraCriteria?.length?list(selected.extraCriteria):''}${selected.subtypes?.length?`<p class="dsm-ref-lead"><strong>${escapeHtml(selected.subtypesLead||'註明是否有：')}</strong></p>${list(selected.subtypes)}`:''}${selected.note?`<p class="dsm-ref-note">${escapeHtml(selected.note)}</p>`:''}</section>`:'<p class="reference-empty">請先選擇上方準則，這裡會顯示完整內容。</p>'}<p class="dsm-ref-disclaimer">準則為遊戲學習參照，非正式中譯本或臨床診斷工具。</p></div>`;
+    return `<details class="dsm-reference-picker" ${!selected ? 'open' : ''}><summary>${selected ? `切換準則：${escapeHtml(selected.title)}` : '選擇要閱讀的準則'}</summary><div class="dsm-ref-chips" role="group" aria-label="選擇診斷">${options.map(ref=>`<button class="dsm-ref-chip ${selected?.code===ref.code?'active':''}" data-action="select-dsm-reference" data-code="${ref.code}" aria-pressed="${selected?.code===ref.code}"><strong>${escapeHtml(ref.chip||ref.code)}</strong><span>${escapeHtml(ref.title)}</span></button>`).join('')}</div></details><div class="dsm-reference-content">${selected?`<section class="dsm-ref-block" data-reference-code="${selected.code}" role="region" aria-labelledby="selected-reference-title"><h4 id="selected-reference-title">${escapeHtml(selected.title)} <small>${escapeHtml(selected.chip||selected.code)}</small></h4><p class="dsm-ref-en">${escapeHtml(selected.en)}</p><p>${escapeHtml(selected.intro)}</p><p class="dsm-ref-lead"><strong>${escapeHtml(selected.lead)}</strong></p>${list(selected.criteria)}${selected.extraCriteria?.length?`<p class="dsm-ref-lead"><strong>其他診斷準則：</strong></p>${list(selected.extraCriteria)}`:''}${selected.subtypes?.length?`<p class="dsm-ref-lead"><strong>${escapeHtml(selected.subtypesLead||'註明是否有：')}</strong></p>${list(selected.subtypes)}`:''}${selected.note?`<p class="dsm-ref-note">${escapeHtml(selected.note)}</p>`:''}</section>`:'<p class="reference-empty">請先選擇上方準則，這裡會顯示完整內容。</p>'}<p class="dsm-ref-disclaimer">準則為遊戲學習參照，非正式中譯本或臨床診斷工具。</p></div>`;
   }
 
   renderSideDsmCriteriaWidget() {

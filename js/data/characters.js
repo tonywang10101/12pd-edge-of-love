@@ -1,6 +1,6 @@
 // Character identity and diagnosis references are independent of observed evidence.
-import { DSM_REFERENCE } from './dsmReference.js?v=58';
-import { STORY_ROUTES, buildRouteEvents, getTuning } from './storyContent.js?v=58';
+import { DSM_REFERENCE } from './dsmReference.js?v=60';
+import { STORY_ROUTES, buildRouteEvents, getTuning } from './storyContent.js?v=60';
 export const LOCATIONS = [
   {
     "id": "rooftop",
@@ -480,8 +480,8 @@ const IDENTITIES = {
     "occupation": "咖啡廳店長／自由平面設計師",
     "cluster": "OTHER",
     "dsmCode": "F60.89",
-    "dsmTitle": "其他特定的人格障礙症（混合型人格特質／被動攻擊特徵）",
-    "dsmTitleEn": "Other Specified Personality Disorder (Mixed / Passive-Aggressive Features)",
+    "dsmTitle": "其他特定的人格障礙症（混合型人格特質／控制表現）",
+    "dsmTitleEn": "Other Specified Personality Disorder (Mixed Personality Features / Controlling Presentation)",
     "sex": "male",
     "genderLabel": "順性別男性 (Cis Male)",
     "pronoun": "他",
@@ -495,7 +495,7 @@ const IDENTITIES = {
     "locationId": "cafe",
     "themeColor": "#a855f7",
     "ecgType": "masked_wave",
-    "tagline": "「這次我不說都可以。我有想法，想直接告訴你。」",
+    "tagline": "「交給我就好嘛～……你不會生我的氣吧？」",
     "avatar": {
       "skin": "#f3e8ff",
       "hairColor": "#4c1d95",

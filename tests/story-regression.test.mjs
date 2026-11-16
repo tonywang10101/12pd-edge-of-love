@@ -26,10 +26,14 @@ const TUNED_ENDS={su_fei:{second:'normalEnd',reasoning:'triggerEnd','romance-sty
  han_xiao:{second:'codependentEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'normalEnd'},
  xia_le:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'codependentEnd',distance:'normalEnd',boundary:'trueEnd',pause:'triggerEnd'},
  ruri:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
+ you_ziqian:{second:'normalEnd',reasoning:'normalEnd','romance-style':'codependentEnd',friend:'friendEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'},
+ ji_yan:{second:'normalEnd',reasoning:'triggerEnd','romance-style':'normalEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'trueEnd',pause:'normalEnd'},
+ lin_jianwei:{second:'normalEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'triggerEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'},
+ lu_qinglan:{second:'normalEnd',reasoning:'normalEnd','romance-style':'normalEnd',friend:'friendEnd',distance:'normalEnd',boundary:'normalEnd',pause:'triggerEnd'},
  wen_yan:{second:'trueEnd',reasoning:'normalEnd','romance-style':'triggerEnd',friend:'friendEnd',distance:'normalEnd',boundary:'triggerEnd',pause:'triggerEnd'}};
 const expectEnd=(id,policy,fallback)=>TUNED_ENDS[id]?.[policy]||fallback;
 // 一路挑戰對多數角色是「讓對方想保持距離」；韓梟例外（挑戰讓他尊重你），改用一路戀愛攻略
-const pauseKind=id=>({han_xiao:'romance-style',xia_le:'romance-style'})[id]||'pause';
+const pauseKind=id=>({han_xiao:'romance-style',xia_le:'romance-style',ji_yan:'reasoning'})[id]||'pause';
 function route(id,kind){
  const g=game(),designed=kind==='romantic'&&content.getTuning(id)?.designedRoute;
  for(let e=1;e<=13;e++)playEvent(g,id,e,()=>designed?designed[e-1]:kind==='second'?1:kind==='reasoning'?3:kind==='romance-style'?4:kind==='pause'?2:0);
@@ -245,9 +249,9 @@ test('documented historical interference retains its consequences without labell
 
 test('displayed relationship changes report only the points actually applied at the limits',()=>{
  const g=game(),id='lin_jianwei',cs=g.state.characters[id];cs.affection=99;cs.security=99;cs.boundary=99;
- g.startEvent(id,1);g.handleNextNode();g.handleChoiceSelect(0);
+ g.startEvent(id,1);g.handleNextNode();g.handleChoiceSelect(3);
  for(const key of ['affection','security','boundary']){assert.equal(cs[key],100);assert.equal(g.activeScene.lastChoiceOutcome.stats[key],1);}
- assert.equal(cs.choiceScores['1_1'].affection,3,'raw decision quality is independent of the capped display');
+ assert.equal(cs.choiceScores['1_1'].affection,2,'raw decision quality is independent of the capped display');
  g.state.characters[id].eventCompleted=Math.max(2,g.state.characters[id].eventCompleted);g.startDailyTalk(id);g.handleDailyChoice(0);assert.ok(Object.values(g.activeScene.picked.stats).every(x=>x===0));
 });
 
@@ -266,9 +270,9 @@ test('reference tool is character-independent and switches one diagnosis at a ti
  for(const removed of ['12 位角色與證據','一般準則','dsm-char-pill','data-char-id','jump-dsm-ref'])assert.ok(!html.includes(removed),removed);
  for(const c of CHARACTERS)assert.ok(!html.includes(c.name));
  assert.equal(g.selectedDsmRefCode,null);assert.ok(!html.includes('data-reference-code='));
- const options=g.getDsmReferenceOptions();assert.equal(options.length,13);assert.ok(options.every(x=>x.code!=='GENERAL'));
+ const options=g.getDsmReferenceOptions();assert.equal(options.length,14);assert.equal(options[0].code,'GENERAL');
  for(const {code}of options){assert.equal(g.selectDsmReference(code),true);html=g.renderSideDsmCriteriaWidget();assert.equal((html.match(/data-reference-code=/g)||[]).length,1);assert.ok(html.includes(`data-reference-code="${code}"`));assert.ok(html.includes('aria-pressed="true"'));}
- const selected=g.selectedDsmRefCode;assert.equal(g.selectDsmReference('GENERAL'),false);assert.equal(g.selectDsmReference('unknown'),false);assert.equal(g.selectedDsmRefCode,selected);assert.equal(JSON.stringify(g.state),before,'reading references cannot modify story or evidence');
+ const selected=g.selectedDsmRefCode;assert.equal(g.selectDsmReference('unknown'),false);assert.equal(g.selectedDsmRefCode,selected);assert.equal(JSON.stringify(g.state),before,'reading references cannot modify story or evidence');
  g.startEvent('han_xiao',1);assert.equal(g.selectedDsmRefCode,selected,'new scenes cannot auto-select their diagnosis');
 });
 
@@ -312,12 +316,12 @@ test('completion dossier belongs only to the completed character and is availabl
 
 test('episode analysis quotes the current dialogue, selected reply and observed reaction',()=>{
  const g=game();g.state.studyMode=true;g.startEvent('lin_jianwei',1);g.handleNextNode();g.handleChoiceSelect(1);
- const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節互動解析'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes('自己當下能做'));
+ const sc=g.activeScene,html=g.renderActiveScene();assert.ok(html.includes('本節互動解析'));assert.ok(html.includes(esc(sc.eventData.nodes[1].text)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.choiceText)));assert.ok(html.includes(esc(sc.lastChoiceOutcome.replyCore)));assert.ok(!html.includes('renderCaseStudy'));assert.ok(html.includes('資料來源'));assert.ok(html.includes(esc(sc.eventData.nodes[1].choices[1].interactionAnalysis)));
 });
 
 
 test('low closeness after respectful interaction does not invent a history of hurtful speech',()=>{
- const g=route('lin_jianwei','reasoning'),cs=g.state.characters.lin_jianwei;cs.affection=10;
+ const g=route('lin_jianwei','second'),cs=g.state.characters.lin_jianwei;cs.affection=10;
  g.showEndingForCharacter('lin_jianwei');assert.equal(g.activeScene.endingKey,'triggerEnd');
  assert.ok(!g.activeScene.endingData.romanticText.includes('幾次傷人的話'));
  assert.ok(!g.activeScene.endingData.romanticText.includes('幾次談不攏的期待'));
@@ -358,12 +362,11 @@ test('friendship remembers only the drawing, tea name and lining choice actually
  }
 });
 
-test('Ziqian sends his own refusal at E12 and never returns it to drafts at E13',()=>{
+test('Ziqian weekend agreement from E10 carries into E11 and E13',()=>{
  const g=game(),id='you_ziqian';for(let e=1;e<=10;e++)playEvent(g,id,e);
- g.startEvent(id,11);assert.match(g.activeScene.eventData.continuityText,/草稿/);
+ g.startEvent(id,11);assert.match(g.activeScene.eventData.continuityText,/手機|朋友|週末/);
  playEvent(g,id,11);playEvent(g,id,12);g.startEvent(id,13);
- assert.match(g.activeScene.eventData.continuityText,/已由子謙寄出/);
- assert.ok(!g.activeScene.eventData.continuityText.includes('草稿'));
+ assert.ok(!g.activeScene.eventData.continuityText.includes('拒絕信'));
 });
 
 test('stalled daily responses still answer the selected activity without awarding a repaired memory',()=>{
@@ -488,13 +491,13 @@ test('rejected reassurance requests never become completed takeovers in later sc
  }
 });
 
-test('letter state stays sent at the ending across all five approaches',()=>{
+test('Ziqian ending keeps both agreements across all five approaches and after restore',()=>{
  for(let pick=0;pick<5;pick++){
   const g=game();for(let e=1;e<=14;e++)playEvent(g,'you_ziqian',e,()=>e===14?1:pick);
   const ending=g.renderEndingContinuity('you_ziqian',g.activeScene.endingKey,false);
-  assert.match(ending,/拒絕信已由子謙寄出/);assert.ok(!ending.includes('拒絕信還是草稿'));
+  assert.match(ending,/誰的事誰決定/);assert.match(ending,/週末怎麼過/);assert.ok(!ending.includes('拒絕信'));
   const restored=game();restored.state=restored.migrateState(g.state);
-  assert.match(restored.renderEndingContinuity('you_ziqian','friendEnd',false),/拒絕信已由子謙寄出/);
+  assert.match(restored.renderEndingContinuity('you_ziqian','friendEnd',false),/週末怎麼過/);
  }
 });
 
@@ -567,6 +570,10 @@ const ENDING_EXAMPLES={
  gu_qingcheng:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3400340443414|3',triggerEnd:'3232222220343|3'},
  xia_le:{trueEnd:'3410300231003|0',friendEnd:'0324230101444|1',normalEnd:'2220430233214|4',codependentEnd:'2034032442003|4',triggerEnd:'0444444414340|1'},
  ruri:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'3410300231003|0',codependentEnd:'1412114141114|0',triggerEnd:'2034032442003|4'},
+ you_ziqian:{trueEnd:'4333330041004|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'0334404243123|4',triggerEnd:'3232222220343|3'},
+ ji_yan:{trueEnd:'2121122110204|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'3410300231003|0',triggerEnd:'4133233344333|1'},
+ lin_jianwei:{trueEnd:'1311100113233|4',friendEnd:'4133233344333|1',normalEnd:'4131321344441|3',codependentEnd:'3330343341404|4',triggerEnd:'2034032442003|4'},
+ lu_qinglan:{trueEnd:'3303110131313|0',friendEnd:'0324230101444|1',normalEnd:'2034032442003|4',codependentEnd:'4444333041434|4',triggerEnd:'0424320000024|1'},
  wen_yan:{trueEnd:'0101303104044|0',friendEnd:'4121111110241|1',normalEnd:'3410300231003|0',codependentEnd:'0044044100313|3',triggerEnd:'2034032442003|4'},
  han_xiao:{trueEnd:'3314333333334|3',friendEnd:'4133233344333|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'4131321344441|3'},
  bai_xiaolu:{trueEnd:'0100010100400|4',friendEnd:'4121111110241|1',normalEnd:'0112041104004|2',codependentEnd:'2034032442003|4',triggerEnd:'2220430233214|4'}};

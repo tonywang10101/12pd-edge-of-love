@@ -1,7 +1,7 @@
-import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=58';
+import {PAUSED_CLOSURES,DISTANCE_LINES,DECLINED_INVITATIONS,DIALOGUE_REVISION,DIALOGUE_VARIANTS,CONFESSION_VARIANTS,SHARED_HELPERS,DAILY_VARIANTS} from './dialogueChoices.js?v=60';
 export {DIALOGUE_REVISION,DECLINED_INVITATIONS,PAUSED_CLOSURES,DISTANCE_LINES};
-import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=58';
-export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=58';
+import {composeNarrative, makeNarration, expandChoiceReply, expandEnding} from './narrativeContent.js?v=60';
+export {composeNarrative, makeNarration, expandChoiceReply, expandEnding, narrativeLength, OPENING_NARRATIVE} from './narrativeContent.js?v=60';
 // Revised narrative source: evidence belongs to an observed scene, never an array index.
 // Dialogue is fictional. Case notes describe teaching hypotheses, not player diagnoses.
 export const CONTENT_VERSION = 6;
@@ -18,11 +18,11 @@ export const CLINICAL_SOURCES = [
 function S(title, context, line, criteria, actions, note, effects = {}) {
   return { title, context, line, criteria, actions, note, ...effects };
 }
-export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=58';
+export { getLearningTasks, LEARNING_TASKS, LEGACY_LEARNING_TASKS, LEARNING_STAGES } from './learningContent.js?v=60';
 
-import { STORY_ROUTES } from './routeStories.js?v=58';
+import { STORY_ROUTES } from './routeStories.js?v=60';
 export { STORY_ROUTES };
-import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=58';
+import { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning } from './characterTuning.js?v=60';
 export { CHARACTER_TUNING, STYLE_CODES, STYLE_LABELS, HELP_RESOURCES, STALKING_RESOURCES, getTuning };
 
 // Each case may leave criteria unobserved. These are learning questions, not romance scores.
@@ -98,7 +98,7 @@ function ordinaryScene(route,index){
  return S(d.title,d.context,d.line,[],d.actions,'日常的喜好、互惠與分歧不作為症狀證據。',{portrait:d.portrait,memory:`ordinary_${index}`});
 }
 
-import { TRIO_PAIRS } from './sharedScenes.js?v=58';
+import { TRIO_PAIRS } from './sharedScenes.js?v=60';
 
 export function buildRouteEvents(id) {
  const r=STORY_ROUTES[id];if(!r)return [];
@@ -191,7 +191,7 @@ const EPISODE_PLACES = {
  bai_xiaolu:['cafe:甜點店配方桌','cafe:甜點店休息區','cafe:甜點店文件桌',null,'cafe:飲料店','cafe:甜點報價桌','cafe:甜點店休息區','cafe:甜點店配方桌',null,'cafe:甜點店配方桌','cafe:甜點店休息區','cafe:打烊後的甜點店','cafe:甜點店配方桌','cafe:甜點店收銀處'],
  ji_yan:['archive:展覽會議室','apartment:鋼琴練習間','archive:簡章工作桌',null,'archive:工作室','archive:提案工作桌','archive:海報架製作區','archive:簡章工作桌',null,'archive:共同工作桌','cafe:朋友小聚','apartment:日常支出討論處','cafe:茶桌','archive:簡章收件處'],
  lu_qinglan:['atelier:陶藝工坊','atelier:杯子試用桌','atelier:工坊休息區',null,'atelier:工坊筆記桌','atelier:工坊休息區','atelier:工坊筆記桌','atelier:展台量測區',null,'atelier:電窯旁與安全區','atelier:示範排程桌','atelier:陶藝工作桌','atelier:左手杯試用桌','atelier:展台拆卸處'],
- you_ziqian:['cafe:印刷交件桌','cafe:菜單工作桌','cafe:店務工作桌',null,'cafe:咖啡店休息區','cafe:窗邊座位','cafe:刊物工作桌','cafe:交件討論桌',null,'cafe:咖啡店休息區','cafe:投稿工作桌','cafe:補救費用討論桌','cafe:刊物工作桌','cafe:交件後的窗邊座位']
+ you_ziqian:['cafe:海報工作桌','cafe:菜單工作桌','cafe:店務工作桌',null,'cafe:咖啡店休息區','cafe:窗邊座位','cafe:舊檔資料櫃','cafe:單據整理桌',null,'cafe:週末前的櫃台','cafe:打烊後的店裡','cafe:晚餐的小店','cafe:咖啡師工作檯','cafe:海報掛好的牆前']
 };
 const SHARED_PLACES = {
  bai_xiaolu__han_xiao:'cafe:甜點訂單桌',lin_jianwei__shen_mo:'rooftop:公寓頂樓',gu_qingcheng__wen_yan:'studio:共同圖說工作桌',lu_qinglan__ruri:'atelier:陶藝工坊',han_xiao__xia_le:'lounge:排練舞台',bai_xiaolu__su_fei:'atelier:畫室送貨處',bai_xiaolu__you_ziqian:'cafe:咖啡店',ji_yan__you_ziqian:'archive:海報工作桌',ji_yan__lu_qinglan:'atelier:陶藝工坊',gu_qingcheng__shen_mo:'studio:權限討論桌',lin_jianwei__wen_yan:'apartment:公寓會客處',ruri__shen_mo:'rooftop:頂樓風鈴旁',lin_jianwei__su_fei:'lounge:試音區',wen_yan__xia_le:'archive:小組朗讀室'
