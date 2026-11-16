@@ -12,7 +12,7 @@ export function makeNarration(id,number,core){
 }
 export function expandChoiceReply(id,number,choice,index=0,sharedKey=null,stalled=false){
   const core=choice.replyCore||choice.reply;
-  const note=stalled?'工作上的事還沒談妥。今天的小事做完了，也不代表已經恢復合作。':'';
+  const note='';
   return {...choice,replyCore:core,interactionAnalysis:choice.interactionAnalysis||(sharedKey?getSharedAnalysis(sharedKey,index):CHOICE_ANALYSIS[id]?.[number]?.[index])||null,reply:[core,note].filter(Boolean).join('\n\n')};
 }
 const ENDING_DETAILS = {
@@ -30,7 +30,7 @@ lu_qinglan:'復健和工坊仍照她的安排走。要不要幫忙，先問她�
 you_ziqian:'下次接印刷工作，仍得說清楚能做多少、哪天能交。不想接就早點說，不再讓對方一直等，再猜他到底要不要做。'
 };
 export function expandEnding(id,key,core,context=''){
-  const additions=[ENDING_DETAILS[id]];
+  const additions=key==='normalEnd'?[ENDING_DETAILS[id]]:[];
   return {text:composeNarrative(core,additions,context),narrativeCore:core,narrativeAdditions:additions};
 }
 export const OPENING_NARRATIVE='入夜下起雨。你拖著行李來到公寓，先把濕傘放在門邊。鑰匙剛拿到，還不習慣它的重量。樓上有人走動，交誼廳貼著社區展覽的募集單。你學過心理學，但認識鄰居還是得從問候開始。今晚不用先弄懂任何人，能記住一個名字就很好。你收起筆記，推開門。';

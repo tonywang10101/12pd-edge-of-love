@@ -1176,7 +1176,7 @@ class EdgeOfLoveGame {
       const n=expandEnding(charId,key,core);Object.assign(data,{romanticText:n.text,soulmateText:n.text,narrativeCore:core,narrativeAdditions:n.narrativeAdditions});
     }
     if(!preview&&key==='triggerEnd'&&!Object.values(cs.choiceScores).some(choice=>!choice.healthy)){
-      const core=`展覽結束，你們還沒熟到想繼續私人來往。${r.name}把「${r.task}」交給負責人，你也回到自己的安排。今天先不約，誰也不用勉強答應。以後如果還想見面，就再問問對方，到時候兩個人都想見，再另外約。`;
+      const core=`展覽結束，你們還沒熟到想繼續私人來往。${r.name}把「${r.task}」交給負責人，你也回到自己的安排。展場上那份成果，你們都出過力。今天先不約，誰也不用勉強答應。以後如果還想見面，就再問問對方，到時候兩個人都想見，再另外約。`;
       const narration=expandEnding(charId,key,core);Object.assign(data,{title:'【未完結局】還需要一些時間',subtitle:'保留距離，各自生活',romanticText:narration.text,soulmateText:narration.text,narrativeCore:core,narrativeAdditions:narration.narrativeAdditions});
     }
     if(!preview&&key==='codependentEnd'&&this.getEthicsInfo(charId).active){data.title=`【爭議結局】${r.task}`;data.subtitle='靠近之後，仍須面對越界的代價';}
@@ -2847,6 +2847,9 @@ class EdgeOfLoveGame {
       // Keep the actual daily question and its matching result; unfinished work is separate.
       for(const choice of ev.nodes[1].choices)choice.memory=null;
       ev.unfinishedWork=true;
+      // The stalled narration names only the arrangements that are actually unfinished.
+      const open=['firstAgreement','repairPlan'].map(task=>this.getTaskDecision(charId,task,number)).filter(d=>['takenOver','ruptured','unsettled'].includes(d?.status));
+      if(r.stalledContext?.includes('{task}')&&open.length){const text=r.stalledContext.replace('{task}',open.map(d=>`「${d.label}」`).join('和'));Object.assign(ev.nodes[0],{text,narrativeCore:text,narrativeAdditions:[]});}
     }
     if(number===13||number===14)ev.nodes[1].choices=ev.nodes[1].choices.map((choice,index)=>expandChoiceReply(charId,number,choice,index,null,stalled));
     return ev;

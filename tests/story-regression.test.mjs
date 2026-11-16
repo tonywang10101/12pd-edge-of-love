@@ -132,7 +132,7 @@ test('a temporary privacy hold is never described as deletion and persists on re
 
 test('unfinished tasks do not magically produce autonomous success at E13',()=>{
  const g=game(),id='you_ziqian';for(let e=1;e<=12;e++)playEvent(g,id,e,()=>e===3?2:0);g.startEvent(id,13);
- assert.match(g.activeScene.eventData.continuityText,/還沒恢復/);assert.equal(g.activeScene.eventData.nodes[1].text,content.STORY_ROUTES[id].ordinary[2].line);assert.match(g.activeScene.eventData.nodes[1].choices[0].reply,/今天的小事做完/);assert.ok(!g.activeScene.eventData.nodes[1].choices[0].reply.includes('該簽的名字'));
+ assert.match(g.activeScene.eventData.continuityText,/還沒恢復/);assert.equal(g.activeScene.eventData.nodes[1].text,content.STORY_ROUTES[id].ordinary[2].line);assert.notEqual(g.activeScene.eventData.nodes[0].text,content.STORY_ROUTES[id].ordinary[2].context);assert.match(g.activeScene.eventData.nodes[0].text,/「誰的事誰決定」還沒談好/);assert.ok(!g.activeScene.eventData.nodes[1].choices[0].reply.includes('該簽的名字'));
  assert.ok(g.activeScene.eventData.nodes[1].choices.every(c=>!c.memory));
 });
 
