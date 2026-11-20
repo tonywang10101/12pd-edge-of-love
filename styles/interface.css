@@ -657,3 +657,25 @@ a.brand-guide-link,a.brand-guide-link:hover,a.brand-guide-link:visited{text-deco
 @media (min-width: 481px) {
 .intro-story-br { display: none; }
 }
+
+/* First-visit tutorial: spotlight on one control at a time. */
+#tour-root { position: fixed; inset: 0; z-index: 400; }
+.tour-blocker { position: absolute; inset: 0; }
+.tour-spotlight { position: fixed; border-radius: 14px; box-shadow: 0 0 0 9999px #0f0a16c7, 0 0 0 2px #ffe0a5, 0 0 24px 4px #ffe0a580; transition: top .3s ease, left .3s ease, width .3s ease, height .3s ease; pointer-events: none; }
+.tour-card { position: fixed; z-index: 1; width: min(380px, calc(100vw - 24px)); padding: 20px 22px 18px; border: 1px solid var(--gold-border); border-radius: 18px; background: #2a1a3a; color: #fff2dc; box-shadow: 0 18px 50px #000a; transition: top .3s ease, left .3s ease; animation: tour-pop .3s ease-out; }
+.tour-card h2 { margin: 4px 0 10px; font-size: 1.15rem; color: #ffe0a5; }
+.tour-card p { margin: 0 0 .6em; line-height: 1.8; font-size: .98rem; overflow-wrap: anywhere; }
+.tour-count { font-size: .78rem; letter-spacing: .08em; color: #e9c9f5; opacity: .8; }
+.tour-actions { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.tour-spacer { flex: 1; }
+.tour-actions .btn-primary-large { min-height: 44px; padding: 10px 20px; font-size: .95rem; }
+.tour-actions .nav-btn { min-height: 44px; }
+.tour-skip { background: none; border: 0; color: #e9c9f5; text-decoration: underline; cursor: pointer; padding: 8px 4px; font-size: .9rem; }
+#tour-root.tour-centered .tour-spotlight { top: 50%; left: 50%; width: 0; height: 0; box-shadow: 0 0 0 9999px #0f0a16c7; }
+#tour-root.tour-centered .tour-card { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 32px)); text-align: center; }
+#tour-root.tour-centered .tour-actions { justify-content: center; }
+#tour-root.tour-centered .tour-spacer { display: none; }
+@keyframes tour-pop { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+.tour-spotlight, .tour-card { transition: none; animation: none; }
+}

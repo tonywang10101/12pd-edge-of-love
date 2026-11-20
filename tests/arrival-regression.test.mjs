@@ -61,6 +61,14 @@ test('intro story plays before the door and only then starts the door timer',()=
   g.openEntranceDoor();assert.equal(g.entrancePhase,'door');assert.ok(g.entranceTimer);g.openEntranceDoor();
   g.finishEntranceTransition();assert.equal(started,1);assert.equal(g.entrancePhase,null);
 });
+test('first-visit tutorial covers the main controls and is remembered once finished',()=>{
+  const {g,store}=setup();const steps=g.getTutorialSteps();
+  for(const sel of ['toggle-audio','open-save-modal','toggle-dsm-widget','toggle-study-mode','data-tab="relationships"','data-tab="locations"','relationship-meters','vn-chap-badge'])
+    assert.ok(steps.some(s=>(s.target||'').includes(sel)),sel);
+  assert.ok(steps.some(s=>s.body.join('').includes('好感度高不一定')));
+  assert.equal(g.hasSeenTutorial(),false);g.markTutorialSeen();assert.equal(g.hasSeenTutorial(),true);
+  assert.equal(store.get('edge_of_love_tutorial_v1'),'done');
+});
 test('72 hours uses numeric timestamps, strict boundary, and legacy Taiwan date formats',()=>{
   const {g}=setup(),now=new Date(2026,10,15,20).getTime(),hours=72*60*60*1000;
   assert.equal(g.isSaveExpired({savedAtMs:now-hours},now),false);

@@ -879,6 +879,135 @@ class EdgeOfLoveGame {
 
     this.render();
     this.startEvent(firstChar.id, 1);
+    if (!this.hasSeenTutorial()) setTimeout(() => this.startTutorial(), 500);
+  }
+
+  // ==================== 第一次進入的操作教學 ====================
+  getTutorialSteps() {
+    return [
+      { title: '歡迎入住公寓', body: ['接下來用幾個步驟，帶你認識畫面上的按鈕。', '隨時可以按「略過」。之後想再看一次，可以從選單的「❓ 操作說明」打開。'] },
+      { target: '.vn-chap-badge', title: '每位房客有 15 幕故事', body: ['這裡顯示你現在讀到第幾幕。', '有些幕會有其他房客一起出場，這些共同事件可以讓你認識更多鄰居。讀完 E02 以後，幕和幕之間也能用「🌸 日常回看」和他多相處。'] },
+      { target: '.vn-top-bar .relationship-meters', title: '好感度、安全感、邊界感', body: ['你的每個選擇都會改變這三個數值，故事也會因此走向不同的結局。', '不過，好感度高不一定就是好的發展。如果太沒有邊界感，例如替對方做決定、把他當成個案，可能會發生其他事情。'] },
+      { target: '[data-action="switch-main-tab"][data-tab="locations"]', nav: true, title: '📍 故事推進', body: ['去看其他頁面以後，想繼續讀故事，就按這裡回來。', '這一頁也可以選幕重玩，或打開日常回看。'] },
+      { target: '[data-action="switch-main-tab"][data-tab="relationships"]', nav: true, title: '💞 公寓房客', body: ['這裡可以看已經解鎖的房客資料。', '每位房客都有你們的關係、故事進度和相處日記。'] },
+      { target: '[data-action="toggle-dsm-widget"]', nav: true, title: '📖 準則參照', body: ['打開後可以查 DSM-5-TR 的診斷準則，對照故事裡看到的線索。', '記得，線索不等於診斷。'] },
+      { target: '[data-action="toggle-study-mode"]', nav: true, title: '🎓 教學模式', body: ['開啟時，每次做完選擇都會顯示心理病理學的說明。', '想專心讀故事的時候，可以把它關掉。隨堂小考和相處數值不管開關都會顯示。'] },
+      { target: '[data-action="open-save-modal"]', nav: true, title: '💾 記憶存檔', body: ['這裡可以手動存檔、讀檔，也可以重新開始。', '重新開始時，只有第一位房客能自己挑。之後每讀完一位房客的 E08，就會再開放一位新房客，是誰由故事決定。'] },
+      { target: '[data-action="toggle-audio"]', nav: true, title: '🔊 音樂', body: ['按這裡可以開關背景音樂和音效。'] },
+      { title: '準備好了嗎？', body: ['那麼，去認識你的第一位鄰居吧。'], last: true }
+    ];
+  }
+
+  hasSeenTutorial() {
+    try { return localStorage.getItem('edge_of_love_tutorial_v1') === 'done'; } catch { return false; }
+  }
+
+  markTutorialSeen() {
+    try { localStorage.setItem('edge_of_love_tutorial_v1', 'done'); } catch { /* 無法儲存時，下次仍會顯示教學 */ }
+  }
+
+  startTutorial() {
+    if (this.tourActive || !document.body || document.querySelector('#modal-root .modal-window')) return;
+    this.tourActive = true;
+    this.tourStep = 0;
+    this.tourOpenedNav = false;
+    this.tourReposition = () => this.positionTutorial();
+    window.addEventListener('resize', this.tourReposition);
+    window.addEventListener('scroll', this.tourReposition, { passive: true });
+    this.renderTutorialStep();
+  }
+
+  goTutorialStep(index) {
+    const steps = this.getTutorialSteps();
+    if (index >= steps.length) return this.endTutorial();
+    this.tourStep = Math.max(0, index);
+    this.renderTutorialStep();
+  }
+
+  renderTutorialStep() {
+    const steps = this.getTutorialSteps();
+    const step = steps[this.tourStep];
+    let root = document.getElementById('tour-root');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'tour-root';
+      document.body.appendChild(root);
+    }
+    // 窄螢幕的導覽按鈕收在選單裡，教學需要時先展開選單。
+    const toggle = document.querySelector('.mobile-nav-toggle');
+    const navCollapsed = toggle && toggle.getClientRects().length > 0;
+    const wantNav = Boolean(step.nav && navCollapsed);
+    if (wantNav !== Boolean(this.mobileNavOpen) && (wantNav || this.tourOpenedNav)) {
+      this.mobileNavOpen = wantNav;
+      if (wantNav) this.tourOpenedNav = true;
+      this.render();
+    }
+    const appRoot = document.getElementById('app-root');
+    if (appRoot) appRoot.inert = true;
+
+    const paragraphs = step.body.map(t => `<p>${escapeHtml(t)}</p>`).join('');
+    const isFirst = this.tourStep === 0;
+    root.innerHTML = `<div class="tour-blocker"></div><div class="tour-spotlight" aria-hidden="true"></div><section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-body"><span class="tour-count">${this.tourStep + 1} / ${steps.length}</span><h2 id="tour-title">${escapeHtml(step.title)}</h2><div id="tour-body">${paragraphs}</div><div class="tour-actions">${step.last ? '' : '<button type="button" class="tour-skip" data-action="tour-skip">略過</button>'}<span class="tour-spacer"></span>${isFirst ? '' : '<button type="button" class="nav-btn" data-action="tour-prev">上一步</button>'}<button type="button" class="btn-primary-large tour-next" data-action="tour-next">${step.last ? '繼續故事' : isFirst ? '開始導覽' : '下一步'}</button></div></section>`;
+
+    const target = step.target ? document.querySelector(step.target) : null;
+    if (target && target.getClientRects().length) target.scrollIntoView({ block: 'center', behavior: 'instant' });
+    this.positionTutorial();
+    root.querySelector('.tour-next')?.focus({ preventScroll: true });
+  }
+
+  positionTutorial() {
+    if (!this.tourActive) return;
+    const root = document.getElementById('tour-root');
+    const step = this.getTutorialSteps()[this.tourStep];
+    const spot = root?.querySelector('.tour-spotlight');
+    const card = root?.querySelector('.tour-card');
+    if (!spot || !card) return;
+    const target = step.target ? document.querySelector(step.target) : null;
+    const rect = target && target.getClientRects().length ? target.getBoundingClientRect() : null;
+    const vw = window.innerWidth, vh = window.innerHeight, gap = 14, pad = 8;
+    if (!rect) {
+      root.classList.add('tour-centered');
+      spot.removeAttribute('style');
+      card.removeAttribute('style');
+      return;
+    }
+    root.classList.remove('tour-centered');
+    Object.assign(spot.style, { top: `${rect.top - pad}px`, left: `${rect.left - pad}px`, width: `${rect.width + pad * 2}px`, height: `${rect.height + pad * 2}px` });
+    const cw = Math.min(380, vw - 24);
+    const ch = card.offsetHeight;
+    let left = Math.min(Math.max(12, rect.left + rect.width / 2 - cw / 2), vw - cw - 12);
+    let top = rect.bottom + pad + gap;
+    if (top + ch > vh - 12) top = rect.top - pad - gap - ch;
+    if (top < 12) top = Math.max(12, vh - ch - 12);
+    Object.assign(card.style, { width: `${cw}px`, left: `${left}px`, top: `${top}px` });
+  }
+
+  endTutorial() {
+    if (!this.tourActive) return;
+    this.tourActive = false;
+    this.markTutorialSeen();
+    window.removeEventListener('resize', this.tourReposition);
+    window.removeEventListener('scroll', this.tourReposition);
+    const root = document.getElementById('tour-root');
+    if (root) root.remove();
+    const appRoot = document.getElementById('app-root');
+    if (appRoot) appRoot.inert = false;
+    if (this.tourOpenedNav) { this.mobileNavOpen = false; this.tourOpenedNav = false; this.render(); }
+    document.querySelector('.btn-vn-continue, .vn-choice-btn')?.focus({ preventScroll: true });
+  }
+
+  handleTutorialKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); this.endTutorial(); return; }
+    if (e.key === 'ArrowRight') { e.preventDefault(); this.goTutorialStep(this.tourStep + 1); return; }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); this.goTutorialStep(this.tourStep - 1); return; }
+    if (e.key === 'Tab') {
+      const items = [...document.querySelectorAll('#tour-root button')];
+      if (!items.length) return;
+      const i = items.indexOf(document.activeElement);
+      const next = e.shiftKey ? (i <= 0 ? items.length - 1 : i - 1) : (i + 1) % items.length;
+      e.preventDefault();
+      items[next].focus();
+    }
   }
 
   setFirstCharSelection(charId) {
@@ -1532,6 +1661,7 @@ class EdgeOfLoveGame {
       if (this.dsmWidgetOpen) this.render();
     });
     document.addEventListener('keydown', (e) => {
+      if (this.tourActive) { this.handleTutorialKey(e); return; }
       this.trapDialogFocus(e);
       if (this.pendingNewGame && !this.consentAccepted && e.key === 'Escape') { e.preventDefault(); return; }
       if (e.key === 'Escape') {
@@ -1614,6 +1744,20 @@ class EdgeOfLoveGame {
           break;
         case 'skip-entrance':
           this.finishEntranceTransition();
+          break;
+        case 'tour-next':
+          this.goTutorialStep(this.tourStep + 1);
+          break;
+        case 'tour-prev':
+          this.goTutorialStep(this.tourStep - 1);
+          break;
+        case 'tour-skip':
+          this.endTutorial();
+          break;
+        case 'start-tutorial':
+          this.mobileNavOpen = false;
+          this.render();
+          this.startTutorial();
           break;
         case 'open-entrance-door':
           this.openEntranceDoor();
@@ -2147,6 +2291,7 @@ class EdgeOfLoveGame {
           <button class="nav-btn" data-action="open-save-modal">
             💾 記憶存檔
           </button>
+          <button class="nav-btn" data-action="start-tutorial">❓ 操作說明</button>
           <button class="nav-btn" data-action="toggle-audio" aria-pressed="${audio.enabled}" aria-label="${audio.enabled ? '關閉' : '開啟'}背景音樂與音效" title="背景音樂與音效（低音量）">
             ${audio.enabled ? '🔊 音樂' : '🔇 靜音'}
           </button>
