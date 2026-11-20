@@ -772,8 +772,44 @@ class EdgeOfLoveGame {
     this.consentAccepted = true;
     this.closeModals();
     this.entranceActive = true;
+    this.entrancePhase = 'story';
     this.render();
-    document.querySelector('[data-action="skip-entrance"]')?.focus();
+    document.querySelector('[data-action="skip-entrance"]')?.focus({ preventScroll: true });
+  }
+
+  getIntroStoryLines() {
+    return [
+      '你原本住在鄉下。',
+      '寒窗苦讀之後，|你考上了大城市的心理與諮商研究所。',
+      '於是你在外面租了一間套房，|準備展開新生活。',
+      '',
+      '你懂一些心理學的知識，|也有了一群新的鄰居。',
+      '你可以當他們的朋友，',
+      '也可以把自己當成他們的心理師，',
+      '甚至可以成為他們戀愛的對象……',
+      '',
+      '那麼，我們即將開始。'
+    ];
+  }
+
+  renderEntranceStory() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let order = 0;
+    const lines = this.getIntroStoryLines().map(line => {
+      if (!line) return '<span class="intro-story-gap" aria-hidden="true"></span>';
+      const delay = reduce ? 0 : 0.6 + order++ * 1.5;
+      return `<p class="intro-story-line" style="animation-delay:${delay}s">${line.split('|').map(escapeHtml).join('<br class="intro-story-br">')}</p>`;
+    }).join('');
+    const btnDelay = reduce ? 0 : 0.6 + order * 1.5 + 0.4;
+    return `<main class="entrance-screen intro-story-screen" aria-label="開場故事" data-action="reveal-intro-story"><div class="intro-story-bg" style="background-image:url('${resolveAssetUrl('./assets/backgrounds/apartment.jpg')}')" aria-hidden="true"></div><section class="intro-story-text">${lines}<button class="btn-primary-large intro-story-next" style="animation-delay:${btnDelay}s" data-action="open-entrance-door">推開門 🚪</button></section><button class="nav-btn entrance-skip" data-action="skip-entrance">略過動畫</button></main>`;
+  }
+
+  openEntranceDoor() {
+    if (!this.entranceActive || this.entrancePhase === 'door') return;
+    this.entrancePhase = 'door';
+    audio.playSelect();
+    this.render();
+    document.querySelector('[data-action="skip-entrance"]')?.focus({ preventScroll: true });
     this.entranceTimer = setTimeout(() => this.finishEntranceTransition(),
       window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 2600);
   }
@@ -782,6 +818,7 @@ class EdgeOfLoveGame {
     if (!this.entranceActive || !this.consentAccepted) return;
     clearTimeout(this.entranceTimer);
     this.entranceActive = false;
+    this.entrancePhase = null;
     const pending = this.pendingNewGame;
     this.pendingNewGame = null;
     this.finalizeNewGameStart(pending);
@@ -1578,6 +1615,12 @@ class EdgeOfLoveGame {
         case 'skip-entrance':
           this.finishEntranceTransition();
           break;
+        case 'open-entrance-door':
+          this.openEntranceDoor();
+          break;
+        case 'reveal-intro-story':
+          target.classList.add('is-revealed');
+          break;
         case 'continue-stale-save':
           this.staleSavePending = false;
           this.autoSave();
@@ -1997,6 +2040,10 @@ class EdgeOfLoveGame {
 
     if (this.staleSavePending) {
       appRoot.innerHTML = `${bgLayer}<div class="modal-backdrop"><section class="modal-window welcome-dialog" role="dialog" aria-modal="true" aria-labelledby="return-title"><div class="modal-header"><h2 id="return-title">歡迎回到公寓</h2></div><div class="modal-body"><p>距離上次存檔已超過 72 小時，你想從哪裡開始？</p><p>重新開始會重置自動存檔，手動存檔會保留。</p><div class="welcome-actions"><button class="btn-primary-large" data-action="continue-stale-save">繼續上次存檔紀錄</button><button class="nav-btn" data-action="new-from-stale-save">重新開始新的遊戲</button></div></div></section></div>`;
+      return;
+    }
+    if (this.entranceActive && this.entrancePhase === 'story') {
+      appRoot.innerHTML = this.renderEntranceStory();
       return;
     }
     if (this.entranceActive) {

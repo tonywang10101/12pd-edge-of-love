@@ -53,6 +53,14 @@ test('no game starts or saves before agreement; consent cannot be dismissed to b
   g.startEntranceTransition();assert.equal(g.entranceActive,true);assert.equal(started,0);
   g.finishEntranceTransition();g.finishEntranceTransition();assert.equal(started,1);
 });
+test('intro story plays before the door and only then starts the door timer',()=>{
+  const {g}=setup();g.startNewGameFromForm();let started=0;g.finalizeNewGameStart=()=>started++;
+  g.startEntranceTransition();assert.equal(g.entrancePhase,'story');assert.equal(g.entranceTimer,undefined);
+  const html=g.renderEntranceStory();
+  assert.match(html,/心理與諮商研究所/);assert.match(html,/戀愛的對象/);assert.match(html,/open-entrance-door/);assert.match(html,/skip-entrance/);
+  g.openEntranceDoor();assert.equal(g.entrancePhase,'door');assert.ok(g.entranceTimer);g.openEntranceDoor();
+  g.finishEntranceTransition();assert.equal(started,1);assert.equal(g.entrancePhase,null);
+});
 test('72 hours uses numeric timestamps, strict boundary, and legacy Taiwan date formats',()=>{
   const {g}=setup(),now=new Date(2026,10,15,20).getTime(),hours=72*60*60*1000;
   assert.equal(g.isSaveExpired({savedAtMs:now-hours},now),false);

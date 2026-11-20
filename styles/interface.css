@@ -633,3 +633,27 @@ a.brand-guide-link,a.brand-guide-link:hover,a.brand-guide-link:visited{text-deco
 .learning-teach-point {margin-top: .6rem; padding: .7rem .9rem; border-radius: 8px; background: rgba(143,211,193,.12); line-height: 1.8;}
 .learning-prompt h3 small {margin-left: .6rem; font-size: .8rem; font-weight: 500; opacity: .75;}
 .learning-locked {opacity: .7; font-size: .9rem;}
+
+/* Intro story: lines fade in one by one before the door opens. */
+.intro-story-screen { display: flex; align-items: center; justify-content: center; cursor: default; }
+.intro-story-bg { position: absolute; inset: -20px; background-size: cover; background-position: center; filter: blur(6px) brightness(.28) saturate(.8); transform: scale(1.05); animation: intro-bg-drift 20s ease-out forwards; }
+.intro-story-screen::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, #140e1ccc 100%); pointer-events: none; }
+.intro-story-text { position: relative; z-index: 1; width: min(640px, calc(100vw - 48px)); max-height: calc(100svh - 120px); overflow-y: auto; text-align: center; padding: 24px 0; }
+.intro-story-line { margin: 0 0 .55em; color: #fff2dc; font-size: clamp(1.05rem, 3.6vw, 1.35rem); line-height: 1.9; letter-spacing: .06em; text-shadow: 0 2px 10px #000; opacity: 0; transform: translateY(14px); filter: blur(4px); animation: intro-line-rise 1.3s ease-out forwards; }
+.intro-story-line:last-of-type { color: #ffe0a5; margin-top: .4em; }
+.intro-story-gap { display: block; height: 1.4em; }
+.intro-story-next { margin-top: 30px; opacity: 0; transform: translateY(10px); animation: intro-line-rise 1s ease-out forwards; }
+.intro-story-screen.is-revealed .intro-story-line, .intro-story-screen.is-revealed .intro-story-next { animation-delay: 0s !important; animation-duration: .35s; }
+@keyframes intro-line-rise { to { opacity: 1; transform: none; filter: none; } }
+@keyframes intro-bg-drift { to { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) {
+.intro-story-line, .intro-story-next, .intro-story-bg { animation: none; opacity: 1; transform: none; filter: none; }
+.intro-story-bg { filter: blur(6px) brightness(.28); }
+}
+@media (max-width: 480px) {
+.intro-story-text { max-height: calc(100svh - 100px); }
+.intro-story-line { letter-spacing: .03em; }
+}
+@media (min-width: 481px) {
+.intro-story-br { display: none; }
+}
