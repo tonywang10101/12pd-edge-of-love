@@ -145,7 +145,7 @@ class EdgeOfLoveGame {
       initialized: false,
       studyMode: false, // 教學檢視模式（可隨時於頂部工具列切換）
       player: {
-        name: '林予安',
+        name: '雅婷',
         sex: 'female',
         sexLabel: '生理女性／女性認同 (Female)',
         pronoun: '她',
@@ -676,7 +676,7 @@ class EdgeOfLoveGame {
 
     const fresh = this.getDefaultState();
     fresh.initialized = true;
-    fresh.player.name = (nameInput?.value || '林予安').trim() || '林予安';
+    fresh.player.name = (nameInput?.value || '雅婷').trim() || '雅婷';
     const pronoun = (pronounInput?.value || '她').trim() || '她';
     fresh.player.pronoun = pronoun;
 
